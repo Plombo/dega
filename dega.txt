@@ -1,0 +1,121 @@
+
+          d#########D      e#########ee     gGGGGGGg            A
+          D##D     dDDD    E##E           g##Gg    GGGg        A#A
+          D##D         DD  E##E          g###G        gG      A#A#A
+          D##D          DD E##E          G###G               A#AaA#A
+          D##D          DD E#########EE  G###G              A#A  aA#A
+          D##D          DD E##E          G###G             A#A    aA#A
+          D##D          DD E##E          G###G   ggGGGGg  A###########A
+          D##D         DD  E##E          G###G       GG  A#AAAAAAAAAAA#A
+          D##D     dDDD    E##E           G##Gg    gGG  A#A          aA#A
+          D#########D      E#########EE     GGGGGGGGG  A#A            aA#A
+
+                 it's all just a little bit of history repeating...
+
+    Dega is a Sega Master System / Mark III / Game Gear emulator, and runs
+    under Windows 95,NT,98,2000,ME or XP.
+
+    The old standard disclaimer:
+      I do not accept responsibility for any effects, adverse or otherwise,
+      that this code may have on you, your computer, your sanity, your dog, 
+      and anything else that you can think of. Use it at your own risk.
+    You can use this software freely as long as you don't use it commercially.
+____________________________________________________________________________________
+
+                                What's New?
+
+  v1.07
+  + Added native Dega save state format, .dgz
+    These save states are GZip compressed and also store the FM chip state.
+    To load and save in .dgz format, use Load State and Save State.
+    This format is also used for the auto save/load function.
+    To import and export in Meka's .s00 save state format, use Import Meka and Export Meka.
+  * Changed the window sizing routine since it was changing a bit too much, now the
+    window is just simply 3/4 of the desktop space.
+
+  v1.06
+  + Added VGM sound logging.
+    VGM is a sound format that Zoop and I have come up with for logging sound on various
+    consoles. It is like GYM, CYM and SSL except the accuracy can be stepped up to
+    44.1khz sample accuracy if voices or other sampled sounds are used.
+
+  + Added .PNG screenshot saving (F12). Screenshots are saved to a "shots" subdirectory.
+  * (Changed Start button to C, this was to stop the game pausing when you press
+     enter to okay a dialog.)
+  + Added Pause function
+  + Added frame advance function
+  + Fixed Ghouls 'N Ghosts (sprite offset)
+  + Changed volume table based on Maxim's real SMS experiments
+  + Added a disable switch for the Red/Blue mode (e.g. for playing 3D games in 2D mode)
+  + Noise channel is now rendered using pseudo-random numbers.
+    (hiss is XOR with 0x12000 and buzz is XOR with 0x10000)
+    Both use 0x0001 as the seed, which is reloaded when the noise type
+    is written to.
+
+  v1.05
+  + Added triple-buffering... in a window! Overlays are now triple-buffered
+    (if you have enough video memory).
+  + Added a switch between sound off, 12khz and 44.1khz.
+  + Added fullscreen mode. Press Alt-Enter to activate it.
+
+____________________________________________________________________________________
+
+                                How to use
+
+  Run the emulator and select Load Rom from the File menu.
+  Select a rom and click open. The keys are:
+
+  Up,Down,Left,Right = Cursor keys (not on the numpad)
+  Fire 1,Fire 2      = Z,X
+  Pause/Start        = C
+  (On the Master System, the "Start" button was just the fire button.)
+
+  To toggle the emulator menu, press Escape or the right mouse button.
+  F8 is fast forward.
+
+____________________________________________________________________________________
+
+                               The FM Chip
+
+  Some Japanese machines were equipped with a Yamaha 2413 FM sound chip.
+  Select the "FM Chip" option from the menu to enable it.
+  However please note that some games will only use the chip if both
+  "Japan" and "FM Chip" are selected in the menu.
+
+____________________________________________________________________________________
+
+                               Red/Blue 3D
+
+  If the Red/Blue 3D option is ticked, Dega will take the original flickering
+  glasses effect used on some games and merge the images into a Red/Blue image,
+  suitable for viewing with Red/Blue glasses.
+  Note that not all PC modes can do this (e.g. YUV overlay modes), because YUV doesn't
+  have separate Red/Blue channels.
+
+____________________________________________________________________________________
+
+                             Overlay details
+
+  If Overlay is set to None, Dega will use a normal DirectDraw surface to render
+  graphics to. All modes are supported except 256-color.
+
+  If Overlay is set to YUV, Dega will try to make a triple-buffered YUV Overlay surface.
+  If it can't, it will use a normal surface.
+
+  If Overlay is set to RGB (the default), Dega will try to make a triple-buffered
+  RGB Overlay surface. If it can't, it will try a YUV surface, and if that fails
+  it will use a normal surface.
+
+____________________________________________________________________________________
+
+                           Technical Information
+
+  * Estimated 97% compatibility.
+  * Uses Dave's assembler Z80 core.
+  * Uses Dave's PSG sound emulator.
+  * Uses EMU2413 sound emulator written by Mitsutaka Okazaki.
+  * H-interrupts and raster effects supported.
+  * Supports DirectDraw Overlay surfaces used by modern video cards.
+  * Speech/sampled sound supported.
+
+____________________________________________________________________________________
