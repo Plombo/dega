@@ -1,7 +1,7 @@
 // Mast - main module
 #include "mastint.h"
 
-int MastVer=0x1070; // Version number of the library
+int MastVer=0x1110; // Version number of the library
 
 unsigned char MastInput[2]={0,0}; // Joypads
 unsigned int MastEx=0; // Extra options
@@ -77,6 +77,7 @@ int MastHardReset()
   // Hard reset all memory, including battery
   memset(&Masta,0,sizeof(Masta));
   memset(pMastb,0,sizeof(*pMastb));
+  MsndRefresh(); // Reset sound
   return MastReset();
 }
 

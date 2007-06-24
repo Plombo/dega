@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
 // Doze - Dave's optimized Z80 emulator
-// Copyright (c) 2001 Dave (www.finalburn.com), all rights reserved.
+// Copyright (c) 2004 Dave (www.finalburn.com), all rights reserved.
 
 // You can use, modify and redistribute this code freely as long as you
 // don't do so commercially. This copyright notice must remain with the code.

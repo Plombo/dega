@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
 // Mast - Master System emulator library
-// Copyright (c) 2001 Dave (www.finalburn.com), all rights reserved.
+// Copyright (c) 2004 Dave (www.finalburn.com), all rights reserved.
 
 // This refers to all the code except where stated otherwise
 // (e.g. ym2413 emulator)
@@ -19,15 +19,14 @@ extern "C" {
 #endif
 
 // mast.cpp
-extern int dprintf (char *Format,...);
 extern int MastVer; // Version number of the library
 
 extern unsigned char MastInput[2]; // Joypads
 extern unsigned int MastEx; // Extra options
-#define MX_GG     (1U) // Run as Game Gear
-#define MX_PAL    (2U) // Run as PAL timing
-#define MX_JAPAN  (4U) // Return Japan as Region
-#define MX_FMCHIP (8U) // Emulate FM chip
+#define MX_GG     (1) // Run as Game Gear
+#define MX_PAL    (2) // Run as PAL timing
+#define MX_JAPAN  (4) // Return Japan as Region
+#define MX_FMCHIP (8) // Emulate FM chip
 
 extern int MastDrawDo; // 1 to draw image
 int MastInit();
@@ -71,13 +70,20 @@ extern struct Mdraw Mdraw;
 void MdrawCall();
 
 // samp.cpp
-extern int MastPsgEnhance;
+extern int DpsgEnhance;
 
 // vgm.cpp
 int VgmStart(char *VgmName);
 int VgmStop(unsigned short *Gd3Text);
 extern FILE *VgmFile;
 extern int VgmAccurate; // 1=Sample accurate
+
+// video.cpp
+#define PLAYBACK_MODE 0
+#define RECORD_MODE 1
+void MvidStart(char *videoFilename, int mode, int reset);
+void MvidStop();
+void MvidPostLoadState();
 
 #ifdef __cplusplus
 } // End of extern "C"

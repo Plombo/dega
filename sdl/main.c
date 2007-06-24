@@ -51,6 +51,93 @@ void MsndCall(void* data, Uint8* stream, int len)
 	memcpy(data,(unsigned char*)data+len,audio_len);
 }
 
+static char *chompgets(char *buf, int len, FILE *fh) {
+	char *ret;
+	if (ret = fgets(buf, len, fh)) {
+		char *nl = strchr(buf, '\n');
+		if (nl != NULL) {
+			*nl = '\0';
+		}
+	}
+	return ret;
+}
+
+static FILE *sf;
+
+static int StateLoadAcb(struct MastArea *pma)
+{
+  if (sf!=NULL) fread(pma->Data,1,pma->Len,sf);
+  return 0;
+}
+
+static int StateLoad(char *StateName)
+{
+  if (StateName[0]==0) return 1;
+  
+  sf=fopen (StateName,"rb");
+  if (sf==NULL) return 1;
+
+  // Scan state
+  MastAcb=StateLoadAcb;
+  MastAreaDega();
+  MastAcb=MastAcbNull;
+
+  fclose(sf); sf=NULL;
+
+  MvidPostLoadState();
+  return 0;
+}
+
+static int StateSaveAcb(struct MastArea *pma)
+{
+  if (sf!=NULL) fwrite(pma->Data,1,pma->Len,sf);
+  return 0;
+}
+
+static int StateSave(char *StateName)
+{
+  if (StateName[0]==0) return 1;
+
+  sf=fopen (StateName,"wb");
+  if (sf==NULL) return 1;
+
+  // Scan state
+  MastAcb=StateSaveAcb;
+  MastAreaDega();
+  MastAcb=MastAcbNull;
+
+  fclose(sf); sf=NULL;
+  return 0;
+}
+
+void HandleSaveState() {
+	char buffer[64];
+	puts("Enter name of state to save:");
+	chompgets(buffer, sizeof(buffer), stdin);
+	StateSave(buffer);
+}
+
+void HandleLoadState() {
+	char buffer[64];
+	puts("Enter name of state to load:");
+	chompgets(buffer, sizeof(buffer), stdin);
+	StateLoad(buffer);
+}
+
+void HandleRecordMovie(int reset) {
+	char buffer[64];
+	printf("Enter name of movie to begin recording%s:\n", reset ? " from reset" : "");
+	chompgets(buffer, sizeof(buffer), stdin);
+	MvidStart(buffer, RECORD_MODE, reset);
+}
+
+void HandlePlaybackMovie(void) {
+	char buffer[64];
+	puts("Enter name of movie to begin playback:");
+	chompgets(buffer, sizeof(buffer), stdin);
+	MvidStart(buffer, PLAYBACK_MODE, 0);
+}
+
 void usage(void)
 {
 	printf("\nUsage: %s [OPTION]... [ROM file]\n",APPNAME);
@@ -77,6 +164,7 @@ int main(int argc, char** argv)
 	int key;
 	SDL_AudioSpec aspec;
 	unsigned char* audiobuf;
+	int paused=0, frameadvance=0;
 
 	// options
 	int framerate=60;
@@ -196,20 +284,29 @@ int main(int argc, char** argv)
 	MastDrawDo=1;
 	while(!done)
 	{
-		scrlock();
-		MastFrame();
-		scrunlock();
-		if(sound)
+		if (!paused || frameadvance)
 		{
-			SDL_LockAudio();
-			memcpy(audiobuf+audio_len,pMsndOut,MsndLen*aspec.channels*2);
-			audio_len+=MsndLen*aspec.channels*2;
-			//printf("audio_len %d\n",audio_len);
-			SDL_UnlockAudio();
+			scrlock();
+			MastFrame();
+			scrunlock();
+			if(sound)
+			{
+				SDL_LockAudio();
+				memcpy(audiobuf+audio_len,pMsndOut,MsndLen*aspec.channels*2);
+				audio_len+=MsndLen*aspec.channels*2;
+				//printf("audio_len %d\n",audio_len);
+				SDL_UnlockAudio();
+			}
+		}
+		frameadvance = 0;
+		if (paused)
+		{
+			SDL_WaitEvent(&event);
+			goto Handler;
 		}
                 while(SDL_PollEvent(&event))
                 {
-                        switch (event.type)
+Handler:		switch (event.type)
                         {
                         case SDL_KEYDOWN:
                                 key=event.key.keysym.sym;
@@ -221,6 +318,14 @@ int main(int argc, char** argv)
                                 if(key==SDLK_z || key==SDLK_y) {MastInput[0]|=0x10;break;}
                                 if(key==SDLK_x) {MastInput[0]|=0x20;break;}
                                 if(key==SDLK_c) {MastInput[0]|=0x80;break;}
+				if(key==SDLK_p) {paused=!paused;break;}
+				if(key==SDLK_o) {frameadvance=1;break;}
+				if(key==SDLK_r) {HandleRecordMovie(1);break;}
+				if(key==SDLK_e) {HandleRecordMovie(0);break;}
+				if(key==SDLK_t) {HandlePlaybackMovie();break;}
+				if(key==SDLK_w) {MvidStop();break;}
+				if(key==SDLK_s) {HandleSaveState();break;}
+				if(key==SDLK_l) {HandleLoadState();break;}
                                 break;
                         case SDL_KEYUP:
                                 key=event.key.keysym.sym;
@@ -240,7 +345,10 @@ int main(int argc, char** argv)
                                 break;
                         }
                 }
-		if(sound) while(audio_len>aspec.samples*aspec.channels*2*4) usleep(5);
+		if (!paused || frameadvance)
+		{
+			if(sound) while(audio_len>aspec.samples*aspec.channels*2*4) usleep(5);
+		}
 	}
 }
 

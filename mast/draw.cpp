@@ -39,17 +39,17 @@ void MdrawCramChange(int a)
   {
     // Game gear color
     a>>=1; a&=0x1f; s=((unsigned short *)pMastb->CRam)[a];
-    c =(s&0xe00)>>3; // -> RRR000000
+    c =(s&0xe00)>>3; // -> BBB000000
     c|=(s&0x0e0)>>2; // -> 000GGG000
-    c|=(s&0x00e)>>1; // -> 000000BBB
+    c|=(s&0x00e)>>1; // -> 000000RRR
   }
   else
   {
     // Master System color
     a&=0x1f; s=pMastb->CRam[a];
-    c =(s&0x30)<<3; // -> RR0000000
+    c =(s&0x30)<<3; // -> BB0000000
     c|=(s&0x0c)<<2; // -> 000GG0000
-    c|=(s&0x03)<<1; // -> 000000BB0
+    c|=(s&0x03)<<1; // -> 000000RR0
   }
   Mdraw.Pal[a]=(unsigned short)c; Mdraw.PalChange=1;
 }

@@ -153,7 +153,8 @@ static INLINE void SysWrite(unsigned short a,unsigned char d)
     if (b==3) MastMapPage2();
     goto End;
   }
-  if (a==0xfffb)
+
+  if ((a&0xfffc)==0xfff8)
   {
     int e;
     // Wonderboy 2 writes to this even though it's 2D

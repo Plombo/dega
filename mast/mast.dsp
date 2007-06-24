@@ -97,10 +97,6 @@ SOURCE=.\frame.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\load.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\map.cpp
 # End Source File
 # Begin Source File

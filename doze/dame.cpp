@@ -35,15 +35,9 @@ int Dame_00xx_x011(unsigned int op)
   if ((op>>8) && d!=2) return op&0xff; // No such DD/FD opcode
   DamOpStart(op);
 
-//TEST:
   if (op&8) ot("  dec "); else ot("  inc ");
   ot("%s\n",DamLoc16(d,Ext));
-/* TEST
 
-  DamGet16("dx",d,Ext);
-  if (op&8) ot("  dec dx\n"); else ot("  inc dx\n");
-  DamPut16("dx",d,Ext);
-*/
   ot("  ; (With 16-bit inc, flags aren't changed)\n");
   DamOpDone(t,0);
   return op;

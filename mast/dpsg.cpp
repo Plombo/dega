@@ -2,6 +2,7 @@
 #include "mastint.h"
 
 int DpsgRate=0;
+int DpsgEnhance=0;
 
 struct Dpsg& Dpsg=Masta.p;
 
@@ -16,10 +17,12 @@ static unsigned int Noise=0; // Noise value (lowest byte=position)
 static int DpsgClock=3579540;
 static int DpsgInc=0;
 
-// SMS volume
+// PSG volume
 short RealVol[16]=
 {0x000,0x011,0x017,0x01d,0x028,0x031,0x03a,0x04b,
  0x060,0x074,0x094,0x0bd,0x0e0,0x0fc,0x0ff,0x100};
+
+static int Echo[0x1000]; static const int EchoMask=0x0fff; static int EchoPos=0;
 
 static INLINE void RecalcVol(int c)
 {
@@ -55,6 +58,7 @@ int DpsgInit()
   // If you increase by DpsgInc/Period, you will hit 0x400 at the end of the period
 
   DpsgRecalc();
+  memset(Echo,0,sizeof(Echo));
   return 0;
 }
 
@@ -110,7 +114,7 @@ void DpsgStereo(unsigned char d)
 
 static INLINE void UpdateNoise()
 {
-  int Type,Add; Type=Dpsg.Period[3];
+  int Add=0,Type=Dpsg.Period[3];
 
   if ((Type&3)==3)
   {
@@ -129,13 +133,10 @@ static INLINE void UpdateNoise()
   // When the noise hits 0x400, it's time to change it
   while (Chan[3].Pos>=0x400)
   {
-    if (Noise&1) 
-    {
-      if (Type&4) Noise^=0x12000; // White noise
-      else        Noise^=0x10000; // Periodic noise
-    }
-
+    Noise^=(Noise&1)<<16;
+    if (Type&4) Noise^=(Noise&8)<<13;
     Noise>>=1;
+
     Chan[3].Pos-=0x400;
   }
 }
@@ -175,6 +176,15 @@ void DpsgCalc(int *Total)
   if (Noise&1) Output[3]= Chan[3].Vol;
   else         Output[3]=-Chan[3].Vol;
   UpdateNoise();
+
+  if (DpsgEnhance)
+  {
+    Output[0]+=Echo[(EchoPos+1)&EchoMask];
+    Output[0]*=3; Output[0]>>=2;
+    Output[1]*=3; Output[1]>>=2;
+    Echo[EchoPos]=(Output[0]+Output[1])>>1;
+    EchoPos=(EchoPos+1)&EchoMask;
+  }
 
   Stereo=Dpsg.Stereo;
   for (c=0;c<4;c++,Stereo>>=1)

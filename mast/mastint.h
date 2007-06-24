@@ -24,10 +24,7 @@ extern "C" {
 #endif
 
 // Include sound emu header
-extern "C"
-{
 #include "emu2413.h"
-}
 
 // video chip
 struct Mastv
@@ -134,5 +131,9 @@ int VgmCycleDone(int n);
 void VgmPsg(unsigned char d);
 void VgmPsgStereo(unsigned char d);
 void VgmFm(unsigned char a,unsigned char d);
+
+// video.cpp
+extern int frameCount;
+void MvidPreFrame();
 
 } // End of extern "C"

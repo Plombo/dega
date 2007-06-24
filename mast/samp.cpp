@@ -4,8 +4,6 @@
 
 #define SAMP_COUNT (5)
 
-int MastPsgEnhance=0;
-
 static unsigned char Square[0x80];
 struct Sample Sample[SAMP_COUNT]=
 {
@@ -22,7 +20,7 @@ static void SampReset(struct Sample *ps)
 
 int SampInit()
 {
-  int i; struct Sample *ps;
+  unsigned int i; struct Sample *ps;
 
   // Make default square wave  
   for (i=0;i<sizeof(Square);i++)
@@ -36,7 +34,7 @@ int SampInit()
   memset(&Sample,0,sizeof(Sample));
   for (i=0,ps=Sample; i<SAMP_COUNT; i++,ps++) SampReset(ps);
 
-  if (MastPsgEnhance)
+  if (DpsgEnhance)
   {
     // Use the samples built into the exe
     ps=Sample+1;

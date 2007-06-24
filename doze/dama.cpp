@@ -90,7 +90,7 @@ static int Dama_00xx_x110(unsigned int op)
   // e.g. 0011 0110 nn    ld (hl),$nn
 
   // If it uses hl, it can be extended with dd and fd
-  // If (hl) is extended becomes (ix/iy + signed offset)
+  // If (hl) is extended it becomes (ix/iy + signed offset)
 
   int d=0,t=7;
   d=(op>>3)&7;
