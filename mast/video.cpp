@@ -6,6 +6,7 @@
 #endif
 #ifdef WIN32
 #include <windows.h>
+#include <io.h>
 #endif
 
 static FILE *videoFile = NULL;
@@ -129,7 +130,7 @@ void MvidPostLoadState() {
 #else
 #ifdef WIN32
 		fseek(videoFile, newSize, SEEK_SET);
-		SetEndOfFile((HANDLE)_fileno(videoFile));
+		SetEndOfFile((HANDLE)_get_osfhandle(_fileno(videoFile)));
 #else
 #error no truncate implementation available!
 #endif

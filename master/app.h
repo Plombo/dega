@@ -118,15 +118,19 @@ extern char VgmName[];
 int MenuLoadRom();
 int MenuStatePort(int Export);
 int MenuStateLoad(int Save);
+int MenuVideo(int Action);
 int MenuVgmStart();
-#define WMU_TOGGLEMENU  (WM_APP+0)
-#define WMU_CHANGEDROM  (WM_APP+1)
-#define WMU_COMMAND     (WM_APP+2)
-#define WMU_STATELOAD   (WM_APP+3)
-#define WMU_STATESAVE   (WM_APP+4)
-#define WMU_STATEIMPORT (WM_APP+5)
-#define WMU_STATEEXPORT (WM_APP+6)
-#define WMU_VGMSTART    (WM_APP+7)
+#define WMU_TOGGLEMENU       (WM_APP+0)
+#define WMU_CHANGEDROM       (WM_APP+1)
+#define WMU_COMMAND          (WM_APP+2)
+#define WMU_STATELOAD        (WM_APP+3)
+#define WMU_STATESAVE        (WM_APP+4)
+#define WMU_STATEIMPORT      (WM_APP+5)
+#define WMU_STATEEXPORT      (WM_APP+6)
+#define WMU_VGMSTART         (WM_APP+7)
+#define WMU_VIDEOPLAYBACK    (WM_APP+8)
+#define WMU_VIDEORECORD      (WM_APP+9)
+#define WMU_VIDEORESETRECORD (WM_APP+10)
 
 // conf.cpp
 int ConfLoad();
@@ -144,6 +148,11 @@ int ShotStart();
 void ShotLine();
 int ShotExit();
 int ShotSave();
+
+// video.cpp
+extern char VideoName[256];
+void VideoRecord(int Reset);
+void VideoPlayback();
 
 // zipfn.cpp
 int ZipOpen(char *ZipName);

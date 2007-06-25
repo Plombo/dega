@@ -140,6 +140,64 @@ int MenuStateLoad(int Save)
   return 0;
 }
 
+int MenuVideo(int Action)
+{
+  char Name[256];
+  OPENFILENAME Ofn; int Ret=0;
+
+  SetCurrentDirectory(StateFolder); // Point to the state folder
+
+  memset(Name,0,sizeof(Name));
+  // Copy the name of the rom without the extension
+  if (EmuTitle!=NULL) strncpy(Name,EmuTitle,sizeof(Name)-1);
+
+  memset(&Ofn,0,sizeof(Ofn));
+  Ofn.lStructSize=sizeof(Ofn);
+  Ofn.hwndOwner=hFrameWnd;
+  Ofn.lpstrFilter="Dega video files (.mmv)\0*.mmv\0All Files (*.*)\0*.*\0\0";
+  Ofn.lpstrFile=Name;
+  Ofn.nMaxFile=sizeof(Name);
+  Ofn.lpstrInitialDir=".";
+  Ofn.Flags=OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT;
+  Ofn.lpstrDefExt="s00";
+
+  switch (Action)
+  {
+    case ID_VIDEO_PLAYBACK:
+      Ofn.lpstrTitle="Play video";
+      Ret=GetOpenFileName(&Ofn);
+      break;
+    case ID_VIDEO_RECORD:
+      Ofn.lpstrTitle="Record video";
+      Ret=GetSaveFileName(&Ofn);
+      break;
+    case ID_VIDEO_RESETRECORD:
+      Ofn.lpstrTitle="Record video from reset";
+      Ret=GetSaveFileName(&Ofn);
+      break;
+  }
+
+  // Get the state folder
+  memset(StateFolder,0,sizeof(StateFolder));
+  GetCurrentDirectory(sizeof(StateFolder)-1,StateFolder);
+  
+  // Return to the application folder
+  AppDirectory();
+
+  if (Ret==0) return 1; // Cancel/error
+
+  // Remember the Video name
+  memcpy(VideoName,Name,sizeof(Name));
+  // Post to main message loop
+  switch (Action)
+  {
+    case ID_VIDEO_PLAYBACK:    PostMessage(NULL,WMU_VIDEOPLAYBACK,0,0); break;
+    case ID_VIDEO_RECORD:      PostMessage(NULL,WMU_VIDEORECORD,0,0); break;
+    case ID_VIDEO_RESETRECORD: PostMessage(NULL,WMU_VIDEORESETRECORD,0,0); break;
+  }
+  return 0;
+}
+
 int MenuVgmStart()
 {
   char Name[256];

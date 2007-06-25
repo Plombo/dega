@@ -34,13 +34,17 @@
 #define ID_OPTIONS_SCREENSHOT           40070
 #define ID_STATE_LOADSTATE              40071
 #define ID_STATE_SAVESTATE              40072
+#define ID_VIDEO_RECORD                 40073
+#define ID_VIDEO_RESETRECORD            40074
+#define ID_VIDEO_PLAYBACK               40075
+#define ID_VIDEO_STOP                   40076
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        104
-#define _APS_NEXT_COMMAND_VALUE         40073
+#define _APS_NEXT_COMMAND_VALUE         40076
 #define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

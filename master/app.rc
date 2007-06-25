@@ -113,6 +113,13 @@ BEGIN
 
         END
     END
+    POPUP "Video"
+    BEGIN
+        MENUITEM "Start Recording",                 ID_VIDEO_RECORD
+        MENUITEM "Reset and Start Recording",       ID_VIDEO_RESETRECORD
+        MENUITEM "Start Playback",                  ID_VIDEO_PLAYBACK
+	MENUITEM "Stop Recording/Playback",         ID_VIDEO_STOP
+    END
 END
 
 
@@ -132,8 +139,10 @@ IDI_ICON1               ICON    DISCARDABLE     "icon1.ico"
 
 IDR_ACCELERATOR1 ACCELERATORS DISCARDABLE 
 BEGIN
+    "O",            ID_SETUP_ONEFRAME,      VIRTKEY, NOINVERT
     "O",            ID_SETUP_ONEFRAME,      VIRTKEY, ALT, NOINVERT
     "O",            ID_SETUP_ONEFRAME,      VIRTKEY, CONTROL, ALT, NOINVERT
+    "P",            ID_SETUP_PAUSE,         VIRTKEY, NOINVERT
     "P",            ID_SETUP_PAUSE,         VIRTKEY, ALT, NOINVERT
     "P",            ID_SETUP_PAUSE,         VIRTKEY, CONTROL, ALT, NOINVERT
     "R",            ID_FILE_RESET,          VIRTKEY, ALT, NOINVERT

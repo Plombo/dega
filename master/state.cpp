@@ -47,6 +47,9 @@ int StateLoad(int Meka)
 
   if (sf!=NULL) fclose(sf); sf=NULL;
   if (gf!=NULL) gzclose(gf); gf=NULL;
+
+  MvidPostLoadState();
+
   return 0;
 }
 

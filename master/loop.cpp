@@ -256,12 +256,17 @@ int LoopDo()
       if (Msg.wParam==ID_SOUND_QUALITY_44100HZ) DSoundSamRate=44100;
       if (Msg.wParam==ID_SOUND_VGMLOG_STOP) { VgmStop(NULL); }
       if (Msg.wParam==ID_SOUND_VGMLOG_SAMPLEACCURATE) { VgmAccurate=!VgmAccurate; }
+      if (Msg.wParam==ID_VIDEO_STOP) { MvidStop(); }
     }
     if (Msg.message==WMU_STATELOAD)   { StateLoad(0); }
     if (Msg.message==WMU_STATESAVE)   { StateSave(0); }
     if (Msg.message==WMU_STATEIMPORT) { StateLoad(1); }
     if (Msg.message==WMU_STATEEXPORT) { StateSave(1); }
     if (Msg.message==WMU_VGMSTART) { VgmStart(VgmName); }
+
+    if (Msg.message==WMU_VIDEORECORD)      { VideoRecord(0); }
+    if (Msg.message==WMU_VIDEORESETRECORD) { VideoRecord(1); }
+    if (Msg.message==WMU_VIDEOPLAYBACK)    { VideoPlayback(); }
 
     Ret=MediaInit(InitLevel); if (Ret!=0) { InitLevel=0; goto Error; }
 
@@ -300,12 +305,17 @@ int LoopDo()
         if (Msg.wParam==ID_SOUND_QUALITY_44100HZ) { InitLevel=50; break; }
         if (Msg.wParam==ID_SOUND_VGMLOG_STOP)  { InitLevel=60; break; }
         if (Msg.wParam==ID_SOUND_VGMLOG_SAMPLEACCURATE) { InitLevel=60; break; }
+        if (Msg.wParam==ID_VIDEO_STOP)         { InitLevel=60; break; }
       }
       if (Msg.message==WMU_STATELOAD) { InitLevel=60; break; }
       if (Msg.message==WMU_STATESAVE) { InitLevel=60; break; }
       if (Msg.message==WMU_STATEIMPORT) { InitLevel=60; break; }
       if (Msg.message==WMU_STATEEXPORT) { InitLevel=60; break; }
       if (Msg.message==WMU_VGMSTART)    { InitLevel=60; break; }
+
+      if (Msg.message==WMU_VIDEORECORD)      { InitLevel=60; break; }
+      if (Msg.message==WMU_VIDEORESETRECORD) { InitLevel=60; break; }
+      if (Msg.message==WMU_VIDEOPLAYBACK)    { InitLevel=60; break; }
 
       if (hAccel!=NULL) TranslateAccelerator(hFrameWnd,hAccel,&Msg);
       TranslateMessage(&Msg);
