@@ -4,6 +4,9 @@
 #include <unistd.h>
 #include <sys/types.h>
 #endif
+#ifdef WIN32
+#include <windows.h>
+#endif
 
 static FILE *videoFile = NULL;
 static char videoFilename[64];
@@ -16,10 +19,12 @@ int frameCount;
 
 static int MastAcbVideoRead(struct MastArea *area) {
 	fread(area->Data, area->Len, 1, videoFile);
+	return 0;
 }
 
 static int MastAcbVideoWrite(struct MastArea *area) {
 	fwrite(area->Data, area->Len, 1, videoFile);
+	return 0;
 }
 
 void MvidStart(char *filename, int mode, int reset) {
@@ -117,13 +122,18 @@ void MvidPostLoadState() {
 		int newSize = 0x20 + (beginReset ? 0 : SAVE_STATE_SIZE) + frameCount*sizeof(MastInput);
 
 		fclose(videoFile);
+
+		videoFile = fopen(videoFilename, "r+b");
 #ifdef unix
-		truncate(videoFilename, newSize);
+		ftruncate(fileno(videoFile), newSize);
+#else
+#ifdef WIN32
+		fseek(videoFile, newSize, SEEK_SET);
+		SetEndOfFile((HANDLE)_fileno(videoFile));
 #else
 #error no truncate implementation available!
 #endif
-
-		videoFile = fopen(videoFilename, "r+b");
+#endif
 		rerecordCount++;
 
 		fseek(videoFile, 0xc, SEEK_SET);

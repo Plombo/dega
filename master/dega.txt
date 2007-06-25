@@ -24,6 +24,19 @@ ________________________________________________________________________________
 
                                 What's New?
 
+  v1.12
+  + Added a setting in dega.ini called StartInFullscreen. If set to one, Dega will
+  start in fullscreen (may be useful for game launchers).
+
+  v1.11
+  (+ might have fixed a potential crash on exit)
+
+  v1.09
+  + Added support for loading from .ZIP files (a much requested feature!)
+
+  v1.08
+  + Added reverb effect to channels 0 and 1 in Enhanced PSG mode (sounds better).
+
   v1.07
   + Added native Dega save state format, .dgz
     These save states are GZip compressed and also store the FM chip state.
@@ -51,12 +64,6 @@ ________________________________________________________________________________
     (hiss is XOR with 0x12000 and buzz is XOR with 0x10000)
     Both use 0x0001 as the seed, which is reloaded when the noise type
     is written to.
-
-  v1.05
-  + Added triple-buffering... in a window! Overlays are now triple-buffered
-    (if you have enough video memory).
-  + Added a switch between sound off, 12khz and 44.1khz.
-  + Added fullscreen mode. Press Alt-Enter to activate it.
 
 ____________________________________________________________________________________
 
