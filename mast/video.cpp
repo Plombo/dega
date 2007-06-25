@@ -10,7 +10,7 @@
 #endif
 
 static FILE *videoFile = NULL;
-static char videoFilename[64];
+static char videoFilename[256];
 static int videoMode = 0;
 static int rerecordCount, beginReset;
 
