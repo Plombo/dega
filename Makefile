@@ -28,10 +28,13 @@ endif
 
 ifeq ($(P),unix)
 
-all: dega
+all: dega degavi
 
 dega: $(PLATOBJ) $(DOZEOBJ) $(MASTOBJ)
 	$(CC) -o dega $(PLATOBJ) $(DOZEOBJ) $(MASTOBJ) $(shell sdl-config --libs)
+
+degavi: tools/degavi.o $(DOZEOBJ) $(MASTOBJ)
+	$(CC) -o degavi tools/degavi.o $(DOZEOBJ) $(MASTOBJ) -lm
 
 doze/dozea.o: doze/dozea.asm
 	nasm -f elf doze/dozea.asm
@@ -66,10 +69,16 @@ doze/dam.exe: $(DAMOBJ)
 zlib/libz.a:
 	make -Czlib libz.a
 
+else
+
+all:
+	@echo Please give a parameter P=unix or P=win
+	@false
+
 endif
 
 clean:
-	rm -f $(DOZEOBJ) $(DAMOBJ) $(MASTOBJ) $(PLATOBJ) doze/dozea.asm* doze/dam doze/dam.exe dega dega.exe
+	rm -f $(DOZEOBJ) $(DAMOBJ) $(MASTOBJ) $(PLATOBJ) tools/degavi.o doze/dozea.asm* doze/dam doze/dam.exe dega dega.exe degavi degavi.exe
 	make -Czlib clean
 
 distclean: clean

@@ -8,6 +8,8 @@
 #include <SDL.h>
 #include <malloc.h>
 #include <getopt.h>
+#include <langinfo.h>
+#include <locale.h>
 
 SDL_Surface *thescreen;
 SDL_Color themap[256];
@@ -42,7 +44,7 @@ void MsndCall(void* data, Uint8* stream, int len)
 	{
 		memcpy(stream,data,audio_len);
 		audio_len=0;
-		printf("resetting audio_len\n");
+		// printf("resetting audio_len\n");
 		return;
 	}
 	//printf("audio_len=%d\n",audio_len);
@@ -138,6 +140,29 @@ void HandlePlaybackMovie(void) {
 	MvidStart(buffer, PLAYBACK_MODE, 0);
 }
 
+void HandleSetAuthor(void) {
+	char buffer[64], buffer_utf8[64];
+	char *pbuffer = buffer, *pbuffer_utf8 = buffer_utf8;
+	size_t buffersiz, buffersiz_utf8 = sizeof(buffer_utf8), bytes;
+	iconv_t cd;
+	puts("Enter name of author:");
+	chompgets(buffer, sizeof(buffer), stdin);
+	buffersiz = strlen(buffer);
+
+	cd = iconv_open("UTF-8", nl_langinfo(CODESET));
+	bytes = iconv(cd, &pbuffer, &buffersiz, &pbuffer_utf8, &buffersiz_utf8);
+	if (bytes == (size_t)(-1)) {
+		perror("iconv");
+		iconv_close(cd);
+		return;
+	}
+	iconv_close(cd);
+
+	*pbuffer_utf8 = '\0';
+
+	MvidSetAuthor(buffer_utf8);
+}
+
 void usage(void)
 {
 	printf("\nUsage: %s [OPTION]... [ROM file]\n",APPNAME);
@@ -171,6 +196,8 @@ int main(int argc, char** argv)
 	int autodetect=1;
 	int sound=1;
 	int vidflags=0;
+
+	setlocale(LC_CTYPE, "");
 
 	while(1)
 	{
@@ -326,6 +353,7 @@ Handler:		switch (event.type)
 				if(key==SDLK_w) {MvidStop();break;}
 				if(key==SDLK_s) {HandleSaveState();break;}
 				if(key==SDLK_l) {HandleLoadState();break;}
+				if(key==SDLK_a) {HandleSetAuthor();break;}
                                 break;
                         case SDL_KEYUP:
                                 key=event.key.keysym.sym;

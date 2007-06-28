@@ -14,8 +14,11 @@ static char videoFilename[256];
 static int videoMode = 0;
 static int rerecordCount, beginReset;
 
+static char videoAuthor[64];
+
 int frameCount;
 
+#define HEADER_SIZE 0x60
 #define SAVE_STATE_SIZE 25088
 
 static int MastAcbVideoRead(struct MastArea *area) {
@@ -28,7 +31,9 @@ static int MastAcbVideoWrite(struct MastArea *area) {
 	return 0;
 }
 
-void MvidStart(char *filename, int mode, int reset) {
+int MvidStart(char *filename, int mode, int reset) {
+	int vidFrameCount = 0;
+
 	if (videoFile != NULL) {
 		fclose(videoFile);
 		videoFile = NULL;
@@ -41,11 +46,15 @@ void MvidStart(char *filename, int mode, int reset) {
 	if (mode == PLAYBACK_MODE) {
 		videoFile = fopen(filename, "rb");
 		if (videoFile != NULL) {
-			fseek(videoFile, 0xc, SEEK_SET);
+			fseek(videoFile, 0x8, SEEK_SET);
+			fread(&vidFrameCount, 4, 1, videoFile);
 			fread(&rerecordCount, 4, 1, videoFile);
 			fread(&reset, 4, 1, videoFile);
 
 			fseek(videoFile, 0x20, SEEK_SET);
+			fread(videoAuthor, sizeof(videoAuthor), 1, videoFile);
+
+			fseek(videoFile, HEADER_SIZE, SEEK_SET);
 			if (reset) {
 				MastHardReset();
 			} else {
@@ -68,6 +77,9 @@ void MvidStart(char *filename, int mode, int reset) {
 			fwrite(&zero, 4, 1, videoFile);
 			fwrite(&zero, 4, 1, videoFile);
 
+			memset(videoAuthor, 0, sizeof(videoAuthor));
+			fwrite(videoAuthor, sizeof(videoAuthor), 1, videoFile); // 0020-005f: author
+
 			if (reset) {
 				MastHardReset();
 			} else {
@@ -82,6 +94,8 @@ void MvidStart(char *filename, int mode, int reset) {
 	}
 
 	beginReset = reset;
+
+	return vidFrameCount;
 }
 
 void MvidStop() {
@@ -91,7 +105,28 @@ void MvidStop() {
 		videoFile = NULL;
 	}
 }
-	
+
+int MvidSetAuthor(char *author) {
+	long oldPos;
+
+	if (videoFile == 0 || videoMode != RECORD_MODE) {
+		return 0;
+	}
+
+	memset(videoAuthor, 0, sizeof(videoAuthor));
+	strncpy(videoAuthor, author, sizeof(videoAuthor));
+
+	oldPos = ftell(videoFile);
+	fseek(videoFile, 0x20, SEEK_SET);
+	fwrite(videoAuthor, sizeof(videoAuthor), 1, videoFile);
+
+	return 1;
+}
+
+char *MvidGetAuthor() {
+	return videoAuthor;
+}
+
 void MvidPreFrame() {
 	int result;
 	frameCount++;
@@ -120,7 +155,7 @@ void MvidPreFrame() {
 
 void MvidPostLoadState() {
 	if (videoFile != NULL) {
-		int newSize = 0x20 + (beginReset ? 0 : SAVE_STATE_SIZE) + frameCount*sizeof(MastInput);
+		int newSize = HEADER_SIZE + (beginReset ? 0 : SAVE_STATE_SIZE) + frameCount*sizeof(MastInput);
 
 		fclose(videoFile);
 
