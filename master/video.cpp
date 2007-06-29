@@ -42,7 +42,7 @@ static BOOL CALLBACK VideoPropertiesProc(HWND hwndDlg, UINT uMsg, WPARAM wParam,
 				WideCharToMultiByte(CP_UTF8, 0, authorNameWide, -1, authorName, sizeof(authorName), 0, 0);
 
 				if (MvidSetAuthor(authorName) == 0) {
-					MessageBox(hwndDlg, "Could not set author as movie is not currently being recorded.", "Error", MB_ICONEXCLAMATION | MB_OK);
+					MessageBox(hwndDlg, "For some strange reason, I could not set the author name.", "Error", MB_ICONEXCLAMATION | MB_OK);
 				}
 			}
 

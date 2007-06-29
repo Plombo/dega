@@ -139,6 +139,7 @@ int ConfSave();
 // state.cpp
 extern char StateName[];
 extern int AutoLoadSave;
+extern int VideoReadOnly;
 int StateLoad(int Meka);
 int StateSave(int Meka);
 int StateAuto(int Save);

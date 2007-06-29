@@ -10,7 +10,7 @@
 #endif
 
 static FILE *videoFile = NULL;
-static char videoFilename[256];
+static char videoFilename[256] = "";
 static int videoMode = 0;
 static int vidFrameCount, rerecordCount, beginReset;
 
@@ -115,24 +115,29 @@ void MvidStop() {
 }
 
 int MvidSetAuthor(char *author) {
-	long oldPos;
+	FILE *rwVideoFile;
 
-	if (videoFile == 0 || videoMode != RECORD_MODE) {
+	if (*videoFilename == 0) {
 		return 0;
 	}
 
 	memset(videoAuthor, 0, sizeof(videoAuthor));
 	strncpy(videoAuthor, author, sizeof(videoAuthor));
 
-	oldPos = ftell(videoFile);
-	fseek(videoFile, 0x20, SEEK_SET);
-	fwrite(videoAuthor, sizeof(videoAuthor), 1, videoFile);
+	rwVideoFile = fopen(videoFilename, "r+b");
+	fseek(rwVideoFile, 0x20, SEEK_SET);
+	fwrite(videoAuthor, sizeof(videoAuthor), 1, rwVideoFile);
+	fclose(rwVideoFile);
 
 	return 1;
 }
 
 char *MvidGetAuthor() {
 	return videoAuthor;
+}
+
+int MvidGotProperties() {
+	return (*videoFilename != 0);
 }
 
 void MvidPreFrame() {
@@ -161,29 +166,33 @@ void MvidPreFrame() {
 	}
 }
 
-void MvidPostLoadState() {
+void MvidPostLoadState(int readonly) {
 	if (videoFile != NULL) {
-		int newSize = HEADER_SIZE + (beginReset ? 0 : SAVE_STATE_SIZE) + frameCount*sizeof(MastInput);
+		int newPosition = HEADER_SIZE + (beginReset ? 0 : SAVE_STATE_SIZE) + frameCount*sizeof(MastInput);
 
-		fclose(videoFile);
+		if (readonly != 0 && videoMode == PLAYBACK_MODE) {
+			fseek(videoFile, newPosition, SEEK_SET);
+		} else {
+			fclose(videoFile);
 
-		videoFile = fopen(videoFilename, "r+b");
+			videoFile = fopen(videoFilename, "r+b");
 #ifdef unix
-		ftruncate(fileno(videoFile), newSize);
+			ftruncate(fileno(videoFile), newPosition);
 #else
 #ifdef WIN32
-		fseek(videoFile, newSize, SEEK_SET);
-		SetEndOfFile((HANDLE)_get_osfhandle(_fileno(videoFile)));
+			fseek(videoFile, newPosition, SEEK_SET);
+			SetEndOfFile((HANDLE)_get_osfhandle(_fileno(videoFile)));
 #else
 #error no truncate implementation available!
 #endif
 #endif
-		rerecordCount++;
+			rerecordCount++;
 
-		fseek(videoFile, 0xc, SEEK_SET);
-		fwrite(&rerecordCount, 4, 1, videoFile);
+			fseek(videoFile, 0xc, SEEK_SET);
+			fwrite(&rerecordCount, 4, 1, videoFile);
 
-		fseek(videoFile, 0, SEEK_END);
-		videoMode = RECORD_MODE;
+			fseek(videoFile, 0, SEEK_END);
+			videoMode = RECORD_MODE;
+		}
 	}
 }

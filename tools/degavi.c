@@ -7,6 +7,8 @@
 #include <errno.h>
 #include <mast.h>
 #include <getopt.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 unsigned char paldata[256][3];
 
@@ -66,7 +68,7 @@ void FifoPop(Fifo fifo) {
 }
 
 int FifoFlush(Fifo fifo, int fd) {
-	int size, newsize;
+	int size;
 	
 	if (fifo[0].DataCur == 0) {
 		return 0;
@@ -155,7 +157,7 @@ void usage(char *name) {
 }
 
 int main(int argc, char **argv) {
-	int framerate = 60, i, frames = 0;
+	int framerate = 60, i, frames = 0, status;
 
 	unsigned char *rom;
 	int romlength;
@@ -205,7 +207,6 @@ int main(int argc, char **argv) {
 	}
 
 	for (i = 0; i < frames+additionalFrames; i++) {
-		fd_set fds;
 		int progress;
 		pMsndOut = FifoPush(audiofifo, MsndLen*2*2);
 		videodata = FifoPush(videofifo, 288*192*3);
@@ -290,6 +291,7 @@ int main(int argc, char **argv) {
 		close(audiofd);
 	}
 
-	waitpid(mencoder_pid, 0, 0);
+	waitpid(mencoder_pid, &status, 0);
+	return WIFEXITED(status) ? WEXITSTATUS(status) : 1;
 }
 

@@ -119,6 +119,7 @@ BEGIN
         MENUITEM "Reset and Start Recording",       ID_VIDEO_RESETRECORD
         MENUITEM "Start Playback",                  ID_VIDEO_PLAYBACK
 	MENUITEM "Stop Recording/Playback",         ID_VIDEO_STOP
+	MENUITEM "Read-only Mode",                  ID_VIDEO_READONLY
 	MENUITEM SEPARATOR
 	MENUITEM "Properties",                      ID_VIDEO_PROPERTIES
     END

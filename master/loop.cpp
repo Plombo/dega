@@ -136,6 +136,8 @@ static int MediaInit(int Level)
     EnableMenuItem(hFrameMenu,ID_SOUND_VGMLOG_START,VgmFile==NULL ? MF_ENABLED : MF_GRAYED);
     EnableMenuItem(hFrameMenu,ID_SOUND_VGMLOG_STOP, VgmFile!=NULL ? MF_ENABLED : MF_GRAYED);
     CHK(ID_SOUND_VGMLOG_SAMPLEACCURATE,VgmAccurate)
+    CHK(ID_VIDEO_READONLY,VideoReadOnly)
+    EnableMenuItem(hFrameMenu,ID_VIDEO_PROPERTIES, MvidGotProperties() ? MF_ENABLED : MF_GRAYED);
 
     if (ShowMenu) SetMenu(hFrameWnd,hFrameMenu);
     else          SetMenu(hFrameWnd,NULL);
@@ -257,6 +259,7 @@ int LoopDo()
       if (Msg.wParam==ID_SOUND_VGMLOG_STOP) { VgmStop(NULL); }
       if (Msg.wParam==ID_SOUND_VGMLOG_SAMPLEACCURATE) { VgmAccurate=!VgmAccurate; }
       if (Msg.wParam==ID_VIDEO_STOP) { MvidStop(); }
+      if (Msg.wParam==ID_VIDEO_READONLY) { VideoReadOnly=!VideoReadOnly; }
     }
     if (Msg.message==WMU_STATELOAD)   { StateLoad(0); }
     if (Msg.message==WMU_STATESAVE)   { StateSave(0); }
@@ -306,6 +309,7 @@ int LoopDo()
         if (Msg.wParam==ID_SOUND_VGMLOG_STOP)  { InitLevel=60; break; }
         if (Msg.wParam==ID_SOUND_VGMLOG_SAMPLEACCURATE) { InitLevel=60; break; }
         if (Msg.wParam==ID_VIDEO_STOP)         { InitLevel=60; break; }
+        if (Msg.wParam==ID_VIDEO_READONLY)     { InitLevel=70; break; }
       }
       if (Msg.message==WMU_STATELOAD) { InitLevel=60; break; }
       if (Msg.message==WMU_STATESAVE) { InitLevel=60; break; }

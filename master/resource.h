@@ -43,13 +43,14 @@
 #define ID_VIDEO_PLAYBACK               40075
 #define ID_VIDEO_STOP                   40076
 #define ID_VIDEO_PROPERTIES             40077
+#define ID_VIDEO_READONLY               40078
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        105
-#define _APS_NEXT_COMMAND_VALUE         40078
+#define _APS_NEXT_COMMAND_VALUE         40079
 #define _APS_NEXT_CONTROL_VALUE         1004
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

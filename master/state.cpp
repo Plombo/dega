@@ -6,6 +6,7 @@ char StateName[256]="";
 static FILE *sf=NULL; // State file
 static gzFile gf=NULL; // State file (compressed)
 int AutoLoadSave=0;
+int VideoReadOnly=0;
 
 static char *MakeAutoName(int Battery)
 {
@@ -48,7 +49,7 @@ int StateLoad(int Meka)
   if (sf!=NULL) fclose(sf); sf=NULL;
   if (gf!=NULL) gzclose(gf); gf=NULL;
 
-  MvidPostLoadState();
+  MvidPostLoadState(VideoReadOnly);
 
   return 0;
 }

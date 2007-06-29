@@ -83,11 +83,12 @@ extern int VgmAccurate; // 1=Sample accurate
 #define RECORD_MODE 1
 int MvidStart(char *videoFilename, int mode, int reset);
 void MvidStop();
-void MvidPostLoadState();
+void MvidPostLoadState(int readonly);
 int MvidSetAuthor(char *author);
 char *MvidGetAuthor();
 int MvidGetFrameCount();
 int MvidGetRerecordCount();
+int MvidGotProperties();
 
 #ifdef __cplusplus
 } // End of extern "C"

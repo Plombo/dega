@@ -18,6 +18,8 @@ int width, height;
 
 static int audio_len=0;
 
+int readonly;
+
 int scrlock()
 {
         if(SDL_MUSTLOCK(thescreen))
@@ -55,7 +57,7 @@ void MsndCall(void* data, Uint8* stream, int len)
 
 static char *chompgets(char *buf, int len, FILE *fh) {
 	char *ret;
-	if (ret = fgets(buf, len, fh)) {
+	if ((ret = fgets(buf, len, fh))) {
 		char *nl = strchr(buf, '\n');
 		if (nl != NULL) {
 			*nl = '\0';
@@ -86,7 +88,7 @@ static int StateLoad(char *StateName)
 
   fclose(sf); sf=NULL;
 
-  MvidPostLoadState();
+  MvidPostLoadState(readonly);
   return 0;
 }
 
@@ -174,6 +176,7 @@ void usage(void)
 	printf("  -p --pal\tuse PAL mode (default NTSC)\n");
 	printf("  -s --nosound\tdisable sound\n");
 	printf("  -f --fullscreen\tfullscreen display\n");
+	printf("  -r --readonly\tmovies are readonly\n");
 	printf("\n" APPNAME_LONG " version " VERSION " by Ulrich Hecht <uli@emulinks.de>\n");
 	printf("based on Win32 version by Dave <dave@finalburn.com>\n");
 	exit (0);
@@ -199,6 +202,8 @@ int main(int argc, char** argv)
 
 	setlocale(LC_CTYPE, "");
 
+	readonly = 0;
+
 	while(1)
 	{
 		int option_index=0;
@@ -212,6 +217,7 @@ int main(int argc, char** argv)
 			{"pal",no_argument,NULL,'p'},
 			{"nosound",no_argument,NULL,'s'},
 			{"fullscreen",no_argument,NULL,'f'},
+			{"readonly",no_argument,NULL,'r'},
 			{0,0,0,0}
 		};
 		
@@ -250,6 +256,10 @@ int main(int argc, char** argv)
 				vidflags |= SDL_FULLSCREEN;
 				break;
 				
+			case 'r':
+				readonly = 1;
+				break;
+
 			case '?':
 				usage();
 				break;
@@ -378,11 +388,12 @@ Handler:		switch (event.type)
 			if(sound) while(audio_len>aspec.samples*aspec.channels*2*4) usleep(5);
 		}
 	}
+	return 0;
 }
 
 void MdrawCall()
 {
-	int i,len,yoff=0;
+	int i,yoff=0;
 	if(Mdraw.Data[0]) printf("MdrawCall called, line %d, first pixel %d\n",Mdraw.Line,Mdraw.Data[0]);
 	if(Mdraw.PalChange)
 	{
