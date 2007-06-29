@@ -119,6 +119,8 @@ BEGIN
         MENUITEM "Reset and Start Recording",       ID_VIDEO_RESETRECORD
         MENUITEM "Start Playback",                  ID_VIDEO_PLAYBACK
 	MENUITEM "Stop Recording/Playback",         ID_VIDEO_STOP
+	MENUITEM SEPARATOR
+	MENUITEM "Properties",                      ID_VIDEO_PROPERTIES
     END
 END
 
@@ -150,6 +152,26 @@ BEGIN
     VK_PAUSE,       ID_SETUP_PAUSE,         VIRTKEY, NOINVERT
     VK_RETURN,      ID_SETUP_FULLSCREEN,    VIRTKEY, ALT, NOINVERT
     VK_RETURN,      ID_SETUP_FULLSCREEN,    VIRTKEY, CONTROL, ALT, NOINVERT
+END
+
+
+// "Movie properties" dialog
+
+IDD_MOVIEPROPERTIES DIALOG 10, 10, 250, 95
+STYLE WS_POPUP | WS_BORDER
+CAPTION "Movie Properties"
+BEGIN
+  LTEXT "Frame count:", 0, 10, 10, 100, 10
+  RTEXT "", IDT_MP_FRAMECOUNT, 150, 10, 90, 10
+
+  LTEXT "Rerecord count:", 0, 10, 30, 100, 10
+  RTEXT "", IDT_MP_RERECORDCOUNT, 150, 30, 90, 10
+
+  LTEXT "Author:", 0, 10, 50, 100, 10
+  EDITTEXT IDT_MP_AUTHOR, 100, 50, 140, 10
+
+  PUSHBUTTON "OK", IDOK, 70, 70, 50, 15
+  PUSHBUTTON "Cancel", IDCANCEL, 130, 70, 50, 15
 END
 
 #endif    // English (U.K.) resources

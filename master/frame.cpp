@@ -46,6 +46,7 @@ static LRESULT CALLBACK WindowProc(HWND hWnd,UINT Msg,WPARAM wParam,LPARAM lPara
     if (Item==ID_SOUND_VGMLOG_START) { MenuVgmStart(); return 0; }
     if (Item==ID_VIDEO_PLAYBACK || Item==ID_VIDEO_RECORD || Item==ID_VIDEO_RESETRECORD)
       { MenuVideo(Item); return 0; }
+    if (Item==ID_VIDEO_PROPERTIES) { VideoProperties(); return 0; }
     PostMessage(NULL,WMU_COMMAND,Item,0);
   }
 

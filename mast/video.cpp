@@ -12,7 +12,7 @@
 static FILE *videoFile = NULL;
 static char videoFilename[256];
 static int videoMode = 0;
-static int rerecordCount, beginReset;
+static int vidFrameCount, rerecordCount, beginReset;
 
 static char videoAuthor[64];
 
@@ -32,7 +32,7 @@ static int MastAcbVideoWrite(struct MastArea *area) {
 }
 
 int MvidStart(char *filename, int mode, int reset) {
-	int vidFrameCount = 0;
+	vidFrameCount = 0;
 
 	if (videoFile != NULL) {
 		fclose(videoFile);
@@ -96,6 +96,14 @@ int MvidStart(char *filename, int mode, int reset) {
 	beginReset = reset;
 
 	return vidFrameCount;
+}
+
+int MvidGetFrameCount() {
+	return vidFrameCount;
+}
+
+int MvidGetRerecordCount() {
+	return rerecordCount;
 }
 
 void MvidStop() {

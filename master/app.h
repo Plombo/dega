@@ -153,6 +153,7 @@ int ShotSave();
 extern char VideoName[256];
 void VideoRecord(int Reset);
 void VideoPlayback();
+void VideoProperties();
 
 // zipfn.cpp
 int ZipOpen(char *ZipName);

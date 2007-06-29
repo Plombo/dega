@@ -1,4 +1,4 @@
-OPTFLAGS=-O3 -fomit-frame-pointer -funroll-loops
+OPTFLAGS=-O3 -fomit-frame-pointer -funroll-loops -Wall
 #OPTFLAGS=-O3 -fomit-frame-pointer -funroll-loops -march=i686 -mcpu=i686
 #OPTFLAGS=-xM -O3
 

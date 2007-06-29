@@ -86,6 +86,8 @@ void MvidStop();
 void MvidPostLoadState();
 int MvidSetAuthor(char *author);
 char *MvidGetAuthor();
+int MvidGetFrameCount();
+int MvidGetRerecordCount();
 
 #ifdef __cplusplus
 } // End of extern "C"
