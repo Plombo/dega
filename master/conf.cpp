@@ -26,7 +26,7 @@ int ConfLoad()
   // Go through each line of the config file
   for (;;)
   {
-    int Len=0;
+    int i, Len=0;
     if (fgets(Line,sizeof(Line),h)==NULL) break; // End of config file
 
     Len=strlen(Line);
@@ -53,6 +53,13 @@ int ConfLoad()
     STR(StateFolder)
     VAR(AutoLoadSave)
 
+    for (i = 0; i < KMAPCOUNT; i++)
+    {
+      char buf[20], *value;
+      snprintf(buf, sizeof(buf), "KeyMapping%d", i);
+      value = LabelCheck(Line, buf);
+      if (value!=NULL) KeyMappings[i] = strtol(value,NULL,0);
+    }
 #undef STR
 #undef VAR
   }
@@ -64,6 +71,7 @@ int ConfLoad()
 // Write out the config file for the whole application
 int ConfSave()
 {
+  int i;
   FILE *h=NULL;
   h=fopen(Config,"wt");
   if (h==NULL) return 1;
@@ -94,6 +102,12 @@ int ConfSave()
     STR(StateFolder)
     VAR(AutoLoadSave)
 
+    fprintf (h, "\n// Keys\n");
+    for (i = 0; i < KMAPCOUNT; i++)
+    {
+      fprintf( h, "KeyMapping%d %d\n", i, KeyMappings[i]);
+    }
+    
 #undef STR
 #undef VAR
 

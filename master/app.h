@@ -156,6 +156,10 @@ void VideoRecord(int Reset);
 void VideoPlayback();
 void VideoProperties();
 
+// keymap.cpp
+extern unsigned short KeyMappings[KMAPCOUNT];
+void KeyMapping();
+
 // zipfn.cpp
 int ZipOpen(char *ZipName);
 int ZipClose();

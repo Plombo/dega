@@ -204,6 +204,27 @@ static int MediaExit(int Level)
   return 0;
 }
 
+struct CustomKeyMap {
+	int key;
+	WPARAM command;
+};
+
+static void TranslateCustomKeys(HWND hwnd, struct CustomKeyMap *map, MSG *msg) {
+	if (msg->hwnd != hwnd || msg->message != WM_KEYDOWN) return;
+	while (map->key != 0 || map->command != 0) {
+		if (msg->wParam == KeyMappings[map->key]) {
+			SendMessage(hwnd, WM_COMMAND, map->command, 0);
+			return;
+		}
+		map++;
+	}
+}
+
+struct CustomKeyMap mymap[] = {
+ { KMAP_PAUSE, ID_SETUP_PAUSE },
+ { KMAP_FRAMEADVANCE, ID_SETUP_ONEFRAME },
+ { 0, 0 }
+};
 
 // Main program loop
 int LoopDo()
@@ -322,6 +343,7 @@ int LoopDo()
       if (Msg.message==WMU_VIDEOPLAYBACK)    { InitLevel=60; break; }
 
       if (hAccel!=NULL) TranslateAccelerator(hFrameWnd,hAccel,&Msg);
+      TranslateCustomKeys(hFrameWnd,mymap,&Msg);
       TranslateMessage(&Msg);
       DispatchMessage(&Msg);
     }

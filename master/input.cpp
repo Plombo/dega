@@ -13,13 +13,13 @@ int InputGet()
   if (UseJoystick==0)
   {
     // Keyboard
-    if (DirInputState(VK_UP    )) MastInput[0]|=0x01;
-    if (DirInputState(VK_DOWN  )) MastInput[0]|=0x02;
-    if (DirInputState(VK_LEFT  )) MastInput[0]|=0x04;
-    if (DirInputState(VK_RIGHT )) MastInput[0]|=0x08;
-    if (DirInputState('Z'      )) MastInput[0]|=0x10;
-    if (DirInputState('X'      )) MastInput[0]|=0x20;
-    if (DirInputState('C'      )) MastInput[0]|=0x80;
+    if (DirInputState(KeyMappings[KMAP_UP]   )) MastInput[0]|=0x01;
+    if (DirInputState(KeyMappings[KMAP_DOWN] )) MastInput[0]|=0x02;
+    if (DirInputState(KeyMappings[KMAP_LEFT] )) MastInput[0]|=0x04;
+    if (DirInputState(KeyMappings[KMAP_RIGHT])) MastInput[0]|=0x08;
+    if (DirInputState(KeyMappings[KMAP_1]    )) MastInput[0]|=0x10;
+    if (DirInputState(KeyMappings[KMAP_2]    )) MastInput[0]|=0x20;
+    if (DirInputState(KeyMappings[KMAP_START])) MastInput[0]|=0x80;
   }
   else
   {
