@@ -8,8 +8,10 @@
 
 #define KMAP_PAUSE 7
 #define KMAP_FRAMEADVANCE 8
+#define KMAP_QUICKLOAD 9
+#define KMAP_QUICKSAVE 10
 
-#define KMAPCOUNT 9
+#define KMAPCOUNT 11
 
 #define ID_KMAP_START 41000
 #define IS_ID_KMAP(id) ((id) >= ID_KMAP_START && (id) < ID_KMAP_START+KMAPCOUNT)

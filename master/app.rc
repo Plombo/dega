@@ -95,6 +95,9 @@ BEGIN
         MENUITEM "Save State",                  ID_STATE_SAVESTATE
         MENUITEM "Auto load/save",              ID_STATE_AUTOLOADSAVE
         MENUITEM SEPARATOR
+        MENUITEM "Quick Save",                  ID_STATE_QUICKSAVE
+        MENUITEM "Quick Load",                  ID_STATE_QUICKLOAD
+        MENUITEM SEPARATOR
         MENUITEM "Import Meka",                 ID_STATE_IMPORT
         MENUITEM "Export Meka",                 ID_STATE_EXPORT
     END
@@ -180,7 +183,7 @@ END
 
 // "Hotkey mapping" dialog
 
-IDD_HOTKEYMAP DIALOGEX 10, 10, 130, 225
+IDD_HOTKEYMAP DIALOGEX 10, 10, 130, 265
 STYLE WS_POPUP | WS_BORDER
 CAPTION "Hotkey Mapping"
 FONT 8, "MS Sans Serif"
@@ -195,9 +198,11 @@ BEGIN
 
   KMAP_DIALOG_RES("Pause", KMAP_PAUSE, 10, 160)
   KMAP_DIALOG_RES("Frame Adv", KMAP_FRAMEADVANCE, 10, 180)
+  KMAP_DIALOG_RES("Quick Load", KMAP_QUICKLOAD, 10, 200)
+  KMAP_DIALOG_RES("Quick Save", KMAP_QUICKSAVE, 10, 220)
 
-  PUSHBUTTON "OK", IDOK, 10, 200, 50, 15
-  PUSHBUTTON "Cancel", IDCANCEL, 70, 200, 50, 15
+  PUSHBUTTON "OK", IDOK, 10, 240, 50, 15
+  PUSHBUTTON "Cancel", IDCANCEL, 70, 240, 50, 15
 
 END
 

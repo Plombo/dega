@@ -223,6 +223,8 @@ static void TranslateCustomKeys(HWND hwnd, struct CustomKeyMap *map, MSG *msg) {
 struct CustomKeyMap mymap[] = {
  { KMAP_PAUSE, ID_SETUP_PAUSE },
  { KMAP_FRAMEADVANCE, ID_SETUP_ONEFRAME },
+ { KMAP_QUICKLOAD, ID_STATE_QUICKLOAD },
+ { KMAP_QUICKSAVE, ID_STATE_QUICKSAVE },
  { 0, 0 }
 };
 
@@ -281,6 +283,8 @@ int LoopDo()
       if (Msg.wParam==ID_SOUND_VGMLOG_SAMPLEACCURATE) { VgmAccurate=!VgmAccurate; }
       if (Msg.wParam==ID_VIDEO_STOP) { MvidStop(); }
       if (Msg.wParam==ID_VIDEO_READONLY) { VideoReadOnly=!VideoReadOnly; }
+      if (Msg.wParam==ID_STATE_QUICKLOAD) { StateAutoState(0); }
+      if (Msg.wParam==ID_STATE_QUICKSAVE) { StateAutoState(1); }
     }
     if (Msg.message==WMU_STATELOAD)   { StateLoad(0); }
     if (Msg.message==WMU_STATESAVE)   { StateSave(0); }
@@ -331,6 +335,8 @@ int LoopDo()
         if (Msg.wParam==ID_SOUND_VGMLOG_SAMPLEACCURATE) { InitLevel=60; break; }
         if (Msg.wParam==ID_VIDEO_STOP)         { InitLevel=60; break; }
         if (Msg.wParam==ID_VIDEO_READONLY)     { InitLevel=70; break; }
+        if (Msg.wParam==ID_STATE_QUICKLOAD)    { InitLevel=60; break; }
+        if (Msg.wParam==ID_STATE_QUICKSAVE)    { InitLevel=60; break; }
       }
       if (Msg.message==WMU_STATELOAD) { InitLevel=60; break; }
       if (Msg.message==WMU_STATESAVE) { InitLevel=60; break; }

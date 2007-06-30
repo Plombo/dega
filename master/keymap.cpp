@@ -10,6 +10,8 @@ unsigned short KeyMappings[KMAPCOUNT] = {
   'C',      /* START */
   'P',      /* Pause */
   'O',      /* Frame Advance */
+  VK_F5,    /* Quick Load */
+  VK_F8,    /* Quick Save */
 };
 
 static unsigned short NewKeyMappings[KMAPCOUNT];

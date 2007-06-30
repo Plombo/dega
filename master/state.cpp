@@ -142,7 +142,7 @@ int BatteryLoad()
   return 0;
 }
 
-static int StateAutoState(int Save)
+int StateAutoState(int Save)
 {
   char *Name=NULL;
   // Load/Save state

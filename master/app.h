@@ -143,6 +143,7 @@ extern int VideoReadOnly;
 int StateLoad(int Meka);
 int StateSave(int Meka);
 int StateAuto(int Save);
+int StateAutoState(int Save);
 
 // shot.cpp
 int ShotStart();
