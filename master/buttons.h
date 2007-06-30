@@ -21,6 +21,6 @@
 #define ID_LAB_KMAP(kmap) ((kmap) + ID_LAB_KMAP_START)
 
 #define KMAP_DIALOG_RES(label, kmap, x, y) \
-  LTEXT label, 0, x, y+2, 50, 10 \
+  LTEXT label, 0, x, y+3, 50, 10 \
   PUSHBUTTON "Set", ID_KMAP(kmap), x+60, y, 30, 15 \
-  LTEXT "", ID_LAB_KMAP(kmap), x+100, y+2, 20, 10
+  LTEXT "", ID_LAB_KMAP(kmap), x+100, y+3, 20, 10
