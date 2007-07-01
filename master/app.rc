@@ -80,6 +80,9 @@ BEGIN
         MENUITEM "Pause Emu",                   ID_SETUP_PAUSE
         MENUITEM "One Frame",                   ID_SETUP_ONEFRAME
         MENUITEM SEPARATOR
+        MENUITEM "Speed Up",                    ID_SETUP_SPEEDUP
+        MENUITEM "Slow Down",                   ID_SETUP_SLOWDOWN
+        MENUITEM SEPARATOR
         MENUITEM "Screenshot\tF12",             ID_OPTIONS_SCREENSHOT
     END
     POPUP "Input"

@@ -55,14 +55,14 @@ static void RunIdle()
   if (DSoundPlaying) { DSoundCheck(); return; }
 
   Time=timeGetTime()-LastSecond; // This will be about 0-1000 ms
-  Frame=Time*FramesPerSecond/1000;
+  Frame=Time*RealFramesPerSecond/1000;
   Do=Frame-FramesDone;
   FramesDone=Frame;
 
   if (FramesPerSecond>0)
   {
     // Carry over any >60 frame count to one second
-    while (FramesDone>=FramesPerSecond) { FramesDone-=FramesPerSecond; LastSecond+=1000; }
+    while (FramesDone>=RealFramesPerSecond) { FramesDone-=RealFramesPerSecond; LastSecond+=1000; }
   }
 
   if (Do<=0) { Sleep(4); return; }

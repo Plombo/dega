@@ -48,6 +48,8 @@
 #define ID_INPUT_KEYMAPPING             40079
 #define ID_STATE_QUICKLOAD              40080
 #define ID_STATE_QUICKSAVE              40081
+#define ID_SETUP_SPEEDUP                40082
+#define ID_SETUP_SLOWDOWN               40083
 
 // Next default values for new objects
 // 

@@ -165,6 +165,15 @@ void HandleSetAuthor(void) {
 	MvidSetAuthor(buffer_utf8);
 }
 
+void SetRateMult(int framerate, int mult) {
+	int newrate = mult>0 ? framerate<<mult : framerate>>-mult;
+	if (newrate < 1) newrate = 1;
+
+	free(pMsndOut);
+	MsndLen=(MsndRate+(newrate>>1))/newrate; 
+	pMsndOut = malloc(MsndLen*2*2);
+}
+
 void usage(void)
 {
 	printf("\nUsage: %s [OPTION]... [ROM file]\n",APPNAME);
@@ -181,7 +190,6 @@ void usage(void)
 	printf("based on Win32 version by Dave <dave@finalburn.com>\n");
 	exit (0);
 }
-	                
 
 int main(int argc, char** argv)
 {
@@ -196,6 +204,7 @@ int main(int argc, char** argv)
 
 	// options
 	int framerate=60;
+	int mult=0;
 	int autodetect=1;
 	int sound=1;
 	int vidflags=0;
@@ -301,7 +310,7 @@ int main(int argc, char** argv)
 		aspec.format=AUDIO_S16;
 		aspec.channels=2;
 		aspec.samples=1024;
-		audiobuf=malloc(aspec.samples*aspec.channels*2*4);
+		audiobuf=malloc(aspec.samples*aspec.channels*2*64);
 		memset(audiobuf,0,aspec.samples*aspec.channels*2);
 		aspec.callback=MsndCall;
 		pMsndOut=malloc(MsndLen*aspec.channels*2);
@@ -364,6 +373,8 @@ Handler:		switch (event.type)
 				if(key==SDLK_s) {HandleSaveState();break;}
 				if(key==SDLK_l) {HandleLoadState();break;}
 				if(key==SDLK_a) {HandleSetAuthor();break;}
+				if(key==SDLK_EQUALS) {SetRateMult(framerate, ++mult);break;}
+				if(key==SDLK_MINUS) {SetRateMult(framerate, --mult);break;}
                                 break;
                         case SDL_KEYUP:
                                 key=event.key.keysym.sym;

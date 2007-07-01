@@ -111,12 +111,14 @@ static INLINE unsigned char SysIn(unsigned short a)
     goto End;
   }
 End:
+//printf("read 0x%x (PC=0x%x) -> 0x%x\n", a, Doze.pc, d);
   return d;
 }
 
 static INLINE void SysOut(unsigned short a,unsigned char d)
 {
   a&=0xff; // 8-bit ports
+//printf("write 0x%x (PC=0x%x) -> 0x%x\n", a, Doze.pc, d);
   if ( a      ==0x06) { DpsgStereo(d);   goto End; } // Psg Stereo
   if ( a      ==0x3f) { pMastb->Out3F=d; goto End; } // Region detect
   if ((a&0xfe)==0x7e) { DpsgWrite(d); goto End; } // Psg Write

@@ -32,6 +32,7 @@ void MdrawCramChangeAll()
 // A change in CRam - update the color in Mdraw
 void MdrawCramChange(int a)
 {
+  static int i = 0;
   int s,c;
   if (pMastb==NULL) return;
 
@@ -52,6 +53,7 @@ void MdrawCramChange(int a)
     c|=(s&0x03)<<1; // -> 000000RR0
   }
   Mdraw.Pal[a]=(unsigned short)c; Mdraw.PalChange=1;
+  // printf("MdrawCramChange %d %d\n", a,i++);
 }
 
 static INLINE void TileLine(unsigned char *pd,unsigned int Line,char nPal)

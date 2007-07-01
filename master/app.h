@@ -67,6 +67,8 @@ int EmuFrame();
 extern int DSoundSamRate;     // sample rate
 extern int DSoundSegCount;    // Segs in the pdsbLoop buffer
 extern int FramesPerSecond;    // Application fps
+extern int RealFramesPerSecond; // Application fps taking into account speedup/slowdown
+extern int FrameMult;         // frame multiplier 
 extern int DSoundSegLen;      // Seg length in samples (calculated from Rate/Fps)
 extern short *DSoundNextSound; // The next sound seg we will add to the sample loop
 extern unsigned char DSoundPlaying;  // True if the Loop buffer is playing

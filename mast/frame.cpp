@@ -51,6 +51,8 @@ static void RunLine()
 
 int MastFrame()
 {
+printf("frame PC=0x%x\n", Doze.pc);
+
   MvidPreFrame();
 
   nDozeInterrupt=Masta.Irq ? 0xff : -1; // Load IRQ latch

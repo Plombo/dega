@@ -285,6 +285,8 @@ int LoopDo()
       if (Msg.wParam==ID_VIDEO_READONLY) { VideoReadOnly=!VideoReadOnly; }
       if (Msg.wParam==ID_STATE_QUICKLOAD) { StateAutoState(0); }
       if (Msg.wParam==ID_STATE_QUICKSAVE) { StateAutoState(1); }
+      if (Msg.wParam==ID_SETUP_SPEEDUP) { FrameMult++; }
+      if (Msg.wParam==ID_SETUP_SLOWDOWN) { FrameMult--; }
     }
     if (Msg.message==WMU_STATELOAD)   { StateLoad(0); }
     if (Msg.message==WMU_STATESAVE)   { StateSave(0); }
@@ -337,6 +339,8 @@ int LoopDo()
         if (Msg.wParam==ID_VIDEO_READONLY)     { InitLevel=70; break; }
         if (Msg.wParam==ID_STATE_QUICKLOAD)    { InitLevel=60; break; }
         if (Msg.wParam==ID_STATE_QUICKSAVE)    { InitLevel=60; break; }
+        if (Msg.wParam==ID_SETUP_SPEEDUP)      { InitLevel=50; break; }
+        if (Msg.wParam==ID_SETUP_SLOWDOWN)     { InitLevel=50; break; }
       }
       if (Msg.message==WMU_STATELOAD) { InitLevel=60; break; }
       if (Msg.message==WMU_STATESAVE) { InitLevel=60; break; }

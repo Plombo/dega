@@ -15,6 +15,8 @@ int DSoundSegCount=5;           // Segs in the pdsbLoop buffer
 static int cbLoopLen=0;          // Loop length (in bytes) calculated
 
 int FramesPerSecond=60;          // Application fps
+int FrameMult=0;                 // Frame multiplier
+int RealFramesPerSecond=60;      // Application fps taking into account speedup/slowdown
 int DSoundSegLen=0;             // Seg length in samples (calculated from Rate/Fps)
 short *DSoundNextSound=NULL;     // The next sound seg we will add to the sample loop
 static unsigned char DSoundOkay=0;     // True if DSound was initted okay
@@ -115,9 +117,12 @@ int DSoundInit(HWND hWnd)
   if (FramesPerSecond<=0) return 1;
   if (FramesPerSecond>500) return 1;
 
+  RealFramesPerSecond=FrameMult>0 ? FramesPerSecond<<FrameMult : FramesPerSecond>>-FrameMult;
+  if (RealFramesPerSecond<1) RealFramesPerSecond = 1;
+
   // Calculate the Seg Length and Loop length
   // (round to nearest sample)
-  DSoundSegLen=(DSoundSamRate+(FramesPerSecond>>1))/FramesPerSecond;
+  DSoundSegLen=(DSoundSamRate+(RealFramesPerSecond>>1))/RealFramesPerSecond;
   cbLoopLen=(DSoundSegLen*DSoundSegCount)<<2;
 
   // Make the format of the sound
