@@ -1,17 +1,20 @@
 #include "app.h"
 
 unsigned short KeyMappings[KMAPCOUNT] = {
-  'Z',      /* "1" */
-  'X',      /* "2" */
-  VK_UP,    /* Up */
-  VK_DOWN,  /* Down */
-  VK_LEFT,  /* Left */
-  VK_RIGHT, /* Right */
-  'C',      /* START */
-  'P',      /* Pause */
-  'O',      /* Frame Advance */
-  VK_F5,    /* Quick Load */
-  VK_F8,    /* Quick Save */
+  'Z',          /* "1" */
+  'X',          /* "2" */
+  VK_UP,        /* Up */
+  VK_DOWN,      /* Down */
+  VK_LEFT,      /* Left */
+  VK_RIGHT,     /* Right */
+  'C',          /* START */
+  'P',          /* Pause */
+  'O',          /* Frame Advance */
+  VK_F5,        /* Quick Load */
+  VK_F6,        /* Quick Save */
+  VK_OEM_PLUS,  /* Speed Up */
+  VK_OEM_MINUS, /* Slow Down */
+  VK_F8,        /* Fast Forward */
 };
 
 static unsigned short NewKeyMappings[KMAPCOUNT];

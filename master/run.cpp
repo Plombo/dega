@@ -45,7 +45,7 @@ static void RunIdle()
   int Time=0,Frame=0;
   int Do=0,i=0;
 
-  if (GetActiveWindow()==hFrameWnd && GetAsyncKeyState(VK_F8)&0x8000)
+  if (GetActiveWindow()==hFrameWnd && GetAsyncKeyState(KeyMappings[KMAP_FASTFORWARD])&0x8000)
   {
     // Fast forward
     int i=0; for (i=0;i<5;i++) RunFrame(0,NULL);

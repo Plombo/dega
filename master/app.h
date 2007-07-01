@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #define WIN32_LEAN_AND_MEAN
+#define WINVER 0x500
 #include <windows.h>
 #include <commctrl.h>
 #include <commdlg.h>

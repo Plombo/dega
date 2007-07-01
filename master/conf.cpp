@@ -56,7 +56,7 @@ int ConfLoad()
     for (i = 0; i < KMAPCOUNT; i++)
     {
       char buf[20], *value;
-      snprintf(buf, sizeof(buf), "KeyMapping%d", i);
+      snprintf(buf, sizeof(buf), "Key%dMapping", i);
       value = LabelCheck(Line, buf);
       if (value!=NULL) KeyMappings[i] = strtol(value,NULL,0);
     }
@@ -105,7 +105,7 @@ int ConfSave()
     fprintf (h, "\n// Keys\n");
     for (i = 0; i < KMAPCOUNT; i++)
     {
-      fprintf( h, "KeyMapping%d %d\n", i, KeyMappings[i]);
+      fprintf( h, "Key%dMapping %d\n", i, KeyMappings[i]);
     }
     
 #undef STR

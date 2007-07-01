@@ -51,7 +51,7 @@ static void RunLine()
 
 int MastFrame()
 {
-printf("frame PC=0x%x\n", Doze.pc);
+//printf("frame PC=0x%x\n", Doze.pc);
 
   MvidPreFrame();
 
