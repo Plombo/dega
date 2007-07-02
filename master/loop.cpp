@@ -274,7 +274,7 @@ int LoopDo()
       {
         RunText("One Frame Step",2*60);
 	LoopPause=1;
-        RunFrame(1,NULL);
+        // RunFrame(1,NULL);
       }
       
       if (Msg.wParam==ID_INPUT_KEYBOARD) UseJoystick=0;

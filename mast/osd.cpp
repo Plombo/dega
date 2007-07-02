@@ -5,7 +5,7 @@ int MdrawOsdOptions = 0;
 #define CHARWIDTH 7
 #define CHARHEIGHT 7
 
-static unsigned short Palette[2] = { 0000, 0777 };
+static unsigned short Palette[2] = { 0000, 0666 };
 
 static unsigned char CharUp[CHARHEIGHT][CHARWIDTH] = {
 { 0, 0, 0, 2, 0, 0, 0 },
