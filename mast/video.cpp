@@ -22,13 +22,11 @@ int frameCount;
 #define SAVE_STATE_SIZE 25088
 
 static int MastAcbVideoRead(struct MastArea *area) {
-	fread(area->Data, area->Len, 1, videoFile);
-	return 0;
+	return fread(area->Data, area->Len, 1, videoFile);
 }
 
 static int MastAcbVideoWrite(struct MastArea *area) {
-	fwrite(area->Data, area->Len, 1, videoFile);
-	return 0;
+	return fwrite(area->Data, area->Len, 1, videoFile);
 }
 
 int MvidStart(char *filename, int mode, int reset) {
@@ -170,7 +168,7 @@ void MvidPreFrame() {
 	}
 }
 
-void MvidPostLoadState(int readonly) {
+static void MvidOldPostLoadState(int readonly) {
 	if (videoFile != NULL) {
 		int newPosition = HEADER_SIZE + (beginReset ? 0 : SAVE_STATE_SIZE) + frameCount*sizeof(MastInput);
 
@@ -198,5 +196,66 @@ void MvidPostLoadState(int readonly) {
 			fseek(videoFile, 0, SEEK_END);
 			videoMode = RECORD_MODE;
 		}
+	}
+}
+
+void MvidPostLoadState(int readonly) {
+	if (videoFile != NULL) {
+		MastArea ma;
+		unsigned char *data;
+		int size;
+		if (frameCount == 0) {
+			MvidStop();
+			return;
+		}
+
+		size = HEADER_SIZE + (beginReset ? 0 : SAVE_STATE_SIZE) + frameCount*sizeof(MastInput);
+
+		if (readonly != 0 && videoMode == PLAYBACK_MODE) {
+			fseek(videoFile, size, SEEK_SET);
+			return;
+		}
+
+		data = (unsigned char *)malloc(size);
+
+		ma.Len = size; ma.Data = data;
+		if (MastAcb(&ma) == 0) { /* old-style save state without embedded video file */
+			MvidOldPostLoadState(readonly);
+			return;
+		}
+
+		rerecordCount++;
+		*(int *)(data + 0xc) = rerecordCount; /* TODO magic number */
+
+		vidFrameCount = frameCount;
+
+		fclose(videoFile);
+		videoFile = fopen(videoFilename, "wb");
+		fwrite(data, size, 1, videoFile);
+		free(data);
+
+		videoMode = RECORD_MODE;
+	}
+}
+
+void MvidPostSaveState() {
+	if (videoFile != NULL) {
+		MastArea ma;
+		unsigned char *data;
+		int size;
+		FILE *readVideoFile;
+
+		size = HEADER_SIZE + (beginReset ? 0 : SAVE_STATE_SIZE) + frameCount*sizeof(MastInput);
+		data = (unsigned char *)malloc(size);
+
+		readVideoFile = fopen(videoFilename, "rb");
+		fread(data, size, 1, readVideoFile);
+
+		*(int *)(data + 0x8) = frameCount; /* TODO magic number */
+
+		ma.Len = size; ma.Data = data; MastAcb(&ma);
+
+		free(data);
+		fclose(readVideoFile);
 	}
 }

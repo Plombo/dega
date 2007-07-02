@@ -84,6 +84,7 @@ extern int VgmAccurate; // 1=Sample accurate
 int MvidStart(char *videoFilename, int mode, int reset);
 void MvidStop();
 void MvidPostLoadState(int readonly);
+void MvidPostSaveState();
 int MvidSetAuthor(char *author);
 char *MvidGetAuthor();
 int MvidGetFrameCount();

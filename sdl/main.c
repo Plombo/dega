@@ -70,7 +70,7 @@ static FILE *sf;
 
 static int StateLoadAcb(struct MastArea *pma)
 {
-  if (sf!=NULL) fread(pma->Data,1,pma->Len,sf);
+  if (sf!=NULL) return fread(pma->Data,1,pma->Len,sf);
   return 0;
 }
 
@@ -84,11 +84,11 @@ static int StateLoad(char *StateName)
   // Scan state
   MastAcb=StateLoadAcb;
   MastAreaDega();
+  MvidPostLoadState(readonly);
   MastAcb=MastAcbNull;
 
   fclose(sf); sf=NULL;
 
-  MvidPostLoadState(readonly);
   return 0;
 }
 
@@ -108,6 +108,7 @@ static int StateSave(char *StateName)
   // Scan state
   MastAcb=StateSaveAcb;
   MastAreaDega();
+  MvidPostSaveState();
   MastAcb=MastAcbNull;
 
   fclose(sf); sf=NULL;

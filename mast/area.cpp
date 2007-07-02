@@ -1,7 +1,7 @@
 // Mast - state area module
 #include "mastint.h"
 
-int MastAcbNull (struct MastArea *pba) { (void)pba; return 1; }
+int MastAcbNull (struct MastArea *pba) { (void)pba; return 0; }
 int (*MastAcb) (struct MastArea *pma)=MastAcbNull; // Area callback
 
 // Scan the information stored in non-volatile memory

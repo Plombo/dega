@@ -28,8 +28,8 @@ static char *MakeAutoName(int Battery)
 
 static int StateLoadAcb(struct MastArea *pma)
 {
-       if (gf!=NULL) gzread(gf,pma->Data,pma->Len);
-  else if (sf!=NULL) fread(pma->Data,1,pma->Len,sf);
+       if (gf!=NULL) return gzread(gf,pma->Data,pma->Len);
+  else if (sf!=NULL) return fread(pma->Data,1,pma->Len,sf);
   return 0;
 }
 
@@ -43,13 +43,14 @@ int StateLoad(int Meka)
 
   // Scan state
   MastAcb=StateLoadAcb;
-  if (Meka) MastAreaMeka(); else MastAreaDega();
+  if (Meka) MastAreaMeka(); else {
+    MastAreaDega();
+    MvidPostLoadState(VideoReadOnly);
+  }
   MastAcb=MastAcbNull;
 
   if (sf!=NULL) fclose(sf); sf=NULL;
   if (gf!=NULL) gzclose(gf); gf=NULL;
-
-  MvidPostLoadState(VideoReadOnly);
 
   return 0;
 }
@@ -58,8 +59,8 @@ int StateLoad(int Meka)
 
 static int StateSaveAcb(struct MastArea *pma)
 {
-       if (gf!=NULL) gzwrite(gf,pma->Data,pma->Len);
-  else if (sf!=NULL) fwrite(pma->Data,1,pma->Len,sf);
+       if (gf!=NULL) return gzwrite(gf,pma->Data,pma->Len);
+  else if (sf!=NULL) return fwrite(pma->Data,1,pma->Len,sf);
   return 0;
 }
 
@@ -73,7 +74,10 @@ int StateSave(int Meka)
 
   // Scan state
   MastAcb=StateSaveAcb;
-  if (Meka) MastAreaMeka(); else MastAreaDega();
+  if (Meka) MastAreaMeka(); else {
+    MastAreaDega();
+    MvidPostSaveState();
+  }
   MastAcb=MastAcbNull;
 
   if (sf!=NULL) fclose(sf); sf=NULL;
@@ -89,8 +93,8 @@ static int BattCont=0; // 1 if the battery contains something
 static int BatteryAcb(struct MastArea *pma)
 {
   unsigned char *pd,*pe;
-  if (bs==0) { fread (pma->Data,1,pma->Len,bf); return 0; }
-  if (bs==1) { fwrite(pma->Data,1,pma->Len,bf); return 0; }
+  if (bs==0) { return fread (pma->Data,1,pma->Len,bf); }
+  if (bs==1) { return fwrite(pma->Data,1,pma->Len,bf); }
 
   // Search for non-zero memory in the battery
   if (BattCont) return 0; // Already found something
