@@ -81,6 +81,9 @@ static int MediaInit(int Level)
     if (SetupPal==0 || MastEx&MX_GG) { MastEx&=~MX_PAL; FramesPerSecond=60; } 
     else                             { MastEx|= MX_PAL; FramesPerSecond=50; }
   
+    RealFramesPerSecond=FrameMult>0 ? FramesPerSecond<<FrameMult : FramesPerSecond>>-FrameMult;
+    if (RealFramesPerSecond<1) RealFramesPerSecond = 1;
+
     DSoundInit(hFrameWnd);
   }
 

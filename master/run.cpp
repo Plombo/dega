@@ -42,8 +42,14 @@ int RunText(char *Text,int Len)
 
 static void RunIdle()
 {
+#if 1
   int Time=0,Frame=0;
   int Do=0,i=0;
+#else
+  int NewTime;
+  int MsPerFrame=1000/RealFramesPerSecond;
+  static int SkipCount=0;
+#endif
 
   if (GetActiveWindow()==hFrameWnd && GetAsyncKeyState(KeyMappings[KMAP_FASTFORWARD])&0x8000)
   {
@@ -54,6 +60,7 @@ static void RunIdle()
   // Try to run with sound
   if (DSoundPlaying) { DSoundCheck(); return; }
 
+#if 1
   Time=timeGetTime()-LastSecond; // This will be about 0-1000 ms
   Frame=Time*RealFramesPerSecond/1000;
   Do=Frame-FramesDone;
@@ -75,6 +82,19 @@ static void RunIdle()
     if (i>=Do-1) RunFrame(1,NULL);
     else         RunFrame(0,NULL);
   }
+#else
+  NewTime = timeGetTime();
+  printf("N-L = %d, M = %d, S = %d\n", NewTime-LastSecond, MsPerFrame, SkipCount);
+  if (NewTime-LastSecond>MsPerFrame && SkipCount<10) {
+    RunFrame(0,NULL);
+    SkipCount++;
+  } else {
+    SkipCount=0;
+    if (MsPerFrame>NewTime-LastSecond) Sleep(MsPerFrame-(NewTime-LastSecond));
+    RunFrame(1,NULL);
+  }
+  LastSecond=NewTime;
+#endif
 }
 
 // Callback from DSoundCheck()

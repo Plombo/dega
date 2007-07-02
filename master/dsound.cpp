@@ -117,9 +117,6 @@ int DSoundInit(HWND hWnd)
   if (FramesPerSecond<=0) return 1;
   if (FramesPerSecond>500) return 1;
 
-  RealFramesPerSecond=FrameMult>0 ? FramesPerSecond<<FrameMult : FramesPerSecond>>-FrameMult;
-  if (RealFramesPerSecond<1) RealFramesPerSecond = 1;
-
   // Calculate the Seg Length and Loop length
   // (round to nearest sample)
   DSoundSegLen=(DSoundSamRate+(RealFramesPerSecond>>1))/RealFramesPerSecond;
