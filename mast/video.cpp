@@ -140,6 +140,10 @@ int MvidGotProperties() {
 	return (*videoFilename != 0);
 }
 
+int MvidInVideo() {
+	return (videoFile != 0);
+}
+
 void MvidPreFrame() {
 	int result;
 	frameCount++;

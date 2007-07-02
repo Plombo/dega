@@ -138,6 +138,8 @@ static int MediaInit(int Level)
     CHK(ID_SOUND_VGMLOG_SAMPLEACCURATE,VgmAccurate)
     CHK(ID_VIDEO_READONLY,VideoReadOnly)
     EnableMenuItem(hFrameMenu,ID_VIDEO_PROPERTIES, MvidGotProperties() ? MF_ENABLED : MF_GRAYED);
+    CHK(ID_VIDEO_FRAMECOUNTER,MdrawOsdOptions&OSD_FRAMECOUNT)
+    CHK(ID_INPUT_BUTTONS,MdrawOsdOptions&OSD_BUTTONS)
 
     if (ShowMenu) SetMenu(hFrameWnd,hFrameMenu);
     else          SetMenu(hFrameWnd,NULL);
@@ -271,6 +273,7 @@ int LoopDo()
       if (Msg.wParam==ID_SETUP_ONEFRAME)
       {
         RunText("One Frame Step",2*60);
+	LoopPause=1;
         RunFrame(1,NULL);
       }
       
@@ -289,6 +292,8 @@ int LoopDo()
       if (Msg.wParam==ID_STATE_QUICKSAVE) { StateAutoState(1); }
       if (Msg.wParam==ID_SETUP_SPEEDUP) { FrameMult++; }
       if (Msg.wParam==ID_SETUP_SLOWDOWN) { FrameMult--; }
+      if (Msg.wParam==ID_VIDEO_FRAMECOUNTER) { MdrawOsdOptions^=OSD_FRAMECOUNT; }
+      if (Msg.wParam==ID_INPUT_BUTTONS) { MdrawOsdOptions^=OSD_BUTTONS; }
     }
     if (Msg.message==WMU_STATELOAD)   { StateLoad(0); }
     if (Msg.message==WMU_STATESAVE)   { StateSave(0); }
@@ -343,6 +348,8 @@ int LoopDo()
         if (Msg.wParam==ID_STATE_QUICKSAVE)    { InitLevel=60; break; }
         if (Msg.wParam==ID_SETUP_SPEEDUP)      { InitLevel=50; break; }
         if (Msg.wParam==ID_SETUP_SLOWDOWN)     { InitLevel=50; break; }
+	if (Msg.wParam==ID_VIDEO_FRAMECOUNTER) { InitLevel=70; break; }
+	if (Msg.wParam==ID_INPUT_BUTTONS)      { InitLevel=70; break; }
       }
       if (Msg.message==WMU_STATELOAD) { InitLevel=60; break; }
       if (Msg.message==WMU_STATESAVE) { InitLevel=60; break; }

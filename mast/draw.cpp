@@ -20,6 +20,9 @@ int MdrawInit()
   memset(qc,0,sizeof(qc));
   memcpy(qc+0x000,Src+0x00,8); memcpy(qc+0x100,Src+0x08,8);
   memcpy(qc+0x200,Src+0x10,8); memcpy(qc+0x300,Src+0x18,8);
+
+  MdrawOsdInit();
+
   return 0;
 }
 
@@ -191,7 +194,7 @@ void MdrawDo()
 
   if (Hide==0) { if ((Masta.v.Reg[1]&0x40)==0) Hide=1; }
   
-  if (Hide) { memset(Mdraw.Data+16,Border,0x100); MdrawCall(); return; } // Line is hidden
+  if (Hide) { memset(Mdraw.Data+16,Border,0x100); MdrawOsd(); MdrawCall(); return; } // Line is hidden
 
   NeedHigh=MdrawBackground(0x0000); // low chars
   MdrawSprites();
@@ -199,5 +202,7 @@ void MdrawDo()
 
   if (Masta.v.Reg[0]&0x20) memset(Mdraw.Data+16,Border,8); // Hide first column
   
+  MdrawOsd();
+
   MdrawCall();
 }

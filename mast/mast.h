@@ -89,6 +89,12 @@ char *MvidGetAuthor();
 int MvidGetFrameCount();
 int MvidGetRerecordCount();
 int MvidGotProperties();
+int MvidInVideo();
+
+// osd.cpp
+#define OSD_BUTTONS 1
+#define OSD_FRAMECOUNT 2
+extern int MdrawOsdOptions;
 
 #ifdef __cplusplus
 } // End of extern "C"

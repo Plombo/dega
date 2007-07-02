@@ -136,4 +136,8 @@ void VgmFm(unsigned char a,unsigned char d);
 extern int frameCount;
 void MvidPreFrame();
 
+// osd.cpp
+void MdrawOsdInit();
+void MdrawOsd();
+
 } // End of extern "C"

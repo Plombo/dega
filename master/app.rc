@@ -91,6 +91,8 @@ BEGIN
         MENUITEM "Joystick",                    ID_INPUT_JOYSTICK
 	MENUITEM SEPARATOR
         MENUITEM "Key Mappings",                ID_INPUT_KEYMAPPING
+	MENUITEM SEPARATOR
+	MENUITEM "Show Button States",          ID_INPUT_BUTTONS
     END
     POPUP "State"
     BEGIN
@@ -128,6 +130,7 @@ BEGIN
         MENUITEM "Start Playback",                  ID_VIDEO_PLAYBACK
 	MENUITEM "Stop Recording/Playback",         ID_VIDEO_STOP
 	MENUITEM "Read-only Mode",                  ID_VIDEO_READONLY
+	MENUITEM "Show Frame Counter",              ID_VIDEO_FRAMECOUNTER
 	MENUITEM SEPARATOR
 	MENUITEM "Properties",                      ID_VIDEO_PROPERTIES
     END
@@ -158,7 +161,7 @@ BEGIN
 //    "P",            ID_SETUP_PAUSE,         VIRTKEY, CONTROL, ALT, NOINVERT
     "R",            ID_FILE_RESET,          VIRTKEY, ALT, NOINVERT
     VK_F12,         ID_OPTIONS_SCREENSHOT,  VIRTKEY, NOINVERT
-    VK_PAUSE,       ID_SETUP_PAUSE,         VIRTKEY, NOINVERT
+//    VK_PAUSE,       ID_SETUP_PAUSE,         VIRTKEY, NOINVERT
     VK_RETURN,      ID_SETUP_FULLSCREEN,    VIRTKEY, ALT, NOINVERT
     VK_RETURN,      ID_SETUP_FULLSCREEN,    VIRTKEY, CONTROL, ALT, NOINVERT
 END
@@ -167,9 +170,9 @@ END
 // "Movie properties" dialog
 
 IDD_MOVIEPROPERTIES DIALOGEX 10, 10, 250, 95
-STYLE WS_POPUP | WS_BORDER
+STYLE WS_POPUP | WS_BORDER | DS_SHELLFONT
 CAPTION "Movie Properties"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Shell Dlg"
 BEGIN
   LTEXT "Frame count:", 0, 10, 10, 100, 10
   RTEXT "", IDT_MP_FRAMECOUNT, 150, 10, 90, 10
@@ -187,9 +190,9 @@ END
 // "Hotkey mapping" dialog
 
 IDD_HOTKEYMAP DIALOGEX 10, 10, 130, 325
-STYLE WS_POPUP | WS_BORDER
+STYLE WS_POPUP | WS_BORDER | DS_SHELLFONT
 CAPTION "Hotkey Mapping"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Shell Dlg"
 BEGIN
   KMAP_DIALOG_RES("1", KMAP_1, 10, 10)
   KMAP_DIALOG_RES("2", KMAP_2, 10, 30)

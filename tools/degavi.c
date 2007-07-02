@@ -151,6 +151,8 @@ void usage(char *name) {
 	       "  -o options    supply the given options to mencoder (default: low quality avi)\n"
 	       "  -m movie.mmv  use the given movie file (without this option, encode a movie\n"
 	       "                with no input and the number of frames given by -f)\n"
+	       "  -b            show button presses as an overlay on each frame\n"
+	       "  -n            show a frame number as an overlay on each frame\n"
 	       "  rom.sms       the ROM file to load\n"
 	       "  movie.avi     the name of the encoded movie (needs not be AVI)\n",
 	name);
@@ -166,7 +168,7 @@ int main(int argc, char **argv) {
 	char *mencoderOptions = "-oac mp3lame -ovc xvid -xvidencopts \"bitrate=200:me_quality=1:gmc:aspect=4/3\" -lameopts preset=30:aq=9 -noskip -mc 0", *movieFile = 0;
 	int opt;
 
-	while ((opt = getopt(argc, argv, "f:o:m:")) != -1) {
+	while ((opt = getopt(argc, argv, "f:o:m:bn")) != -1) {
 		switch (opt) {
 			case 'f':
 				additionalFrames = atoi(optarg);
@@ -176,6 +178,12 @@ int main(int argc, char **argv) {
 				break;
 			case 'm':
 				movieFile = optarg;
+				break;
+			case 'b':
+				MdrawOsdOptions |= OSD_BUTTONS;
+				break;
+			case 'n':
+				MdrawOsdOptions |= OSD_FRAMECOUNT;
 				break;
 			default:
 				usage(argv[0]);

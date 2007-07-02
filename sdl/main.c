@@ -365,7 +365,7 @@ Handler:		switch (event.type)
                                 if(key==SDLK_x) {MastInput[0]|=0x20;break;}
                                 if(key==SDLK_c) {MastInput[0]|=0x80;break;}
 				if(key==SDLK_p) {paused=!paused;break;}
-				if(key==SDLK_o) {frameadvance=1;break;}
+				if(key==SDLK_o) {paused=1;frameadvance=1;break;}
 				if(key==SDLK_r) {HandleRecordMovie(1);break;}
 				if(key==SDLK_e) {HandleRecordMovie(0);break;}
 				if(key==SDLK_t) {HandlePlaybackMovie();break;}
@@ -373,6 +373,8 @@ Handler:		switch (event.type)
 				if(key==SDLK_s) {HandleSaveState();break;}
 				if(key==SDLK_l) {HandleLoadState();break;}
 				if(key==SDLK_a) {HandleSetAuthor();break;}
+				if(key==SDLK_b) {MdrawOsdOptions^=OSD_BUTTONS;break;}
+				if(key==SDLK_f) {MdrawOsdOptions^=OSD_FRAMECOUNT;break;}
 				if(key==SDLK_EQUALS) {SetRateMult(framerate, ++mult);break;}
 				if(key==SDLK_MINUS) {SetRateMult(framerate, --mult);break;}
                                 break;
