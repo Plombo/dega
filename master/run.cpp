@@ -18,8 +18,6 @@ int RunFrame(int Draw,short *pSound)
   // Run frame
   EmuFrame();
 
-  if (Draw) DispDraw();
-
   // Update status window
   StatusCount--;
   if (StatusCount==0)
@@ -28,6 +26,8 @@ int RunFrame(int Draw,short *pSound)
     SetWindowText(hFrameStatus,"");
     StatusCount=-1;
   }
+
+  if (Draw) DispDraw();
   return 0;
 }
 
@@ -38,6 +38,23 @@ int RunText(char *Text,int Len)
   ShowWindow(hFrameStatus,SW_NORMAL);
   StatusCount=Len;
   return 0;
+}
+
+int StatusHeight()
+{
+  if (StatusCount>0)
+  {
+    static int height = -1;
+    if (height==-1)
+    {
+      RECT rect;
+      GetClientRect(hFrameStatus,&rect);
+      height=rect.bottom;
+    }
+    return height;
+  } else {
+    return 0;
+  }
 }
 
 static void RunIdle()

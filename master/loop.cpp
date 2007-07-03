@@ -114,6 +114,7 @@ static int MediaInit(int Level)
 
   if (Level<=70) // Menu
   {
+    int i;
    
 #define CHK(a,b) CheckMenuItem(hFrameMenu,a,(b)?MF_CHECKED:MF_UNCHECKED);
 
@@ -143,6 +144,7 @@ static int MediaInit(int Level)
     EnableMenuItem(hFrameMenu,ID_VIDEO_PROPERTIES, MvidGotProperties() ? MF_ENABLED : MF_GRAYED);
     CHK(ID_VIDEO_FRAMECOUNTER,MdrawOsdOptions&OSD_FRAMECOUNT)
     CHK(ID_INPUT_BUTTONS,MdrawOsdOptions&OSD_BUTTONS)
+    for (i = 0; i < 10; i++) CHK(ID_STATE_SLOT(i), SaveSlot==i)
 
     if (ShowMenu) SetMenu(hFrameWnd,hFrameMenu);
     else          SetMenu(hFrameWnd,NULL);
@@ -232,6 +234,16 @@ struct CustomKeyMap mymap[] = {
  { KMAP_QUICKSAVE, ID_STATE_QUICKSAVE },
  { KMAP_SPEEDUP, ID_SETUP_SPEEDUP },
  { KMAP_SLOWDOWN, ID_SETUP_SLOWDOWN },
+ { KMAP_SAVESLOT(0), ID_STATE_SLOT(0) },
+ { KMAP_SAVESLOT(1), ID_STATE_SLOT(1) },
+ { KMAP_SAVESLOT(2), ID_STATE_SLOT(2) },
+ { KMAP_SAVESLOT(3), ID_STATE_SLOT(3) },
+ { KMAP_SAVESLOT(4), ID_STATE_SLOT(4) },
+ { KMAP_SAVESLOT(5), ID_STATE_SLOT(5) },
+ { KMAP_SAVESLOT(6), ID_STATE_SLOT(6) },
+ { KMAP_SAVESLOT(7), ID_STATE_SLOT(7) },
+ { KMAP_SAVESLOT(8), ID_STATE_SLOT(8) },
+ { KMAP_SAVESLOT(9), ID_STATE_SLOT(9) },
  { 0, 0 }
 };
 
@@ -291,12 +303,27 @@ int LoopDo()
       if (Msg.wParam==ID_SOUND_VGMLOG_SAMPLEACCURATE) { VgmAccurate=!VgmAccurate; }
       if (Msg.wParam==ID_VIDEO_STOP) { MvidStop(); }
       if (Msg.wParam==ID_VIDEO_READONLY) { VideoReadOnly=!VideoReadOnly; }
-      if (Msg.wParam==ID_STATE_QUICKLOAD) { StateAutoState(0); }
-      if (Msg.wParam==ID_STATE_QUICKSAVE) { StateAutoState(1); }
+      if (Msg.wParam==ID_STATE_QUICKLOAD)
+      {
+	RunText("Quick Load", 2*60);
+        StateAutoState(0);
+      }
+      if (Msg.wParam==ID_STATE_QUICKSAVE)
+      {
+	RunText("Quick Save", 2*60);
+        StateAutoState(1);
+      }
       if (Msg.wParam==ID_SETUP_SPEEDUP) { FrameMult++; }
       if (Msg.wParam==ID_SETUP_SLOWDOWN) { FrameMult--; }
       if (Msg.wParam==ID_VIDEO_FRAMECOUNTER) { MdrawOsdOptions^=OSD_FRAMECOUNT; }
       if (Msg.wParam==ID_INPUT_BUTTONS) { MdrawOsdOptions^=OSD_BUTTONS; }
+      if (Msg.wParam>=ID_STATE_SLOT(0) && Msg.wParam<=ID_STATE_SLOT(9))
+      {
+        char msg[20];
+        SaveSlot=Msg.wParam-ID_STATE_SLOT_START;
+        snprintf(msg, sizeof(msg), "Save Slot %d", SaveSlot);
+	RunText(msg, 2*60);
+      }
     }
     if (Msg.message==WMU_STATELOAD)   { StateLoad(0); }
     if (Msg.message==WMU_STATESAVE)   { StateSave(0); }
@@ -353,6 +380,7 @@ int LoopDo()
         if (Msg.wParam==ID_SETUP_SLOWDOWN)     { InitLevel=50; break; }
 	if (Msg.wParam==ID_VIDEO_FRAMECOUNTER) { InitLevel=70; break; }
 	if (Msg.wParam==ID_INPUT_BUTTONS)      { InitLevel=70; break; }
+	if (Msg.wParam>=ID_STATE_SLOT(0) && Msg.wParam<=ID_STATE_SLOT(9)) { InitLevel=70; break; }
       }
       if (Msg.message==WMU_STATELOAD) { InitLevel=60; break; }
       if (Msg.message==WMU_STATESAVE) { InitLevel=60; break; }

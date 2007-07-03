@@ -7,6 +7,7 @@ static FILE *sf=NULL; // State file
 static gzFile gf=NULL; // State file (compressed)
 int AutoLoadSave=0;
 int VideoReadOnly=0;
+int SaveSlot=0;
 
 static char *MakeAutoName(int Battery)
 {
@@ -15,14 +16,19 @@ static char *MakeAutoName(int Battery)
   Len=strlen(EmuTitle);
 
   if (Battery) Extra=11; // saves,\ and .sav 0
-  else         Extra=16; // saves,\ and _Auto.dgz 0
+  else         Extra=18; // saves,\ and _Auto.x.dgz 0
 
   Name=(char *)malloc(Len+Extra);
   if (Name==NULL) return NULL;
+#if 0
   memcpy(Name,"saves\\",6);
   memcpy(Name+6,EmuTitle,Len);
   if (Battery) memcpy(Name+6+Len,".sav",5);
   else         memcpy(Name+6+Len,"_auto.dgz",10);
+#else
+  if (Battery) snprintf(Name, Len+Extra, "saves\\%s.sav", EmuTitle);
+  else         snprintf(Name, Len+Extra, "saves\\%s_auto.%d.dgz", EmuTitle, SaveSlot);
+#endif
   return Name;
 }
 

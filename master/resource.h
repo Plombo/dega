@@ -52,13 +52,15 @@
 #define ID_SETUP_SLOWDOWN               40083
 #define ID_INPUT_BUTTONS                40084
 #define ID_VIDEO_FRAMECOUNTER           40085
+#define ID_STATE_SLOT_START             40086
+#define ID_STATE_SLOT(x)               (ID_STATE_SLOT_START+(x))
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        106
-#define _APS_NEXT_COMMAND_VALUE         40086
+#define _APS_NEXT_COMMAND_VALUE         40096
 #define _APS_NEXT_CONTROL_VALUE         1004
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

@@ -53,6 +53,7 @@ static int OverlayPut()
   if (DispOver==NULL) return 1;
 
   GetClientScreenRect(hFrameWnd,&Dest);
+  Dest.bottom-=StatusHeight();
 
   if (memcmp(&LastOver,&Dest,sizeof(Dest))==0) return 0; // Overlay already in the right place
 
@@ -76,6 +77,7 @@ static int NormalPut()
   if (DispBuff==NULL) return 1;
   // buffer surface --> primary surface
   GetClientScreenRect(hFrameWnd,&Dest);
+  Dest.bottom-=StatusHeight();
 
   // Normal
   Ret=DispPrim->Blt(&Dest,DispBuff,NULL,DDBLT_WAIT,NULL);

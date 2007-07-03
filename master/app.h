@@ -54,6 +54,7 @@ int RunFrame(int Draw,short *pSound);
 int RunStart();
 int RunStop();
 int RunText(char *Text,int Len);
+int StatusHeight();
 
 // emu.cpp
 extern char EmuRomName[];
@@ -143,6 +144,7 @@ int ConfSave();
 extern char StateName[];
 extern int AutoLoadSave;
 extern int VideoReadOnly;
+extern int SaveSlot;
 int StateLoad(int Meka);
 int StateSave(int Meka);
 int StateAuto(int Save);

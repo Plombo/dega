@@ -102,6 +102,19 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Quick Save",                  ID_STATE_QUICKSAVE
         MENUITEM "Quick Load",                  ID_STATE_QUICKLOAD
+	POPUP "Quick Save Slot"
+	BEGIN
+	    MENUITEM "0",                          ID_STATE_SLOT(0)
+	    MENUITEM "1",                          ID_STATE_SLOT(1)
+	    MENUITEM "2",                          ID_STATE_SLOT(2)
+	    MENUITEM "3",                          ID_STATE_SLOT(3)
+	    MENUITEM "4",                          ID_STATE_SLOT(4)
+	    MENUITEM "5",                          ID_STATE_SLOT(5)
+	    MENUITEM "6",                          ID_STATE_SLOT(6)
+	    MENUITEM "7",                          ID_STATE_SLOT(7)
+	    MENUITEM "8",                          ID_STATE_SLOT(8)
+	    MENUITEM "9",                          ID_STATE_SLOT(9)
+	END
         MENUITEM SEPARATOR
         MENUITEM "Import Meka",                 ID_STATE_IMPORT
         MENUITEM "Export Meka",                 ID_STATE_EXPORT
@@ -189,7 +202,7 @@ END
 
 // "Hotkey mapping" dialog
 
-IDD_HOTKEYMAP DIALOGEX 10, 10, 270, 175
+IDD_HOTKEYMAP DIALOGEX 10, 10, 400, 235
 STYLE WS_POPUP | WS_BORDER | DS_SHELLFONT
 CAPTION "Hotkey Mapping"
 FONT 8, "MS Shell Dlg"
@@ -210,8 +223,19 @@ BEGIN
   KMAP_DIALOG_RES("Slow Down", KMAP_SLOWDOWN, 140, 110)
   KMAP_DIALOG_RES("Fast Forward", KMAP_FASTFORWARD, 140, 130)
 
-  PUSHBUTTON "OK", IDOK, 80, 150, 50, 15
-  PUSHBUTTON "Cancel", IDCANCEL, 140, 150, 50, 15
+  KMAP_DIALOG_RES("Save Slot 0", KMAP_SAVESLOT(0), 270, 10)
+  KMAP_DIALOG_RES("Save Slot 1", KMAP_SAVESLOT(1), 270, 30)
+  KMAP_DIALOG_RES("Save Slot 2", KMAP_SAVESLOT(2), 270, 50)
+  KMAP_DIALOG_RES("Save Slot 3", KMAP_SAVESLOT(3), 270, 70)
+  KMAP_DIALOG_RES("Save Slot 4", KMAP_SAVESLOT(4), 270, 90)
+  KMAP_DIALOG_RES("Save Slot 5", KMAP_SAVESLOT(5), 270, 110)
+  KMAP_DIALOG_RES("Save Slot 6", KMAP_SAVESLOT(6), 270, 130)
+  KMAP_DIALOG_RES("Save Slot 7", KMAP_SAVESLOT(7), 270, 150)
+  KMAP_DIALOG_RES("Save Slot 8", KMAP_SAVESLOT(8), 270, 170)
+  KMAP_DIALOG_RES("Save Slot 9", KMAP_SAVESLOT(9), 270, 190)
+
+  PUSHBUTTON "OK", IDOK, 80, 210, 50, 15
+  PUSHBUTTON "Cancel", IDCANCEL, 140, 210, 50, 15
 
 END
 

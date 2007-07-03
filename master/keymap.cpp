@@ -15,6 +15,16 @@ unsigned short KeyMappings[KMAPCOUNT] = {
   VK_OEM_PLUS,  /* Speed Up */
   VK_OEM_MINUS, /* Slow Down */
   VK_F8,        /* Fast Forward */
+  '0',          /* Save Slot 0 */
+  '1',          /* Save Slot 1 */
+  '2',          /* Save Slot 2 */
+  '3',          /* Save Slot 3 */
+  '4',          /* Save Slot 4 */
+  '5',          /* Save Slot 5 */
+  '6',          /* Save Slot 6 */
+  '7',          /* Save Slot 7 */
+  '8',          /* Save Slot 8 */
+  '9',          /* Save Slot 9 */
 };
 
 static unsigned short NewKeyMappings[KMAPCOUNT];

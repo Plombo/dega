@@ -14,7 +14,9 @@
 #define KMAP_SLOWDOWN 12
 #define KMAP_FASTFORWARD 13
 
-#define KMAPCOUNT 14
+#define KMAP_SAVESLOT(x) (14+(x))
+
+#define KMAPCOUNT 24
 
 #define ID_KMAP_START 41000
 #define IS_ID_KMAP(id) ((id) >= ID_KMAP_START && (id) < ID_KMAP_START+KMAPCOUNT)
