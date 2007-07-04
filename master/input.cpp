@@ -6,7 +6,9 @@ int UseJoystick=0;
 int InputGet()
 {
   static unsigned int LastInput=0;
+  static unsigned int AltFrame=0;
   memset(&MastInput,0,sizeof(MastInput));
+  AltFrame=!AltFrame;
   if (GetActiveWindow()!=hFrameWnd) { LastInput=0; return 0; } // No window focus
 
   DirInputStart();
@@ -20,6 +22,17 @@ int InputGet()
     if (DirInputState(KeyMappings[KMAP_1]    )) MastInput[0]|=0x10;
     if (DirInputState(KeyMappings[KMAP_2]    )) MastInput[0]|=0x20;
     if (DirInputState(KeyMappings[KMAP_START])) MastInput[0]|=0x80;
+
+    if (AltFrame)
+    {
+      if (DirInputState(KeyMappings[KMAP_AUTO_UP]   )) MastInput[0]|=0x01;
+      if (DirInputState(KeyMappings[KMAP_AUTO_DOWN] )) MastInput[0]|=0x02;
+      if (DirInputState(KeyMappings[KMAP_AUTO_LEFT] )) MastInput[0]|=0x04;
+      if (DirInputState(KeyMappings[KMAP_AUTO_RIGHT])) MastInput[0]|=0x08;
+      if (DirInputState(KeyMappings[KMAP_AUTO_1]    )) MastInput[0]|=0x10;
+      if (DirInputState(KeyMappings[KMAP_AUTO_2]    )) MastInput[0]|=0x20;
+      if (DirInputState(KeyMappings[KMAP_AUTO_START])) MastInput[0]|=0x80;
+    }
   }
   else
   {

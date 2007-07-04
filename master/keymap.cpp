@@ -25,6 +25,15 @@ unsigned short KeyMappings[KMAPCOUNT] = {
   '7',          /* Save Slot 7 */
   '8',          /* Save Slot 8 */
   '9',          /* Save Slot 9 */
+  0,            /* Auto "1" */
+  0,            /* Auto "2" */
+  0,            /* Auto Up */
+  0,            /* Auto Down */
+  0,            /* Auto Left */
+  0,            /* Auto Right */
+  0,            /* Auto START */
+  0,            /* Normal Speed */
+  0,            /* Toggle Read-only */
 };
 
 static unsigned short NewKeyMappings[KMAPCOUNT];
@@ -63,6 +72,7 @@ static LRESULT CALLBACK KeyMappingHook(int code, WPARAM wParam, LPARAM lParam) {
 }
 
 static BOOL CALLBACK KeyMappingProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+  unsigned short cmd;
   switch (uMsg) {
 	case WM_INITDIALOG: {
 		int i;
@@ -70,23 +80,31 @@ static BOOL CALLBACK KeyMappingProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
 		memcpy(NewKeyMappings, KeyMappings, sizeof(KeyMappings));
 
 		for (i = 0; i < KMAPCOUNT; i++) {
-			char keyNameBuf[16];
-			snprintf(keyNameBuf, 16, "0x%02x", KeyMappings[i]);
-			SetDlgItemText(hwndKeyDlg, ID_LAB_KMAP(i), keyNameBuf);
+			if (KeyMappings[i] == 0) {
+				SetDlgItemText(hwndKeyDlg, ID_LAB_KMAP(i), "none");
+			} else {
+				char keyNameBuf[16];
+				snprintf(keyNameBuf, 16, "0x%02x", KeyMappings[i]);
+				SetDlgItemText(hwndKeyDlg, ID_LAB_KMAP(i), keyNameBuf);
+			}
 		}
 			
 		break;
 	}
 
 	case WM_COMMAND:
-		if (IS_ID_KMAP(wParam & 0xffff)) {
-			receivingKmap = KMAP_ID(wParam & 0xffff);
+		cmd = wParam & 0xffff;
+		if (IS_ID_KMAP(cmd)) {
+			receivingKmap = KMAP_ID(cmd);
 			hook = SetWindowsHookEx(WH_KEYBOARD, KeyMappingHook, 0, GetCurrentThreadId());
 
 			EnableAll(FALSE);
 
 			break;
-		} else switch (wParam & 0xffff) {
+		} else if (IS_ID_CLEAR_KMAP(cmd)) {
+			NewKeyMappings[KMAP_ID_CLEAR(cmd)] = 0;
+			SetDlgItemText(kwndDlg, ID_LAB_KMAP(KMAP_ID_CLEAR(cmd)), "none");
+		} else switch (cmd) {
 			case IDOK:
 				memcpy(KeyMappings, NewKeyMappings, sizeof(KeyMappings));
 			case IDCANCEL:

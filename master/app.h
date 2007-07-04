@@ -54,6 +54,11 @@ int RunFrame(int Draw,short *pSound);
 int RunStart();
 int RunStop();
 int RunText(char *Text,int Len);
+#define STATUS_HIDE 0
+#define STATUS_AUTO 1
+#define STATUS_SHOW 2
+int GetStatusMode();
+void SetStatusMode(int NewMode);
 int StatusHeight();
 
 // emu.cpp

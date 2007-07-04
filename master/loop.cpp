@@ -130,6 +130,9 @@ static int MediaInit(int Level)
     CHK(ID_SETUP_FULLSCREEN, Fullscreen)
     CHK(ID_SETUP_REDBLUE3D, RedBlue3D)
     CHK(ID_SETUP_PAUSE, LoopPause)
+    CHK(ID_SETUP_STATUSHIDE, StatusMode==STATUS_HIDE)
+    CHK(ID_SETUP_STATUSAUTO, StatusMode==STATUS_AUTO)
+    CHK(ID_SETUP_STATUSSHOW, StatusMode==STATUS_SHOW)
     CHK(ID_INPUT_KEYBOARD,UseJoystick==0)
     CHK(ID_INPUT_JOYSTICK,UseJoystick!=0)
     CHK(ID_STATE_AUTOLOADSAVE,AutoLoadSave!=0)
@@ -234,6 +237,7 @@ struct CustomKeyMap mymap[] = {
  { KMAP_QUICKSAVE, ID_STATE_QUICKSAVE },
  { KMAP_SPEEDUP, ID_SETUP_SPEEDUP },
  { KMAP_SLOWDOWN, ID_SETUP_SLOWDOWN },
+ { KMAP_NORMALSPEED, ID_SETUP_NORMALSPEED },
  { KMAP_SAVESLOT(0), ID_STATE_SLOT(0) },
  { KMAP_SAVESLOT(1), ID_STATE_SLOT(1) },
  { KMAP_SAVESLOT(2), ID_STATE_SLOT(2) },
@@ -244,6 +248,7 @@ struct CustomKeyMap mymap[] = {
  { KMAP_SAVESLOT(7), ID_STATE_SLOT(7) },
  { KMAP_SAVESLOT(8), ID_STATE_SLOT(8) },
  { KMAP_SAVESLOT(9), ID_STATE_SLOT(9) },
+ { KMAP_READONLY, ID_VIDEO_READONLY },
  { 0, 0 }
 };
 
@@ -302,19 +307,28 @@ int LoopDo()
       if (Msg.wParam==ID_SOUND_VGMLOG_STOP) { VgmStop(NULL); }
       if (Msg.wParam==ID_SOUND_VGMLOG_SAMPLEACCURATE) { VgmAccurate=!VgmAccurate; }
       if (Msg.wParam==ID_VIDEO_STOP) { MvidStop(); }
-      if (Msg.wParam==ID_VIDEO_READONLY) { VideoReadOnly=!VideoReadOnly; }
+      if (Msg.wParam==ID_VIDEO_READONLY)
+      { 
+        VideoReadOnly=!VideoReadOnly;
+	RunText(VideoReadOnly ? "Read Only Mode" : "Read Write Mode", 2*60);
+      }
       if (Msg.wParam==ID_STATE_QUICKLOAD)
       {
-	RunText("Quick Load", 2*60);
+        char msg[20];
+	snprintf(msg, sizeof(msg), "Quick Load %d", SaveSlot);
+	RunText(msg, 2*60);
         StateAutoState(0);
       }
       if (Msg.wParam==ID_STATE_QUICKSAVE)
       {
-	RunText("Quick Save", 2*60);
+        char msg[20];
+	snprintf(msg, sizeof(msg), "Quick Save %d", SaveSlot);
+	RunText(msg, 2*60);
         StateAutoState(1);
       }
       if (Msg.wParam==ID_SETUP_SPEEDUP) { FrameMult++; }
       if (Msg.wParam==ID_SETUP_SLOWDOWN) { FrameMult--; }
+      if (Msg.wParam==ID_SETUP_NORMALSPEED) { FrameMult=0; }
       if (Msg.wParam==ID_VIDEO_FRAMECOUNTER) { MdrawOsdOptions^=OSD_FRAMECOUNT; }
       if (Msg.wParam==ID_INPUT_BUTTONS) { MdrawOsdOptions^=OSD_BUTTONS; }
       if (Msg.wParam>=ID_STATE_SLOT(0) && Msg.wParam<=ID_STATE_SLOT(9))
@@ -324,6 +338,9 @@ int LoopDo()
         snprintf(msg, sizeof(msg), "Save Slot %d", SaveSlot);
 	RunText(msg, 2*60);
       }
+      if (Msg.wParam==ID_SETUP_STATUSHIDE) { SetStatusMode(STATUS_HIDE); }
+      if (Msg.wParam==ID_SETUP_STATUSAUTO) { SetStatusMode(STATUS_AUTO); }
+      if (Msg.wParam==ID_SETUP_STATUSSHOW) { SetStatusMode(STATUS_SHOW); }
     }
     if (Msg.message==WMU_STATELOAD)   { StateLoad(0); }
     if (Msg.message==WMU_STATESAVE)   { StateSave(0); }
@@ -378,9 +395,13 @@ int LoopDo()
         if (Msg.wParam==ID_STATE_QUICKSAVE)    { InitLevel=60; break; }
         if (Msg.wParam==ID_SETUP_SPEEDUP)      { InitLevel=50; break; }
         if (Msg.wParam==ID_SETUP_SLOWDOWN)     { InitLevel=50; break; }
+        if (Msg.wParam==ID_SETUP_NORMALSPEED)  { InitLevel=50; break; }
 	if (Msg.wParam==ID_VIDEO_FRAMECOUNTER) { InitLevel=70; break; }
 	if (Msg.wParam==ID_INPUT_BUTTONS)      { InitLevel=70; break; }
 	if (Msg.wParam>=ID_STATE_SLOT(0) && Msg.wParam<=ID_STATE_SLOT(9)) { InitLevel=70; break; }
+        if (Msg.wParam==ID_SETUP_STATUSHIDE)   { InitLevel=70; break; }
+        if (Msg.wParam==ID_SETUP_STATUSAUTO)   { InitLevel=70; break; }
+        if (Msg.wParam==ID_SETUP_STATUSSHOW)   { InitLevel=70; break; }
       }
       if (Msg.message==WMU_STATELOAD) { InitLevel=60; break; }
       if (Msg.message==WMU_STATESAVE) { InitLevel=60; break; }

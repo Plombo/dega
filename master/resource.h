@@ -54,6 +54,10 @@
 #define ID_VIDEO_FRAMECOUNTER           40085
 #define ID_STATE_SLOT_START             40086
 #define ID_STATE_SLOT(x)               (ID_STATE_SLOT_START+(x))
+#define ID_SETUP_NORMALSPEED            40096
+#define ID_SETUP_STATUSHIDE             40097
+#define ID_SETUP_STATUSAUTO             40098
+#define ID_SETUP_STATUSSHOW             40099
 
 // Next default values for new objects
 // 

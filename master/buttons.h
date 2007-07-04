@@ -16,7 +16,18 @@
 
 #define KMAP_SAVESLOT(x) (14+(x))
 
-#define KMAPCOUNT 24
+#define KMAP_AUTO_1 24
+#define KMAP_AUTO_2 25
+#define KMAP_AUTO_UP 26
+#define KMAP_AUTO_DOWN 27
+#define KMAP_AUTO_LEFT 28
+#define KMAP_AUTO_RIGHT 29
+#define KMAP_AUTO_START 30
+
+#define KMAP_NORMALSPEED 31
+#define KMAP_READONLY 32
+
+#define KMAPCOUNT 33
 
 #define ID_KMAP_START 41000
 #define IS_ID_KMAP(id) ((id) >= ID_KMAP_START && (id) < ID_KMAP_START+KMAPCOUNT)
@@ -24,10 +35,17 @@
 #define ID_KMAP(kmap) ((kmap) + ID_KMAP_START)
 #define KMAP_ID(id) ((id) - ID_KMAP_START)
 
+#define ID_CLEAR_KMAP_START 43000
+#define IS_ID_CLEAR_KMAP(id) ((id) >= ID_CLEAR_KMAP_START && (id) < ID_CLEAR_KMAP_START+KMAPCOUNT)
+
+#define ID_CLEAR_KMAP(kmap) ((kmap) + ID_CLEAR_KMAP_START)
+#define KMAP_ID_CLEAR(id) ((id) - ID_CLEAR_KMAP_START)
+
 #define ID_LAB_KMAP_START 42000
 #define ID_LAB_KMAP(kmap) ((kmap) + ID_LAB_KMAP_START)
 
 #define KMAP_DIALOG_RES(label, kmap, x, y) \
-  LTEXT label, 0, x, y+3, 50, 10 \
-  PUSHBUTTON "Set", ID_KMAP(kmap), x+60, y, 30, 15 \
+  LTEXT label, 0, x, y+3, 45, 10 \
+  PUSHBUTTON "Set", ID_KMAP(kmap), x+45, y, 20, 15 \
+  PUSHBUTTON "Clear", ID_CLEAR_KMAP(kmap), x+70, y, 20, 15 \
   LTEXT "", ID_LAB_KMAP(kmap), x+100, y+3, 20, 10

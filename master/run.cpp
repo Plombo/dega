@@ -7,6 +7,7 @@ static int FramesDone=0;
 static HANDLE hRunThread=NULL;
 static DWORD RunId=0,MainId=0;
 
+int StatusMode=STATUS_AUTO;
 static int StatusCount=-1;
 
 // Run a frame (with or without sound)
@@ -22,7 +23,7 @@ int RunFrame(int Draw,short *pSound)
   StatusCount--;
   if (StatusCount==0)
   {
-    ShowWindow(hFrameStatus,SW_HIDE);
+    if (StatusMode==STATUS_AUTO) ShowWindow(hFrameStatus,SW_HIDE);
     SetWindowText(hFrameStatus,"");
     StatusCount=-1;
   }
@@ -35,25 +36,37 @@ int RunFrame(int Draw,short *pSound)
 int RunText(char *Text,int Len)
 {
   SetWindowText(hFrameStatus,Text);
-  ShowWindow(hFrameStatus,SW_NORMAL);
+  if (StatusMode==STATUS_AUTO) ShowWindow(hFrameStatus,SW_NORMAL);
   StatusCount=Len;
   return 0;
 }
 
+void SetStatusMode(int NewMode)
+{
+       if (NewMode==STATUS_HIDE) ShowWindow(hFrameStatus,SW_HIDE);
+  else if (NewMode==STATUS_SHOW) ShowWindow(hFrameStatus,SW_NORMAL);
+  else if (NewMode==STATUS_AUTO) ShowWindow(hFrameStatus,StatusCount>0?SW_NORMAL:SW_HIDE);
+  StatusMode=NewMode;
+}
+
 int StatusHeight()
 {
-  if (StatusCount>0)
+  static int height = -1;
+  if (height==-1)
   {
-    static int height = -1;
-    if (height==-1)
-    {
-      RECT rect;
-      GetClientRect(hFrameStatus,&rect);
-      height=rect.bottom;
-    }
-    return height;
-  } else {
+    RECT rect;
+    GetClientRect(hFrameStatus,&rect);
+    height=rect.bottom;
+  }
+  if (StatusMode==STATUS_HIDE)
+  {
     return 0;
+  } else if (StatusMode==STATUS_AUTO)
+  {
+    return StatusCount>0 ? height : 0;
+  } else /* StatusMode==STATUS_SHOW */
+  {
+    return height;
   }
 }
 
