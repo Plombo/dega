@@ -186,7 +186,7 @@ void MvidPreFrame() {
 				break;
 			case RECORD_MODE:
 				fwrite(MastInput, sizeof(MastInput), 1, videoFile);
-				for (i = 0; i < packetSize-sizeof(MastInput), i++) {
+				for (i = 0; i < packetSize-sizeof(MastInput); i++) {
 					fwrite(&zero, 1, 1, videoFile);
 				}
 
