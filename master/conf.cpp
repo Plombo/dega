@@ -44,6 +44,7 @@ int ConfLoad()
     VAR(MastEx)
     VAR(TryOverlay)
     VAR(StartInFullscreen)
+    VAR(StatusMode)
 
     VAR(DSoundSamRate)
     VAR(DpsgEnhance)
@@ -90,6 +91,7 @@ int ConfSave()
     VAR(MastEx)
     VAR(TryOverlay)
     VAR(StartInFullscreen)
+    VAR(StatusMode)
 
     fprintf (h,"\n// Sound\n");
     VAR(DSoundSamRate)

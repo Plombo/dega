@@ -2,6 +2,7 @@
 #include "app.h"
 
 int UseJoystick=0;
+unsigned char AutoHold=0;
 
 int InputGet()
 {
@@ -33,6 +34,8 @@ int InputGet()
       if (DirInputState(KeyMappings[KMAP_AUTO_2]    )) MastInput[0]|=0x20;
       if (DirInputState(KeyMappings[KMAP_AUTO_START])) MastInput[0]|=0x80;
     }
+
+    MastInput[0]|=AutoHold;
   }
   else
   {

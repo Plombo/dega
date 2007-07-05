@@ -1,7 +1,7 @@
 // Mast - main module
 #include "mastint.h"
 
-int MastVer=0x1110; // Version number of the library
+int MastVer=0x1130; // Version number of the library
 
 unsigned char MastInput[2]={0,0}; // Joypads
 unsigned int MastEx=0; // Extra options

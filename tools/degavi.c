@@ -15,6 +15,8 @@ unsigned char paldata[256][3];
 int mencoder_pid;
 int videofd, audiofd;
 
+int xlef, ytop, xwid, yhei, framerate=60;
+
 struct FifoElem {
 	unsigned char *DataCur, *DataStart;
 	int Remaining;
@@ -78,7 +80,7 @@ int FifoFlush(Fifo fifo, int fd) {
 
 	while (1) {
 		int newsize = write(fd, fifo[0].DataCur, size);
-		if (newsize == 0 && errno == EAGAIN) {
+		if (newsize == -1 && errno == EAGAIN) {
 			size /= 2;
 		} else {
 			size = newsize;
@@ -110,8 +112,10 @@ void MdrawCall() {
 		}
 	}
 
-	for (i = 0; i < sizeof(Mdraw.Data); i++) {
-		memcpy(videodata+(Mdraw.Line*sizeof(Mdraw.Data)*3)+i*3, paldata[Mdraw.Data[i]], 3);
+	if (Mdraw.Line<ytop || Mdraw.Line>=ytop+yhei) return;
+
+	for (i = 0; i < xwid; i++) {
+		memcpy(videodata+((Mdraw.Line-ytop)*xwid*3)+i*3, paldata[Mdraw.Data[i+xlef]], 3);
 	}
 }
 
@@ -126,7 +130,7 @@ int spawn_mencoder(char *params, char *output) {
 		close(audiofds[1]);
 
 		char cmdline[512];
-		snprintf(cmdline, 512, "mencoder -demuxer rawvideo -rawvideo format=0x52474218:w=288:h=192:fps=60 -audio-demuxer rawaudio -rawaudio channels=2:rate=44100:samplesize=2 -audiofile /dev/fd/%d %s -o %s /dev/fd/%d", audiofds[0], params, output, videofds[0]);
+		snprintf(cmdline, 512, "mencoder -demuxer rawvideo -rawvideo format=0x52474218:w=%d:h=%d:fps=%d -audio-demuxer rawaudio -rawaudio channels=2:rate=44100:samplesize=2 -audiofile /dev/fd/%d %s -o %s /dev/fd/%d", xwid, yhei, framerate, audiofds[0], params, output, videofds[0]);
 
 		execl("/bin/sh", "sh", "-c", cmdline, (char *) NULL);
 	} else {
@@ -146,20 +150,22 @@ int spawn_mencoder(char *params, char *output) {
 void usage(char *name) {
 	printf("DegAVI -- mmv movie encoder for Unix\n"
 	       "Usage:\n"
-	       "%s [-f frames] [-o options] [-m movie.mmv] rom.sms movie.avi\n"
+	       "%s [-f frames] [-o options] [-m movie.mmv] [-bngp] rom.sms movie.avi\n"
 	       "  -f frames     encode specified number of frames after movie end (default: 0)\n"
 	       "  -o options    supply the given options to mencoder (default: low quality avi)\n"
 	       "  -m movie.mmv  use the given movie file (without this option, encode a movie\n"
 	       "                with no input and the number of frames given by -f)\n"
 	       "  -b            show button presses as an overlay on each frame\n"
 	       "  -n            show a frame number as an overlay on each frame\n"
+	       "  -g            use this flag for Game Gear games\n"
+	       "  -p            use this flag for movies recorded in PAL mode\n"
 	       "  rom.sms       the ROM file to load\n"
 	       "  movie.avi     the name of the encoded movie (needs not be AVI)\n",
 	name);
 }
 
 int main(int argc, char **argv) {
-	int framerate = 60, i, frames = 0, status;
+	int i, frames = 0, status;
 
 	unsigned char *rom;
 	int romlength;
@@ -168,7 +174,7 @@ int main(int argc, char **argv) {
 	char *mencoderOptions = "-oac mp3lame -ovc xvid -xvidencopts \"bitrate=200:me_quality=1:gmc:aspect=4/3\" -lameopts preset=30:aq=9 -noskip -mc 0", *movieFile = 0;
 	int opt;
 
-	while ((opt = getopt(argc, argv, "f:o:m:bn")) != -1) {
+	while ((opt = getopt(argc, argv, "f:o:m:bngp")) != -1) {
 		switch (opt) {
 			case 'f':
 				additionalFrames = atoi(optarg);
@@ -185,6 +191,13 @@ int main(int argc, char **argv) {
 			case 'n':
 				MdrawOsdOptions |= OSD_FRAMECOUNT;
 				break;
+			case 'g':
+				MastEx |= MX_GG;
+				break;
+			case 'p':
+				MastEx |= MX_PAL;
+				framerate = 50;
+				break;
 			default:
 				usage(argv[0]);
 				exit(1);
@@ -195,6 +208,11 @@ int main(int argc, char **argv) {
 		usage(argv[0]);
 		exit(1);
 	}
+
+	xlef = MastEx&MX_GG ? 64 : 16;
+	ytop = MastEx&MX_GG ? 24 : 0;
+	xwid = MastEx&MX_GG ? 160 : 256;
+	yhei = MastEx&MX_GG ? 144 : 192;
 
 	mencoder_pid = spawn_mencoder(mencoderOptions, argv[optind+1]);
 
@@ -217,7 +235,7 @@ int main(int argc, char **argv) {
 	for (i = 0; i < frames+additionalFrames; i++) {
 		int progress;
 		pMsndOut = FifoPush(audiofifo, MsndLen*2*2);
-		videodata = FifoPush(videofifo, 288*192*3);
+		videodata = FifoPush(videofifo, xwid*yhei*3);
 
 		MastFrame();
 

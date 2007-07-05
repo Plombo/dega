@@ -103,7 +103,7 @@ static BOOL CALLBACK KeyMappingProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
 			break;
 		} else if (IS_ID_CLEAR_KMAP(cmd)) {
 			NewKeyMappings[KMAP_ID_CLEAR(cmd)] = 0;
-			SetDlgItemText(kwndDlg, ID_LAB_KMAP(KMAP_ID_CLEAR(cmd)), "none");
+			SetDlgItemText(hwndDlg, ID_LAB_KMAP(KMAP_ID_CLEAR(cmd)), "none");
 		} else switch (cmd) {
 			case IDOK:
 				memcpy(KeyMappings, NewKeyMappings, sizeof(KeyMappings));

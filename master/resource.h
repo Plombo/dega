@@ -58,13 +58,20 @@
 #define ID_SETUP_STATUSHIDE             40097
 #define ID_SETUP_STATUSAUTO             40098
 #define ID_SETUP_STATUSSHOW             40099
+#define ID_INPUT_HOLD_1                 40100
+#define ID_INPUT_HOLD_2                 40101
+#define ID_INPUT_HOLD_UP                40102
+#define ID_INPUT_HOLD_DOWN              40103
+#define ID_INPUT_HOLD_LEFT              40104
+#define ID_INPUT_HOLD_RIGHT             40105
+#define ID_INPUT_HOLD_START             40106
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        106
-#define _APS_NEXT_COMMAND_VALUE         40096
+#define _APS_NEXT_COMMAND_VALUE         40107
 #define _APS_NEXT_CONTROL_VALUE         1004
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

@@ -57,7 +57,7 @@ int RunText(char *Text,int Len);
 #define STATUS_HIDE 0
 #define STATUS_AUTO 1
 #define STATUS_SHOW 2
-int GetStatusMode();
+extern int StatusMode;
 void SetStatusMode(int NewMode);
 int StatusHeight();
 
@@ -96,6 +96,7 @@ extern HWND hFrameStatus; // Frame - status window
 
 // input.cpp
 extern int UseJoystick;
+extern unsigned char AutoHold;
 int InputGet();
 
 // disp.cpp

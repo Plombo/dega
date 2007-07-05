@@ -27,7 +27,15 @@
 #define KMAP_NORMALSPEED 31
 #define KMAP_READONLY 32
 
-#define KMAPCOUNT 33
+#define KMAP_HOLD_1 33
+#define KMAP_HOLD_2 34
+#define KMAP_HOLD_UP 35
+#define KMAP_HOLD_DOWN 36
+#define KMAP_HOLD_LEFT 37
+#define KMAP_HOLD_RIGHT 38
+#define KMAP_HOLD_START 39
+
+#define KMAPCOUNT 40
 
 #define ID_KMAP_START 41000
 #define IS_ID_KMAP(id) ((id) >= ID_KMAP_START && (id) < ID_KMAP_START+KMAPCOUNT)

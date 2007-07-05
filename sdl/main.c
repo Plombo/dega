@@ -1,6 +1,6 @@
 #define APPNAME "dega"
 #define APPNAME_LONG "Dega/SDL"
-#define VERSION "1.07"
+#define VERSION "1.13 RC3"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -188,6 +188,7 @@ void usage(void)
 	printf("  -f --fullscreen\tfullscreen display\n");
 	printf("  -r --readonly\tmovies are readonly\n");
 	printf("\n" APPNAME_LONG " version " VERSION " by Ulrich Hecht <uli@emulinks.de>\n");
+	printf("extended by Peter Collingbourne <pcc03@doc.ic.ac.uk>\n");
 	printf("based on Win32 version by Dave <dave@finalburn.com>\n");
 	exit (0);
 }
@@ -231,7 +232,7 @@ int main(int argc, char** argv)
 			{0,0,0,0}
 		};
 		
-		copt=getopt_long(argc,argv,"vgmpsf",long_options,&option_index);
+		copt=getopt_long(argc,argv,"vgmpsfr",long_options,&option_index);
 		if(copt==-1) break;
 		switch(copt)
 		{

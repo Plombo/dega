@@ -11,6 +11,7 @@ static LRESULT CALLBACK WindowProc(HWND hWnd,UINT Msg,WPARAM wParam,LPARAM lPara
   if (Msg==WM_CREATE)
   {
     hFrameStatus=CreateStatusWindow(WS_CHILD,"",hWnd,0);
+    if (StatusMode==STATUS_SHOW) ShowWindow(hFrameStatus,SW_NORMAL);
     return 0;
   }
 

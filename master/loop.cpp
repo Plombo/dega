@@ -249,6 +249,13 @@ struct CustomKeyMap mymap[] = {
  { KMAP_SAVESLOT(8), ID_STATE_SLOT(8) },
  { KMAP_SAVESLOT(9), ID_STATE_SLOT(9) },
  { KMAP_READONLY, ID_VIDEO_READONLY },
+ { KMAP_HOLD_1,     ID_INPUT_HOLD_1 },
+ { KMAP_HOLD_2,     ID_INPUT_HOLD_2 },
+ { KMAP_HOLD_UP,    ID_INPUT_HOLD_UP },
+ { KMAP_HOLD_DOWN,  ID_INPUT_HOLD_DOWN },
+ { KMAP_HOLD_LEFT,  ID_INPUT_HOLD_LEFT },
+ { KMAP_HOLD_RIGHT, ID_INPUT_HOLD_RIGHT },
+ { KMAP_HOLD_START, ID_INPUT_HOLD_START },
  { 0, 0 }
 };
 
@@ -310,7 +317,8 @@ int LoopDo()
       if (Msg.wParam==ID_VIDEO_READONLY)
       { 
         VideoReadOnly=!VideoReadOnly;
-	RunText(VideoReadOnly ? "Read Only Mode" : "Read Write Mode", 2*60);
+	if (VideoReadOnly) RunText("Read Only Mode", 2*60);
+	             else  RunText("Read Write Mode", 2*60);
       }
       if (Msg.wParam==ID_STATE_QUICKLOAD)
       {
@@ -402,6 +410,14 @@ int LoopDo()
         if (Msg.wParam==ID_SETUP_STATUSHIDE)   { InitLevel=70; break; }
         if (Msg.wParam==ID_SETUP_STATUSAUTO)   { InitLevel=70; break; }
         if (Msg.wParam==ID_SETUP_STATUSSHOW)   { InitLevel=70; break; }
+
+        if (Msg.wParam==ID_INPUT_HOLD_UP   ) AutoHold^=0x01;
+        if (Msg.wParam==ID_INPUT_HOLD_DOWN ) AutoHold^=0x02;
+        if (Msg.wParam==ID_INPUT_HOLD_LEFT ) AutoHold^=0x04;
+        if (Msg.wParam==ID_INPUT_HOLD_RIGHT) AutoHold^=0x08;
+        if (Msg.wParam==ID_INPUT_HOLD_1    ) AutoHold^=0x10;
+        if (Msg.wParam==ID_INPUT_HOLD_2    ) AutoHold^=0x20;
+        if (Msg.wParam==ID_INPUT_HOLD_START) AutoHold^=0x80;
       }
       if (Msg.message==WMU_STATELOAD) { InitLevel=60; break; }
       if (Msg.message==WMU_STATESAVE) { InitLevel=60; break; }

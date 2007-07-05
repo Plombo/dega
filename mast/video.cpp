@@ -242,7 +242,12 @@ void MvidPostLoadState(int readonly) {
 
 		size = inputOffset + frameCount*packetSize;
 
-		if (readonly != 0 && videoMode == PLAYBACK_MODE) {
+		if (readonly != 0) {
+			if (videoMode == RECORD_MODE) {
+				fclose(videoFile);
+				videoFile = fopen(videoFilename, "rb");
+				videoMode = PLAYBACK_MODE;
+			}
 			fseek(videoFile, size, SEEK_SET);
 			return;
 		}
