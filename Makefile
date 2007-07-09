@@ -28,13 +28,16 @@ endif
 
 ifeq ($(P),unix)
 
-all: dega degavi
+all: dega degavi degaconvert
 
 dega: $(PLATOBJ) $(DOZEOBJ) $(MASTOBJ)
 	$(CC) -o dega $(PLATOBJ) $(DOZEOBJ) $(MASTOBJ) $(shell sdl-config --libs)
 
 degavi: tools/degavi.o $(DOZEOBJ) $(MASTOBJ)
 	$(CC) -o degavi tools/degavi.o $(DOZEOBJ) $(MASTOBJ) -lm
+
+degaconvert: tools/degaconvert.o
+	$(CC) -o degaconvert tools/degaconvert.o
 
 doze/dozea.o: doze/dozea.asm
 	nasm -f elf doze/dozea.asm
@@ -49,10 +52,13 @@ doze/dam: $(DAMOBJ)
 
 else ifeq ($(P),win)
 
-all: dega.exe
+all: dega.exe degaconvert.exe
 
 dega.exe: $(PLATOBJ) $(DOZEOBJ) $(MASTOBJ) zlib/libz.a
 	$(CC) -mno-cygwin -Wl,--subsystem,windows -o dega.exe $(PLATOBJ) $(DOZEOBJ) $(MASTOBJ) -Lzlib -ldsound -ldinput -lddraw -ldxguid -lcomdlg32 -lcomctl32 -luser32 -lwinmm -lz
+
+degaconvert.exe: tools/degaconvert.o
+	$(CC) -o degaconvert.exe tools/degaconvert.o
 
 master/app.o: master/app.rc
 	cd master && $(WINDRES) -o app.o app.rc
@@ -78,7 +84,7 @@ all:
 endif
 
 clean:
-	rm -f $(DOZEOBJ) $(DAMOBJ) $(MASTOBJ) $(PLATOBJ) tools/degavi.o doze/dozea.asm* doze/dam doze/dam.exe dega dega.exe degavi degavi.exe
+	rm -f $(DOZEOBJ) $(DAMOBJ) $(MASTOBJ) $(PLATOBJ) tools/degavi.o doze/dozea.asm* doze/dam doze/dam.exe dega dega.exe degavi degavi.exe degaconvert degaconvert.exe
 	make -Czlib clean
 
 distclean: clean

@@ -119,6 +119,10 @@ void MdrawCall() {
 	}
 }
 
+void MvidModeChanged() {
+	framerate = (MastEx & MX_PAL) ? 50 : 60;
+}
+
 int spawn_mencoder(char *params, char *output) {
 	int videofds[2], audiofds[2], mencoder_pid;
 
@@ -150,17 +154,23 @@ int spawn_mencoder(char *params, char *output) {
 void usage(char *name) {
 	printf("DegAVI -- mmv movie encoder for Unix\n"
 	       "Usage:\n"
-	       "%s [-f frames] [-o options] [-m movie.mmv] [-bngp] rom.sms movie.avi\n"
+	       "%s [-f frames] [-o options] [-m movie.mmv] [-a audio.raw]\n"
+	       "  [-v video.raw] [-bng] rom.sms movie.avi\n"
+	       "\n"
 	       "  -f frames     encode specified number of frames after movie end (default: 0)\n"
 	       "  -o options    supply the given options to mencoder (default: low quality avi)\n"
 	       "  -m movie.mmv  use the given movie file (without this option, encode a movie\n"
 	       "                with no input and the number of frames given by -f)\n"
+	       "  -a audio.raw  write raw audio data to given file instead of passing directly\n"
+	       "                to mencoder (must be used with -v)\n"
+	       "  -v video.raw  write raw video data to given file instead of passing directly\n"
+	       "                to mencoder (must be used with -a)\n"
 	       "  -b            show button presses as an overlay on each frame\n"
 	       "  -n            show a frame number as an overlay on each frame\n"
 	       "  -g            use this flag for Game Gear games\n"
-	       "  -p            use this flag for movies recorded in PAL mode\n"
 	       "  rom.sms       the ROM file to load\n"
-	       "  movie.avi     the name of the encoded movie (needs not be AVI)\n",
+	       "  movie.avi     the name of the encoded movie (needs not be AVI). You can omit\n"
+	       "                this parameter if -a and -v are given\n",
 	name);
 }
 
@@ -172,9 +182,10 @@ int main(int argc, char **argv) {
 
 	int additionalFrames = 0;
 	char *mencoderOptions = "-oac mp3lame -ovc xvid -xvidencopts \"bitrate=200:me_quality=1:gmc:aspect=4/3\" -lameopts preset=30:aq=9 -noskip -mc 0", *movieFile = 0;
+	char *rawAudioFile = 0, *rawVideoFile = 0;
 	int opt;
 
-	while ((opt = getopt(argc, argv, "f:o:m:bngp")) != -1) {
+	while ((opt = getopt(argc, argv, "f:o:m:a:v:bng")) != -1) {
 		switch (opt) {
 			case 'f':
 				additionalFrames = atoi(optarg);
@@ -185,6 +196,12 @@ int main(int argc, char **argv) {
 			case 'm':
 				movieFile = optarg;
 				break;
+			case 'a':
+				rawAudioFile = optarg;
+				break;
+			case 'v':
+				rawVideoFile = optarg;
+				break;
 			case 'b':
 				MdrawOsdOptions |= OSD_BUTTONS;
 				break;
@@ -194,17 +211,18 @@ int main(int argc, char **argv) {
 			case 'g':
 				MastEx |= MX_GG;
 				break;
-			case 'p':
-				MastEx |= MX_PAL;
-				framerate = 50;
-				break;
 			default:
 				usage(argv[0]);
 				exit(1);
 		}
 	}
 
-	if (optind+1 >= argc) {
+	if (optind+!rawAudioFile >= argc) {
+		usage(argv[0]);
+		exit(1);
+	}
+
+	if ((rawAudioFile != 0) != (rawVideoFile != 0)) {
 		usage(argv[0]);
 		exit(1);
 	}
@@ -214,8 +232,6 @@ int main(int argc, char **argv) {
 	xwid = MastEx&MX_GG ? 160 : 256;
 	yhei = MastEx&MX_GG ? 144 : 192;
 
-	mencoder_pid = spawn_mencoder(mencoderOptions, argv[optind+1]);
-
 	FifoInit(audiofifo);
 	FifoInit(videofifo);
 
@@ -224,12 +240,33 @@ int main(int argc, char **argv) {
 	MastSetRom(rom,romlength);
 	MastHardReset();
 
-	MsndRate=44100; MsndLen=(MsndRate+(framerate>>1))/framerate;
-	pMsndOut=malloc(MsndLen*2*2);
+	MsndRate=44100;
 	MsndInit();
 
 	if (movieFile != 0) {
 		frames = MvidStart(movieFile, PLAYBACK_MODE, 0);
+	}
+
+	MsndLen=(MsndRate+(framerate>>1))/framerate;
+	pMsndOut=malloc(MsndLen*2*2);
+
+	if (rawAudioFile && rawVideoFile) {
+		videofd = open(rawVideoFile, O_WRONLY|O_CREAT|O_TRUNC, 0644);
+		if (videofd == -1) {
+			perror("open");
+			exit(1);
+		}
+
+		audiofd = open(rawAudioFile, O_WRONLY|O_CREAT|O_TRUNC, 0644);
+		if (audiofd == -1) {
+			perror("open");
+			exit(1);
+		}
+
+		fcntl(videofd, F_SETFL, O_NONBLOCK);
+		fcntl(audiofd, F_SETFL, O_NONBLOCK);
+	} else {
+		mencoder_pid = spawn_mencoder(mencoderOptions, argv[optind+1]);
 	}
 
 	for (i = 0; i < frames+additionalFrames; i++) {

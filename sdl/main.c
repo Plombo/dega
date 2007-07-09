@@ -18,6 +18,9 @@ int width, height;
 
 static int audio_len=0;
 
+int framerate=60;
+int mult=0;
+
 int readonly;
 
 int scrlock()
@@ -166,13 +169,18 @@ void HandleSetAuthor(void) {
 	MvidSetAuthor(buffer_utf8);
 }
 
-void SetRateMult(int framerate, int mult) {
+void SetRateMult() {
 	int newrate = mult>0 ? framerate<<mult : framerate>>-mult;
 	if (newrate < 1) newrate = 1;
 
 	free(pMsndOut);
 	MsndLen=(MsndRate+(newrate>>1))/newrate; 
 	pMsndOut = malloc(MsndLen*2*2);
+}
+
+void MvidModeChanged() {
+	framerate = (MastEx & MX_PAL) ? 50 : 60;
+	SetRateMult();
 }
 
 void usage(void)
@@ -205,8 +213,6 @@ int main(int argc, char** argv)
 	int paused=0, frameadvance=0;
 
 	// options
-	int framerate=60;
-	int mult=0;
 	int autodetect=1;
 	int sound=1;
 	int vidflags=0;
@@ -377,8 +383,8 @@ Handler:		switch (event.type)
 				if(key==SDLK_a) {HandleSetAuthor();break;}
 				if(key==SDLK_b) {MdrawOsdOptions^=OSD_BUTTONS;break;}
 				if(key==SDLK_f) {MdrawOsdOptions^=OSD_FRAMECOUNT;break;}
-				if(key==SDLK_EQUALS) {SetRateMult(framerate, ++mult);break;}
-				if(key==SDLK_MINUS) {SetRateMult(framerate, --mult);break;}
+				if(key==SDLK_EQUALS) {mult++;SetRateMult();break;}
+				if(key==SDLK_MINUS) {mult--;SetRateMult();break;}
                                 break;
                         case SDL_KEYUP:
                                 key=event.key.keysym.sym;

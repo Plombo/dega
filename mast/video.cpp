@@ -12,7 +12,9 @@
 static FILE *videoFile = NULL;
 static char videoFilename[256] = "";
 static int videoMode = 0;
-static int vidFrameCount, rerecordCount, beginReset;
+static int vidFrameCount, rerecordCount, beginReset, vidFlags;
+#define VIDFLAG_PAL   (1<<1)
+#define VIDFLAG_JAPAN (1<<2)
 
 static int stateOffset, inputOffset, packetSize;
 
@@ -20,7 +22,7 @@ static char videoAuthor[64];
 
 int frameCount;
 
-#define HEADER_SIZE 0x60
+#define HEADER_SIZE 0x64
 #define SAVE_STATE_SIZE 25088
 
 static int MastAcbVideoRead(struct MastArea *area) {
@@ -32,6 +34,7 @@ static int MastAcbVideoWrite(struct MastArea *area) {
 }
 
 int MvidStart(char *filename, int mode, int reset) {
+	int changed = 0, fileHeaderSize; 
 	vidFrameCount = 0;
 
 	if (videoFile != NULL) {
@@ -68,6 +71,29 @@ int MvidStart(char *filename, int mode, int reset) {
 			}
 
 			fread(videoAuthor, sizeof(videoAuthor), 1, videoFile);
+
+			fileHeaderSize = reset ? inputOffset : stateOffset;
+
+			if (fileHeaderSize >= 0x64) {
+				fread(&vidFlags, 4, 1, videoFile);
+			} else {
+				vidFlags = 0;
+			}
+
+			changed = ((vidFlags & VIDFLAG_PAL) != 0) ^ ((MastEx & MX_PAL) != 0);
+
+			if (vidFlags & VIDFLAG_PAL) {
+				MastEx |= MX_PAL;
+			} else {
+				MastEx &= ~MX_PAL;
+			}
+			if (changed) MvidModeChanged();
+
+			if (vidFlags & VIDFLAG_JAPAN) {
+				MastEx |= MX_JAPAN;
+			} else {
+				MastEx &= ~MX_JAPAN;
+			}
 
 			if (reset) {
 				MastHardReset();

@@ -91,6 +91,8 @@ int MvidGetFrameCount();
 int MvidGetRerecordCount();
 int MvidGotProperties();
 int MvidInVideo();
+// defined by implementation
+void MvidModeChanged();
 
 // osd.cpp
 #define OSD_BUTTONS 1
