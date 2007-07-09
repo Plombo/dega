@@ -127,6 +127,15 @@ int MvidStart(char *filename, int mode, int reset) {
 			memset(videoAuthor, 0, sizeof(videoAuthor));
 			fwrite(videoAuthor, sizeof(videoAuthor), 1, videoFile); // 0020-005f: author
 
+			vidFlags = 0;
+			if (MastEx & MX_PAL) {
+				vidFlags |= VIDFLAG_PAL;
+			}
+			if (MastEx & MX_JAPAN) {
+				vidFlags |= VIDFLAG_JAPAN;
+			}
+			fwrite(&vidFlags, 4, 1, videoFile);    // 0060: flags
+
 			if (reset) {
 				MastHardReset();
 			} else {

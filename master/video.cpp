@@ -10,7 +10,10 @@ void VideoRecord(int reset)
 void VideoPlayback()
 {
   MvidStart(VideoName, PLAYBACK_MODE, 0);
+  SetupPal = (MastEx & MX_PAL) ? 1 : 0;
 }
+
+void MvidModeChanged() {}
 
 static BOOL CALLBACK VideoPropertiesProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
   switch (uMsg) {

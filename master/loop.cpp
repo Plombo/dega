@@ -427,7 +427,7 @@ int LoopDo()
 
       if (Msg.message==WMU_VIDEORECORD)      { InitLevel=60; break; }
       if (Msg.message==WMU_VIDEORESETRECORD) { InitLevel=60; break; }
-      if (Msg.message==WMU_VIDEOPLAYBACK)    { InitLevel=60; break; }
+      if (Msg.message==WMU_VIDEOPLAYBACK)    { InitLevel=50; break; }
 
       if (hAccel!=NULL) TranslateAccelerator(hFrameWnd,hAccel,&Msg);
       TranslateCustomKeys(hFrameWnd,mymap,&Msg);

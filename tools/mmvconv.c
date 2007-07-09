@@ -4,7 +4,7 @@
 
 int PromptYesNo(char *question) {
 	int ch, rv;
-	printf("%s [y/N]", question);
+	printf("%s [y/N] ", question);
 	ch = getchar();
 	rv = (ch=='y'||ch=='Y');
 	while (ch!='\n'&&ch!=EOF) {
@@ -76,6 +76,13 @@ int InplaceConvert(int (*ConvertFn)(FILE *, FILE *), char *filename) {
 	}
 
 	fclose(fd); fclose(fdtmp);
+
+	rv = remove(filename);
+	if (rv == -1) {
+		perror("remove");
+		free(filenametmp);
+		return 0;
+	}
 
 	rv = rename(filenametmp, filename);
 	if (rv == -1) {

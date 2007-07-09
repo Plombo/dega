@@ -28,7 +28,7 @@ endif
 
 ifeq ($(P),unix)
 
-all: dega degavi degaconvert
+all: dega degavi mmvconv
 
 dega: $(PLATOBJ) $(DOZEOBJ) $(MASTOBJ)
 	$(CC) -o dega $(PLATOBJ) $(DOZEOBJ) $(MASTOBJ) $(shell sdl-config --libs)
@@ -36,8 +36,8 @@ dega: $(PLATOBJ) $(DOZEOBJ) $(MASTOBJ)
 degavi: tools/degavi.o $(DOZEOBJ) $(MASTOBJ)
 	$(CC) -o degavi tools/degavi.o $(DOZEOBJ) $(MASTOBJ) -lm
 
-degaconvert: tools/degaconvert.o
-	$(CC) -o degaconvert tools/degaconvert.o
+mmvconv: tools/mmvconv.o
+	$(CC) -o mmvconv tools/mmvconv.o
 
 doze/dozea.o: doze/dozea.asm
 	nasm -f elf doze/dozea.asm
@@ -52,13 +52,13 @@ doze/dam: $(DAMOBJ)
 
 else ifeq ($(P),win)
 
-all: dega.exe degaconvert.exe
+all: dega.exe mmvconv.exe
 
 dega.exe: $(PLATOBJ) $(DOZEOBJ) $(MASTOBJ) zlib/libz.a
 	$(CC) -mno-cygwin -Wl,--subsystem,windows -o dega.exe $(PLATOBJ) $(DOZEOBJ) $(MASTOBJ) -Lzlib -ldsound -ldinput -lddraw -ldxguid -lcomdlg32 -lcomctl32 -luser32 -lwinmm -lz
 
-degaconvert.exe: tools/degaconvert.o
-	$(CC) -o degaconvert.exe tools/degaconvert.o
+mmvconv.exe: tools/mmvconv.o
+	$(CC) -o mmvconv.exe tools/mmvconv.o
 
 master/app.o: master/app.rc
 	cd master && $(WINDRES) -o app.o app.rc
@@ -75,6 +75,12 @@ doze/dam.exe: $(DAMOBJ)
 zlib/libz.a:
 	make -Czlib libz.a
 
+release: all
+	mkdir dega-$(R)-win32
+	cp dega.exe mmvconv.exe master/dega.txt dega-$(R)-win32/
+	$(STRIP) dega-$(R)-win32/dega.exe dega-$(R)-win32/mmvconv.exe
+	cd dega-$(R)-win32 && zip -9 dega-$(R)-win32.zip dega.exe mmvconv.exe dega.txt
+
 else
 
 all:
@@ -84,7 +90,7 @@ all:
 endif
 
 clean:
-	rm -f $(DOZEOBJ) $(DAMOBJ) $(MASTOBJ) $(PLATOBJ) tools/degavi.o doze/dozea.asm* doze/dam doze/dam.exe dega dega.exe degavi degavi.exe degaconvert degaconvert.exe
+	rm -f $(DOZEOBJ) $(DAMOBJ) $(MASTOBJ) $(PLATOBJ) tools/degavi.o tools/mmvconv.o doze/dozea.asm* doze/dam doze/dam.exe dega dega.exe degavi degavi.exe mmvconv mmvconv.exe
 	make -Czlib clean
 
 distclean: clean

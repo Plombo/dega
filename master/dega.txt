@@ -13,7 +13,7 @@
                  it's all just a little bit of history repeating...
 
     Dega is a Sega Master System / Mark III / Game Gear emulator, and runs
-    under Windows 95,NT,98,2000,ME or XP.
+    under Windows 95,NT,98,2000,ME or XP and *NIX.
 
     The old standard disclaimer:
       I do not accept responsibility for any effects, adverse or otherwise,
@@ -23,6 +23,16 @@
 ____________________________________________________________________________________
 
                                 What's New?
+
+  v1.13
+  + Bulletproof rerecording with read-only mode
+  + AVI encoding from a movie file (*NIX only)
+  + Hotkey configuration (Windows only)
+  + Information display (frame counter and button input)
+  + Slow motion/fast forward
+  + Save state slots (Windows only)
+  + Auto-fire/auto-hold (Windows only)
+  + Frame advance now advances 1 frame rather than 2 (Windows)
 
   v1.12
   + Added a setting in dega.ini called StartInFullscreen. If set to one, Dega will
@@ -70,15 +80,35 @@ ________________________________________________________________________________
                                 How to use
 
   Run the emulator and select Load Rom from the File menu.
-  Select a rom and click open. The keys are:
+  Select a rom and click open.  Default key assignments are:
 
   Up,Down,Left,Right = Cursor keys (not on the numpad)
   Fire 1,Fire 2      = Z,X
   Pause/Start        = C
   (On the Master System, the "Start" button was just the fire button.)
 
+  Pause              = P
+  Frame Advance      = O
+  Choose Slot 0..9   = 0..9
+  Quick Load         = F5
+  Quick Save         = F6
+  Speed Up           = +
+  Slow Down          = -
+  Fast Forward       = F8
+
   To toggle the emulator menu, press Escape or the right mouse button.
-  F8 is fast forward.
+
+____________________________________________________________________________________
+
+                                Rerecording
+
+  Dega allows you to record a movie and resume recording it later on.
+  To resume recording, start playing a movie, then load a state file that
+  was created either during playback or recording of the same movie.
+  Recording then resumes at the point when the state was saved.
+
+  If you have selected read-only mode, loading a movie state file will
+  resume playback from that point.
 
 ____________________________________________________________________________________
 
