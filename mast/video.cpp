@@ -234,6 +234,23 @@ void MvidPreFrame() {
 	}
 }
 
+#ifdef unix
+static void Truncate(FILE *file, int size) {
+	ftruncate(fileno(file), size);
+}
+#else
+#ifdef WIN32
+static void Truncate(FILE *file, int size) {
+	long oldOffset = ftell(file);
+	fseek(file, size, SEEK_SET);
+	SetEndOfFile((HANDLE)_get_osfhandle(_fileno(file)));
+	fseek(file, oldOffset, SEEK_SET);
+}
+#else
+#error no truncate implementation available!
+#endif
+#endif
+
 static void MvidOldPostLoadState(int readonly) {
 	if (videoFile != NULL) {
 		int newPosition = inputOffset + frameCount*packetSize;
@@ -244,16 +261,7 @@ static void MvidOldPostLoadState(int readonly) {
 			fclose(videoFile);
 
 			videoFile = fopen(videoFilename, "r+b");
-#ifdef unix
-			ftruncate(fileno(videoFile), newPosition);
-#else
-#ifdef WIN32
-			fseek(videoFile, newPosition, SEEK_SET);
-			SetEndOfFile((HANDLE)_get_osfhandle(_fileno(videoFile)));
-#else
-#error no truncate implementation available!
-#endif
-#endif
+			Truncate(videoFile, newPosition);
 			rerecordCount++;
 
 			fseek(videoFile, 0xc, SEEK_SET);
@@ -269,7 +277,7 @@ void MvidPostLoadState(int readonly) {
 	if (videoFile != NULL) {
 		MastArea ma;
 		unsigned char *data;
-		int size;
+		int size, embInputOffset, embPacketSize;
 		if (frameCount == 0) {
 			MvidStop();
 			return;
@@ -287,22 +295,46 @@ void MvidPostLoadState(int readonly) {
 			return;
 		}
 
-		data = (unsigned char *)malloc(size);
+		data = (unsigned char *)malloc(0x20);
 
-		ma.Len = size; ma.Data = data;
+		ma.Len = 0x20; ma.Data = data;
 		if (MastAcb(&ma) == 0) { /* old-style save state without embedded video file */
+			free(data);
 			MvidOldPostLoadState(readonly);
 			return;
 		}
 
+		embInputOffset = *(int *)(data + 0x18); if (embInputOffset == 0) embInputOffset = beginReset ? 0x60 : 0x60+25088;
+		embPacketSize = *(int *)(data + 0x1c); if (embPacketSize == 0) embPacketSize = 2;
+
+		free(data);
+		data = (unsigned char *)malloc(embInputOffset - 0x20);
+		ma.Len = embInputOffset - 0x20; ma.Data = data;
+		MastAcb(&ma);
+
+		free(data);
+		data = (unsigned char *)malloc(frameCount*embPacketSize);
+		ma.Len = frameCount*embPacketSize; ma.Data = data;
+		MastAcb(&ma);
+
 		rerecordCount++;
-		*(int *)(data + 0xc) = rerecordCount; /* TODO magic number */
 
 		vidFrameCount = frameCount;
 
 		fclose(videoFile);
-		videoFile = fopen(videoFilename, "wb");
-		fwrite(data, size, 1, videoFile);
+		videoFile = fopen(videoFilename, "r+b");
+		Truncate(videoFile, inputOffset);
+
+		fseek(videoFile, 0x8, SEEK_SET);
+		fwrite(&frameCount, 4, 1, videoFile);
+		fwrite(&rerecordCount, 4, 1, videoFile);
+
+		packetSize = embPacketSize;
+		fseek(videoFile, 0x1c, SEEK_SET);
+		fwrite(&packetSize, 4, 1, videoFile);
+
+		fseek(videoFile, 0, SEEK_END);
+		fwrite(data, frameCount*embPacketSize, 1, videoFile);
 		free(data);
 
 		videoMode = RECORD_MODE;
