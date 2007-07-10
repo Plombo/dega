@@ -378,6 +378,14 @@ Handler:		switch (event.type)
                                 if(key==SDLK_z || key==SDLK_y) {MastInput[0]|=0x10;break;}
                                 if(key==SDLK_x) {MastInput[0]|=0x20;break;}
                                 if(key==SDLK_c) {MastInput[0]|=0x80;break;}
+
+                                if(key==SDLK_u) {MastInput[1]|=0x01;break;}
+                                if(key==SDLK_j) {MastInput[1]|=0x02;break;}
+                                if(key==SDLK_h) {MastInput[1]|=0x04;break;}
+                                if(key==SDLK_k) {MastInput[1]|=0x08;break;}
+                                if(key==SDLK_f) {MastInput[1]|=0x10;break;}
+                                if(key==SDLK_g) {MastInput[1]|=0x20;break;}
+
 				if(key==SDLK_p) {paused=!paused;break;}
 				if(key==SDLK_o) {paused=1;frameadvance=1;break;}
 				if(key==SDLK_r) {HandleRecordMovie(1);break;}
@@ -402,6 +410,13 @@ Handler:		switch (event.type)
                                 if(key==SDLK_z || key==SDLK_y) {MastInput[0]&=0xef;break;}
                                 if(key==SDLK_x) {MastInput[0]&=0xdf;break;}
                                 if(key==SDLK_c) {MastInput[0]&=0x7f;break;}
+
+                                if(key==SDLK_u) {MastInput[1]&=0xfe;break;}
+                                if(key==SDLK_j) {MastInput[1]&=0xfd;break;}
+                                if(key==SDLK_h) {MastInput[1]&=0xfb;break;}
+                                if(key==SDLK_k) {MastInput[1]&=0xf7;break;}
+                                if(key==SDLK_f) {MastInput[1]&=0xef;break;}
+                                if(key==SDLK_g) {MastInput[1]&=0xdf;break;}
                                 break;
                         case SDL_QUIT:
                                 done = 1;

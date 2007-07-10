@@ -92,13 +92,15 @@ static INLINE unsigned char SysIn(unsigned short a)
   {
     // Input
     d=MastInput[0]; d&=0x3f;
+    d|=MastInput[1]<<6;
     d=(unsigned char)(~d);
     goto End;
   }
   if (a==0xdd || a==0xc1)
   {
+    d=(~MastInput[1]>>2)&0xf;
+    d|=0x30;
     // Region detect:
-    d=0x3f;
     d|=pMastb->Out3F&0x80; // bit 7->7
     d|=(pMastb->Out3F<<1)&0x40; // bit 5->6
     if (MastEx&MX_JAPAN) d^=0xc0; //select japanese
