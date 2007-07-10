@@ -69,6 +69,7 @@ static INLINE unsigned char SysIn(unsigned short a)
   if (a==0x00)
   {
     d=0x7f; if ((MastInput[0]&0x80)==0) d|=0x80; // Game gear start button
+    if (MastEx&MX_JAPAN) d&=0xbf;
     goto End;
   }
   if (a==0x05) { d=0; goto End; } // Link-up
