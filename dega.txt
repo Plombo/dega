@@ -24,6 +24,10 @@ ________________________________________________________________________________
 
                                 What's New?
 
+  v1.13a
+  + Fixed emulation bug for certain games which would incorrectly determine
+  the region
+
   v1.13
   + Bulletproof rerecording with read-only mode
   + AVI encoding from a movie file (*NIX only)
