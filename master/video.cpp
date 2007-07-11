@@ -134,7 +134,7 @@ UINT_PTR CALLBACK MenuVideoRecordHook(HWND hdlg, UINT uiMsg, WPARAM wParam, LPAR
 
 int MenuVideo(int Action)
 {
-  char Name[256], buf[32];
+  char Name[256];
   OPENFILENAME Ofn; int Ret=0; VideoReset=0;
 
   SetCurrentDirectory(StateFolder); // Point to the state folder
@@ -151,19 +151,22 @@ int MenuVideo(int Action)
   Ofn.lpstrFile=Name;
   Ofn.nMaxFile=sizeof(Name);
   Ofn.lpstrInitialDir=".";
-  Ofn.Flags=OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_ENABLEHOOK|OFN_ENABLETEMPLATE|OFN_EXPLORER;
+  Ofn.Flags=OFN_OVERWRITEPROMPT|OFN_ENABLEHOOK|OFN_ENABLETEMPLATE|OFN_EXPLORER;
   Ofn.lpstrDefExt="mmv";
 
   switch (Action)
   {
     case ID_VIDEO_PLAYBACK:
-      Ofn.lpstrTitle="Play video";
+      Ofn.lpstrTitle="Play movie";
+      if (VideoReadOnly) Ofn.Flags|=OFN_READONLY;
       Ofn.lpfnHook=MenuVideoPlaybackHook;
       Ofn.lpTemplateName=MAKEINTRESOURCE(IDD_PLAYBACK_INFO);
       Ret=GetOpenFileName(&Ofn);
+      VideoReadOnly=(Ofn.Flags&OFN_READONLY)!=0;
       break;
     case ID_VIDEO_RECORD:
-      Ofn.lpstrTitle="Record video";
+      Ofn.lpstrTitle="Record movie";
+      Ofn.Flags|=OFN_HIDEREADONLY;
       Ofn.lpfnHook=MenuVideoRecordHook;
       Ofn.lpTemplateName=MAKEINTRESOURCE(IDD_RECORD_INFO);
       Ret=GetSaveFileName(&Ofn);

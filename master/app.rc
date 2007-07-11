@@ -59,50 +59,22 @@ BEGIN
         MENUITEM "Load Rom",                    ID_FILE_LOADROM
         MENUITEM SEPARATOR
         MENUITEM "Reset\tAlt+R",                ID_FILE_RESET
-        MENUITEM "Free Rom",                    ID_FILE_FREEROM
+        MENUITEM "Close Rom",                   ID_FILE_FREEROM
+        MENUITEM SEPARATOR
+        MENUITEM "Screenshot\tF12",             ID_OPTIONS_SCREENSHOT
         MENUITEM SEPARATOR
         MENUITEM "Exit",                        ID_FILE_EXIT
     END
-    POPUP "&Options"
+    POPUP "&Emulation"
     BEGIN
-        MENUITEM "PAL",                         ID_SETUP_PAL
-        MENUITEM "Japan",                       ID_SETUP_JAPAN
-        MENUITEM "FM Chip",                     ID_SETUP_FMCHIP
-        MENUITEM SEPARATOR
-        POPUP "Overlay"
-        BEGIN
-            MENUITEM "None",                        ID_SETUP_OVERLAY_NONE
-            MENUITEM "YUV",                         ID_SETUP_OVERLAY_YUV
-            MENUITEM "RGB",                         ID_SETUP_OVERLAY_RGB
-        END
-        MENUITEM "Fullscreen\tAlt+Enter",       ID_SETUP_FULLSCREEN
-        MENUITEM "Red/Blue 3D",                 ID_SETUP_REDBLUE3D
-        MENUITEM "Pause Emu",                   ID_SETUP_PAUSE
-        MENUITEM "One Frame",                   ID_SETUP_ONEFRAME
+        MENUITEM "Pause",                   ID_SETUP_PAUSE
+//      MENUITEM "One Frame",                   ID_SETUP_ONEFRAME
         MENUITEM SEPARATOR
         MENUITEM "Speed Up",                    ID_SETUP_SPEEDUP
         MENUITEM "Slow Down",                   ID_SETUP_SLOWDOWN
         MENUITEM "Normal Speed",                ID_SETUP_NORMALSPEED
-        MENUITEM SEPARATOR
-        MENUITEM "Screenshot\tF12",             ID_OPTIONS_SCREENSHOT
-        MENUITEM SEPARATOR
-        POPUP "Status Bar"
-        BEGIN
-            MENUITEM "Hide",                      ID_SETUP_STATUSHIDE
-            MENUITEM "Auto",                      ID_SETUP_STATUSAUTO
-            MENUITEM "Show",                      ID_SETUP_STATUSSHOW
-        END
     END
-    POPUP "Input"
-    BEGIN
-        MENUITEM "Keyboard",                    ID_INPUT_KEYBOARD
-        MENUITEM "Joystick",                    ID_INPUT_JOYSTICK
-	MENUITEM SEPARATOR
-        MENUITEM "Key Mappings",                ID_INPUT_KEYMAPPING
-	MENUITEM SEPARATOR
-	MENUITEM "Show Button States",          ID_INPUT_BUTTONS
-    END
-    POPUP "State"
+    POPUP "&State"
     BEGIN
         MENUITEM "Load State",                  ID_STATE_LOADSTATE
         MENUITEM "Save State",                  ID_STATE_SAVESTATE
@@ -127,7 +99,48 @@ BEGIN
         MENUITEM "Import Meka",                 ID_STATE_IMPORT
         MENUITEM "Export Meka",                 ID_STATE_EXPORT
     END
-    POPUP "Sound"
+    POPUP "&Movie"
+    BEGIN
+        MENUITEM "Start Recording",                 ID_VIDEO_RECORD
+        MENUITEM "Start Playback",                  ID_VIDEO_PLAYBACK
+	MENUITEM "Stop Recording/Playback",         ID_VIDEO_STOP
+	MENUITEM "Read-only Mode",                  ID_VIDEO_READONLY
+	MENUITEM SEPARATOR
+	MENUITEM "Properties",                      ID_VIDEO_PROPERTIES
+    END
+    POPUP "&Config"
+    BEGIN
+        MENUITEM "Keyboard Input",                    ID_INPUT_KEYBOARD
+        MENUITEM "Joystick Input",                    ID_INPUT_JOYSTICK
+	MENUITEM SEPARATOR
+        MENUITEM "Key Mappings",                ID_INPUT_KEYMAPPING
+	MENUITEM SEPARATOR
+        POPUP "Status Bar"
+        BEGIN
+            MENUITEM "Hide",                      ID_SETUP_STATUSHIDE
+            MENUITEM "Auto",                      ID_SETUP_STATUSAUTO
+            MENUITEM "Show",                      ID_SETUP_STATUSSHOW
+        END
+    END
+    POPUP "&Graphics"
+    BEGIN
+        MENUITEM "PAL",                         ID_SETUP_PAL
+        MENUITEM "Japan",                       ID_SETUP_JAPAN
+        MENUITEM "FM Chip",                     ID_SETUP_FMCHIP
+        MENUITEM SEPARATOR
+        POPUP "Overlay"
+        BEGIN
+            MENUITEM "None",                        ID_SETUP_OVERLAY_NONE
+            MENUITEM "YUV",                         ID_SETUP_OVERLAY_YUV
+            MENUITEM "RGB",                         ID_SETUP_OVERLAY_RGB
+        END
+        MENUITEM "Fullscreen\tAlt+Enter",       ID_SETUP_FULLSCREEN
+        MENUITEM "Red/Blue 3D",                 ID_SETUP_REDBLUE3D
+        MENUITEM SEPARATOR
+	MENUITEM "Show Button States",          ID_INPUT_BUTTONS
+	MENUITEM "Show Movie Frame Counter",    ID_VIDEO_FRAMECOUNTER
+    END
+    POPUP "S&ound"
     BEGIN
         MENUITEM "Enhance PSG",                 ID_SOUND_ENHANCEPSG
         POPUP "Quality"
@@ -143,16 +156,6 @@ BEGIN
             MENUITEM "Sample accurate",             ID_SOUND_VGMLOG_SAMPLEACCURATE
 
         END
-    END
-    POPUP "Video"
-    BEGIN
-        MENUITEM "Start Recording",                 ID_VIDEO_RECORD
-        MENUITEM "Start Playback",                  ID_VIDEO_PLAYBACK
-	MENUITEM "Stop Recording/Playback",         ID_VIDEO_STOP
-	MENUITEM "Read-only Mode",                  ID_VIDEO_READONLY
-	MENUITEM "Show Frame Counter",              ID_VIDEO_FRAMECOUNTER
-	MENUITEM SEPARATOR
-	MENUITEM "Properties",                      ID_VIDEO_PROPERTIES
     END
 END
 

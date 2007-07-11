@@ -53,6 +53,7 @@ int ConfLoad()
 
     STR(StateFolder)
     VAR(AutoLoadSave)
+    VAR(VideoReadOnly)
 
     for (i = 0; i < KMAPCOUNT; i++)
     {
@@ -103,6 +104,7 @@ int ConfSave()
     fprintf (h,"\n// State\n");
     STR(StateFolder)
     VAR(AutoLoadSave)
+    VAR(VideoReadOnly)
 
     fprintf (h, "\n// Keys\n");
     for (i = 0; i < KMAPCOUNT; i++)
