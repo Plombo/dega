@@ -96,7 +96,7 @@ extern HWND hFrameStatus; // Frame - status window
 
 // input.cpp
 extern int UseJoystick;
-extern unsigned char AutoHold;
+extern unsigned char AutoHold[2];
 int InputGet();
 
 // disp.cpp
@@ -123,12 +123,11 @@ int DirInputFind();
 
 // load.cpp
 extern char RomFolder[];
-extern char StateFolder[];
+extern char StateFolder[256];
 extern char VgmName[];
 int MenuLoadRom();
 int MenuStatePort(int Export);
 int MenuStateLoad(int Save);
-int MenuVideo(int Action);
 int MenuVgmStart();
 #define WMU_TOGGLEMENU       (WM_APP+0)
 #define WMU_CHANGEDROM       (WM_APP+1)
@@ -140,7 +139,6 @@ int MenuVgmStart();
 #define WMU_VGMSTART         (WM_APP+7)
 #define WMU_VIDEOPLAYBACK    (WM_APP+8)
 #define WMU_VIDEORECORD      (WM_APP+9)
-#define WMU_VIDEORESETRECORD (WM_APP+10)
 
 // conf.cpp
 int ConfLoad();
@@ -164,7 +162,8 @@ int ShotSave();
 
 // video.cpp
 extern char VideoName[256];
-void VideoRecord(int Reset);
+int MenuVideo(int Action);
+void VideoRecord();
 void VideoPlayback();
 void VideoProperties();
 

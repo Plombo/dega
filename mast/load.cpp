@@ -6,6 +6,7 @@ int MastLoadRom(char *Name,unsigned char **pRom,int *pRomLen)
   FILE *h=NULL; int Len=0;
   unsigned char *Mem=NULL;
   int AllocLen=0;
+  char *FileName;
 
   if (Name==NULL) return 1;
   if (Name[0]==0) return 1;
@@ -29,6 +30,12 @@ int MastLoadRom(char *Name,unsigned char **pRom,int *pRomLen)
   fread(Mem,1,Len,h);
 
   fclose(h);
+
+  FileName=strrchr(Name,'/');
+  if (FileName) { FileName++; }
+           else { FileName=Name; }
+
+  MastSetRomName(FileName);
 
   *pRom=Mem; *pRomLen=Len; // return information
   return 0;

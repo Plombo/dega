@@ -183,6 +183,8 @@ void MvidModeChanged() {
 	SetRateMult();
 }
 
+void MvidMovieStopped() {}
+
 void usage(void)
 {
 	printf("\nUsage: %s [OPTION]... [ROM file]\n",APPNAME);

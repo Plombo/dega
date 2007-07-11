@@ -123,6 +123,8 @@ void MvidModeChanged() {
 	framerate = (MastEx & MX_PAL) ? 50 : 60;
 }
 
+void MvidMovieStopped() {}
+
 int spawn_mencoder(char *params, char *output) {
 	int videofds[2], audiofds[2], mencoder_pid;
 

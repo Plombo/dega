@@ -1,5 +1,6 @@
 // Mast - main module
 #include "mastint.h"
+#include "md5.h"
 
 int MastVer=0x1130; // Version number of the library
 
@@ -11,6 +12,8 @@ int MastDrawDo=0; // 1 to draw image
 struct Masta Masta={0};
 struct Mastb *pMastb=NULL;
 struct Mastz Mastz={0};
+
+char MastRomName[128] = "";
 
 int MastInit()
 {
@@ -46,6 +49,23 @@ int MastSetRom(unsigned char *Rom,int RomLen)
   MastMapMemory(); // Map memory
   MastHardReset(); // Start from empty state and battery
   return 0;
+}
+
+void MastSetRomName(char *name)
+{
+  memset(MastRomName, 0, sizeof(MastRomName));
+  strncpy(MastRomName, name, sizeof(MastRomName)); MastRomName[sizeof(MastRomName)-1] = '\0';
+}
+
+void MastGetRomDigest(unsigned char *digest)
+{
+  Md5_t md5;
+  int RealLen=Mastz.RomLen;
+  if (RealLen&2) RealLen-=2; // account for overrun if present
+
+  Md5Initialize(&md5);
+  Md5Update(&md5, Mastz.Rom, RealLen);
+  Md5Final(&md5, digest);
 }
 
 int MastReset()

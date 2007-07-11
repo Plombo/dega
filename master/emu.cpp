@@ -77,6 +77,7 @@ static int AdjustRom(unsigned char *& Rom,int& RomLen)
 int EmuLoad()
 {
   int Ret=0;
+  char *EmuRomFileName;
   if (EmuRomName==NULL) return 1;
   if (EmuRomName[0]==0) return 1;
 
@@ -104,6 +105,11 @@ int EmuLoad()
 
     Ret=GameGearRom(); // Detect Game Gear from the filename
     MastEx&=~MX_GG; if (Ret) MastEx|=MX_GG;
+
+    EmuRomFileName=strrchr(EmuRomName,'\\');
+    if (EmuRomFileName) { EmuRomFileName++; }
+                   else { EmuRomFileName=EmuRomName; }
+    MastSetRomName(EmuRomFileName);
   }
 
   if (EmuTitle!=NULL) free(EmuTitle);

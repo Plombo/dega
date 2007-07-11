@@ -31,8 +31,10 @@ static int MediaInit(int Level)
     Ret=EmuLoad();
     if (Ret==0) { ShowMenu=0; Enabled=MF_ENABLED; LoopPause=0; }
     else EmuFree();
-    EnableMenuItem(hFrameMenu,ID_FILE_RESET  ,Enabled);
-    EnableMenuItem(hFrameMenu,ID_FILE_FREEROM,Enabled);
+    EnableMenuItem(hFrameMenu,ID_FILE_RESET    ,Enabled);
+    EnableMenuItem(hFrameMenu,ID_FILE_FREEROM  ,Enabled);
+    EnableMenuItem(hFrameMenu,ID_VIDEO_RECORD  ,Enabled);
+    EnableMenuItem(hFrameMenu,ID_VIDEO_PLAYBACK,Enabled);
 
     StateAuto(0); // Auto load the state
     // Size and show the frame window
@@ -144,6 +146,7 @@ static int MediaInit(int Level)
     EnableMenuItem(hFrameMenu,ID_SOUND_VGMLOG_STOP, VgmFile!=NULL ? MF_ENABLED : MF_GRAYED);
     CHK(ID_SOUND_VGMLOG_SAMPLEACCURATE,VgmAccurate)
     CHK(ID_VIDEO_READONLY,VideoReadOnly)
+    EnableMenuItem(hFrameMenu,ID_VIDEO_STOP, MvidInVideo() ? MF_ENABLED : MF_GRAYED);
     EnableMenuItem(hFrameMenu,ID_VIDEO_PROPERTIES, MvidGotProperties() ? MF_ENABLED : MF_GRAYED);
     CHK(ID_VIDEO_FRAMECOUNTER,MdrawOsdOptions&OSD_FRAMECOUNT)
     CHK(ID_INPUT_BUTTONS,MdrawOsdOptions&OSD_BUTTONS)
@@ -256,6 +259,12 @@ struct CustomKeyMap mymap[] = {
  { KMAP_HOLD_LEFT,  ID_INPUT_HOLD_LEFT },
  { KMAP_HOLD_RIGHT, ID_INPUT_HOLD_RIGHT },
  { KMAP_HOLD_START, ID_INPUT_HOLD_START },
+ { KMAP_P2_HOLD_1,     ID_INPUT_P2_HOLD_1 },
+ { KMAP_P2_HOLD_2,     ID_INPUT_P2_HOLD_2 },
+ { KMAP_P2_HOLD_UP,    ID_INPUT_P2_HOLD_UP },
+ { KMAP_P2_HOLD_DOWN,  ID_INPUT_P2_HOLD_DOWN },
+ { KMAP_P2_HOLD_LEFT,  ID_INPUT_P2_HOLD_LEFT },
+ { KMAP_P2_HOLD_RIGHT, ID_INPUT_P2_HOLD_RIGHT },
  { 0, 0 }
 };
 
@@ -356,8 +365,7 @@ int LoopDo()
     if (Msg.message==WMU_STATEEXPORT) { StateSave(1); }
     if (Msg.message==WMU_VGMSTART) { VgmStart(VgmName); }
 
-    if (Msg.message==WMU_VIDEORECORD)      { VideoRecord(0); }
-    if (Msg.message==WMU_VIDEORESETRECORD) { VideoRecord(1); }
+    if (Msg.message==WMU_VIDEORECORD)      { VideoRecord(); }
     if (Msg.message==WMU_VIDEOPLAYBACK)    { VideoPlayback(); }
 
     Ret=MediaInit(InitLevel); if (Ret!=0) { InitLevel=0; goto Error; }
@@ -411,13 +419,20 @@ int LoopDo()
         if (Msg.wParam==ID_SETUP_STATUSAUTO)   { InitLevel=70; break; }
         if (Msg.wParam==ID_SETUP_STATUSSHOW)   { InitLevel=70; break; }
 
-        if (Msg.wParam==ID_INPUT_HOLD_UP   ) AutoHold^=0x01;
-        if (Msg.wParam==ID_INPUT_HOLD_DOWN ) AutoHold^=0x02;
-        if (Msg.wParam==ID_INPUT_HOLD_LEFT ) AutoHold^=0x04;
-        if (Msg.wParam==ID_INPUT_HOLD_RIGHT) AutoHold^=0x08;
-        if (Msg.wParam==ID_INPUT_HOLD_1    ) AutoHold^=0x10;
-        if (Msg.wParam==ID_INPUT_HOLD_2    ) AutoHold^=0x20;
-        if (Msg.wParam==ID_INPUT_HOLD_START) AutoHold^=0x80;
+        if (Msg.wParam==ID_INPUT_HOLD_UP   ) AutoHold[0]^=0x01;
+        if (Msg.wParam==ID_INPUT_HOLD_DOWN ) AutoHold[0]^=0x02;
+        if (Msg.wParam==ID_INPUT_HOLD_LEFT ) AutoHold[0]^=0x04;
+        if (Msg.wParam==ID_INPUT_HOLD_RIGHT) AutoHold[0]^=0x08;
+        if (Msg.wParam==ID_INPUT_HOLD_1    ) AutoHold[0]^=0x10;
+        if (Msg.wParam==ID_INPUT_HOLD_2    ) AutoHold[0]^=0x20;
+        if (Msg.wParam==ID_INPUT_HOLD_START) AutoHold[0]^=0x80;
+
+        if (Msg.wParam==ID_INPUT_P2_HOLD_UP   ) AutoHold[1]^=0x01;
+        if (Msg.wParam==ID_INPUT_P2_HOLD_DOWN ) AutoHold[1]^=0x02;
+        if (Msg.wParam==ID_INPUT_P2_HOLD_LEFT ) AutoHold[1]^=0x04;
+        if (Msg.wParam==ID_INPUT_P2_HOLD_RIGHT) AutoHold[1]^=0x08;
+        if (Msg.wParam==ID_INPUT_P2_HOLD_1    ) AutoHold[1]^=0x10;
+        if (Msg.wParam==ID_INPUT_P2_HOLD_2    ) AutoHold[1]^=0x20;
       }
       if (Msg.message==WMU_STATELOAD) { InitLevel=60; break; }
       if (Msg.message==WMU_STATESAVE) { InitLevel=60; break; }
@@ -426,7 +441,6 @@ int LoopDo()
       if (Msg.message==WMU_VGMSTART)    { InitLevel=60; break; }
 
       if (Msg.message==WMU_VIDEORECORD)      { InitLevel=60; break; }
-      if (Msg.message==WMU_VIDEORESETRECORD) { InitLevel=60; break; }
       if (Msg.message==WMU_VIDEOPLAYBACK)    { InitLevel=50; break; }
 
       if (hAccel!=NULL) TranslateAccelerator(hFrameWnd,hAccel,&Msg);

@@ -34,6 +34,31 @@ unsigned short KeyMappings[KMAPCOUNT] = {
   0,            /* Auto START */
   0,            /* Normal Speed */
   0,            /* Toggle Read-only */
+  0,            /* Hold "1" */
+  0,            /* Hold "2" */
+  0,            /* Hold Up */
+  0,            /* Hold Down */
+  0,            /* Hold Left */
+  0,            /* Hold Right */
+  0,            /* Hold START */
+  0,            /* P2 "1" */
+  0,            /* P2 "2" */
+  0,            /* P2 Up */
+  0,            /* P2 Down */
+  0,            /* P2 Left */
+  0,            /* P2 Right */
+  0,            /* P2 Auto "1" */
+  0,            /* P2 Auto "2" */
+  0,            /* P2 Auto Up */
+  0,            /* P2 Auto Down */
+  0,            /* P2 Auto Left */
+  0,            /* P2 Auto Right */
+  0,            /* P2 Hold "1" */
+  0,            /* P2 Hold "2" */
+  0,            /* P2 Hold Up */
+  0,            /* P2 Hold Down */
+  0,            /* P2 Hold Left */
+  0,            /* P2 Hold Right */
 };
 
 static unsigned short NewKeyMappings[KMAPCOUNT];

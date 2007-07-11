@@ -7,9 +7,26 @@
 #define IDR_ACCELERATOR1                103
 #define IDD_MOVIEPROPERTIES             104
 #define IDD_HOTKEYMAP                   105
+#define IDD_RECORD_INFO                 106
+#define IDD_PLAYBACK_INFO               107
+
 #define IDT_MP_FRAMECOUNT               1001
 #define IDT_MP_RERECORDCOUNT            1002
 #define IDT_MP_AUTHOR                   1003
+
+#define IDT_RI_FILENAME                 1004
+#define IDT_RI_AUTHOR                   1005
+#define IDT_RI_RESET                    1006
+
+#define IDT_PI_FRAMECOUNT               1007
+#define IDT_PI_RERECORDCOUNT            1008
+#define IDT_PI_AUTHOR                   1009
+#define IDT_PI_RESET                    1010
+#define IDT_PI_ROM                      1011
+#define IDT_PI_MOVIE_ROM                1012
+#define IDT_PI_DIGEST                   1013
+#define IDT_PI_MOVIE_DIGEST             1014
+
 #define ID_FILE_LOADROM                 40001
 #define ID_FILE_RESET                   40002
 #define ID_FILE_FREEROM                 40003
@@ -40,7 +57,6 @@
 #define ID_STATE_LOADSTATE              40071
 #define ID_STATE_SAVESTATE              40072
 #define ID_VIDEO_RECORD                 40073
-#define ID_VIDEO_RESETRECORD            40074
 #define ID_VIDEO_PLAYBACK               40075
 #define ID_VIDEO_STOP                   40076
 #define ID_VIDEO_PROPERTIES             40077
@@ -65,14 +81,20 @@
 #define ID_INPUT_HOLD_LEFT              40104
 #define ID_INPUT_HOLD_RIGHT             40105
 #define ID_INPUT_HOLD_START             40106
+#define ID_INPUT_P2_HOLD_1              40107
+#define ID_INPUT_P2_HOLD_2              40108
+#define ID_INPUT_P2_HOLD_UP             40109
+#define ID_INPUT_P2_HOLD_DOWN           40110
+#define ID_INPUT_P2_HOLD_LEFT           40111
+#define ID_INPUT_P2_HOLD_RIGHT          40112
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        106
-#define _APS_NEXT_COMMAND_VALUE         40107
-#define _APS_NEXT_CONTROL_VALUE         1004
+#define _APS_NEXT_RESOURCE_VALUE        107
+#define _APS_NEXT_COMMAND_VALUE         40113
+#define _APS_NEXT_CONTROL_VALUE         1005
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

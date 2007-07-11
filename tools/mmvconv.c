@@ -13,11 +13,20 @@ int PromptYesNo(char *question) {
 	return rv;
 }
 
-int ConvertV1toV2(FILE *in, FILE *out) {
-	int flags = 0, reset;
+void CopyRest(FILE *in, FILE *out) {
+	unsigned char buf[4096];
 	size_t size;
 
-	unsigned char buf[4096];
+	do {
+		size = fread(buf, 1, sizeof(buf), in);
+		if (size > 0) fwrite(buf, size, 1, out);
+	} while (size == sizeof(buf));
+}
+
+int ConvertV1toV2(FILE *in, FILE *out) {
+	int flags = 0, reset;
+
+	unsigned char buf[0x60];
 
 	if (PromptYesNo("Recorded in PAL mode?")) {
 		flags |= 2;
@@ -38,10 +47,50 @@ int ConvertV1toV2(FILE *in, FILE *out) {
 
 	fwrite(&flags, 4, 1, out);
 
-	do {
-		size = fread(buf, 1, sizeof(buf), in);
-		if (size > 0) fwrite(buf, size, 1, out);
-	} while (size == sizeof(buf));
+	CopyRest(in, out);
+
+	return 1;
+}
+
+int ConvertV2toV3(FILE *in, FILE *out) {
+	char name[128];
+	unsigned int digestbuf[16];
+	unsigned char digest[16];
+	char *namenl;
+	int i, reset;
+
+	unsigned char buf[0x64];
+
+	memset(name, 0, 128);
+	printf("ROM name (without path): ");
+	fgets(name, 128, stdin);
+	namenl = strrchr(name, '\n');
+	if (namenl) *namenl = '\0';
+
+	printf("ROM MD5sum: ");
+	scanf("%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
+	  &digestbuf[0], &digestbuf[1], &digestbuf[2], &digestbuf[3],
+	  &digestbuf[4], &digestbuf[5], &digestbuf[6], &digestbuf[7],
+	  &digestbuf[8], &digestbuf[9], &digestbuf[10], &digestbuf[11],
+	  &digestbuf[12], &digestbuf[13], &digestbuf[14], &digestbuf[15]);
+
+	for (i = 0; i < 16; i++) {
+		digest[i] = (unsigned char)digestbuf[i];
+	}
+
+	fread(buf, 0x64, 1, in);
+
+	reset = *(int *)(buf + 0x10);
+
+	*(int *)(buf + 0x14) = reset ? 0 : 0xf4;
+	*(int *)(buf + 0x18) = reset ? 0xf4 : 0xf4+25088;
+
+	fwrite(buf, 0x64, 1, out);
+
+	fwrite(name, 128, 1, out);
+	fwrite(digest, 16, 1, out);
+
+	CopyRest(in, out);
 
 	return 1;
 }
@@ -122,7 +171,10 @@ int main(int argc, char **argv) {
 
 	if (headerSize == 0x60) {
 		InplaceConvert(ConvertV1toV2, argv[1]);
+		InplaceConvert(ConvertV2toV3, argv[1]);
 	} else if (headerSize == 0x64) {
+		InplaceConvert(ConvertV2toV3, argv[1]);
+	} else if (headerSize == 0xf4) {
 		puts("File is already latest version.");
 		return 1;
 	} else {

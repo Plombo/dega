@@ -65,6 +65,8 @@ int ZipRead(unsigned char **pMem,int *pLen)
   unzOpenCurrentFile(Zip);
   unzReadCurrentFile(Zip,Mem,Len);
   unzCloseCurrentFile(Zip);
+  // Set name
+  MastSetRomName(Name);
   // Return the allocated memory
   *pMem=Mem; *pLen=Len;
   return 0;

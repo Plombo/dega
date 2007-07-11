@@ -12,17 +12,11 @@
 static FILE *videoFile = NULL;
 static char videoFilename[256] = "";
 static int videoMode = 0;
-static int vidFrameCount, rerecordCount, beginReset, vidFlags;
-#define VIDFLAG_PAL   (1<<1)
-#define VIDFLAG_JAPAN (1<<2)
-
-static int stateOffset, inputOffset, packetSize;
-
-static char videoAuthor[64];
+static struct MvidHeader currentMovie;
 
 int frameCount;
 
-#define HEADER_SIZE 0x64
+#define HEADER_SIZE 0xF4
 #define SAVE_STATE_SIZE 25088
 
 static int MastAcbVideoRead(struct MastArea *area) {
@@ -33,9 +27,64 @@ static int MastAcbVideoWrite(struct MastArea *area) {
 	return fwrite(area->Data, area->Len, 1, videoFile);
 }
 
+int MvidReadHeader(FILE *file, struct MvidHeader *header) {
+	int fileHeaderSize;
+	char id[4];
+
+	fseek(file, 0x0, SEEK_SET);
+	fread(id, 4, 1, file);
+	if (id[0]!='M'||id[1]!='M'||id[2]!='V'||id[3]!='\0') { // Bad file
+	  return 0;
+	}
+
+	fseek(file, 0x8, SEEK_SET);
+	fread(&header->vidFrameCount, 4, 1, file);
+	fread(&header->rerecordCount, 4, 1, file);
+	fread(&header->beginReset, 4, 1, file);
+
+	fread(&header->stateOffset, 4, 1, file);
+	fread(&header->inputOffset, 4, 1, file);
+	fread(&header->packetSize, 4, 1, file);
+
+	if (header->stateOffset==0 && !header->beginReset) {
+		header->stateOffset = 0x60; // hardcoded constants from 1st version
+	}
+
+	if (header->inputOffset==0) {
+		header->inputOffset = header->beginReset ? 0x60 : 0x60+25088; // hardcoded constants from 1st version
+	}
+
+	if (header->packetSize==0) {
+		header->packetSize = 2; // hardcoded constants from 1st version
+	}
+
+	fread(header->videoAuthor, sizeof(header->videoAuthor), 1, file);
+
+	fileHeaderSize = header->beginReset ? header->inputOffset : header->stateOffset;
+
+	if (fileHeaderSize >= 0x64) {
+		fread(&header->vidFlags, 4, 1, file);
+	} else {
+		header->vidFlags = 0;
+	}
+
+	if (fileHeaderSize >= 0xe4) {
+		fread(header->vidRomName, 128, 1, file);
+	} else {
+		memset(header->vidRomName, 0, 128);
+	}
+
+	if (fileHeaderSize >= 0xf4) {
+		fread(header->vidDigest, 16, 1, file);
+	} else {
+		memset(header->vidDigest, 0, 16);
+	}
+
+	return 1;
+}
+
 int MvidStart(char *filename, int mode, int reset) {
-	int changed = 0, fileHeaderSize; 
-	vidFrameCount = 0;
+	int changed = 0; 
 
 	if (videoFile != NULL) {
 		fclose(videoFile);
@@ -49,60 +98,36 @@ int MvidStart(char *filename, int mode, int reset) {
 	if (mode == PLAYBACK_MODE) {
 		videoFile = fopen(filename, "rb");
 		if (videoFile != NULL) {
-			fseek(videoFile, 0x8, SEEK_SET);
-			fread(&vidFrameCount, 4, 1, videoFile);
-			fread(&rerecordCount, 4, 1, videoFile);
-			fread(&reset, 4, 1, videoFile);
-
-			fread(&stateOffset, 4, 1, videoFile);
-			fread(&inputOffset, 4, 1, videoFile);
-			fread(&packetSize, 4, 1, videoFile);
-
-			if (stateOffset==0 && !reset) {
-				stateOffset = 0x60; // hardcoded constants from 1st version
+			int result = MvidReadHeader(videoFile, &currentMovie);
+			if (result==0) {
+			 	fclose(videoFile);
+				videoFile=0;
+				return 0;
 			}
 
-			if (inputOffset==0) {
-				inputOffset = reset ? 0x60 : 0x60+25088; // hardcoded constants from 1st version
-			}
+			changed = ((currentMovie.vidFlags & VIDFLAG_PAL) != 0) ^ ((MastEx & MX_PAL) != 0);
 
-			if (packetSize==0) {
-				packetSize = 2; // hardcoded constants from 1st version
-			}
-
-			fread(videoAuthor, sizeof(videoAuthor), 1, videoFile);
-
-			fileHeaderSize = reset ? inputOffset : stateOffset;
-
-			if (fileHeaderSize >= 0x64) {
-				fread(&vidFlags, 4, 1, videoFile);
-			} else {
-				vidFlags = 0;
-			}
-
-			changed = ((vidFlags & VIDFLAG_PAL) != 0) ^ ((MastEx & MX_PAL) != 0);
-
-			if (vidFlags & VIDFLAG_PAL) {
+			if (currentMovie.vidFlags & VIDFLAG_PAL) {
 				MastEx |= MX_PAL;
 			} else {
 				MastEx &= ~MX_PAL;
 			}
 			if (changed) MvidModeChanged();
 
-			if (vidFlags & VIDFLAG_JAPAN) {
+			if (currentMovie.vidFlags & VIDFLAG_JAPAN) {
 				MastEx |= MX_JAPAN;
 			} else {
 				MastEx &= ~MX_JAPAN;
 			}
 
-			if (reset) {
+			if (currentMovie.beginReset) {
 				MastHardReset();
 			} else {
-				fseek(videoFile, stateOffset, SEEK_SET);
+				fseek(videoFile, currentMovie.stateOffset, SEEK_SET);
 				MastAcb = MastAcbVideoRead;
 				MastAreaDega();
 			}
-			fseek(videoFile, inputOffset, SEEK_SET);
+			fseek(videoFile, currentMovie.inputOffset, SEEK_SET);
 		}
 	} else if (mode == RECORD_MODE) {
 		videoFile = fopen(filename, "wb");
@@ -110,31 +135,39 @@ int MvidStart(char *filename, int mode, int reset) {
 			int zero = 0;
 			fwrite("MMV", 4, 1, videoFile);    // 0000: identifier
 			fwrite(&MastVer, 4, 1, videoFile); // 0004: version
+			currentMovie.vidFrameCount = 0;
 			fwrite(&zero, 4, 1, videoFile);    // 0008: frame count
+			currentMovie.rerecordCount = 0;
 			fwrite(&zero, 4, 1, videoFile);    // 000c: rerecord count
-			rerecordCount = 0;
+			currentMovie.beginReset = reset;
 			fwrite(&reset, 4, 1, videoFile);   // 0010: begin from reset?
 		
-			stateOffset = reset ? 0 : HEADER_SIZE;
-			fwrite(&stateOffset, 4, 1, videoFile); // 0014: offset of state information
+			currentMovie.stateOffset = reset ? 0 : HEADER_SIZE;
+			fwrite(&currentMovie.stateOffset, 4, 1, videoFile); // 0014: offset of state information
 
-			inputOffset = reset ? HEADER_SIZE : HEADER_SIZE+SAVE_STATE_SIZE;
-			fwrite(&inputOffset, 4, 1, videoFile); // 0018: offset of input data
+			currentMovie.inputOffset = reset ? HEADER_SIZE : HEADER_SIZE+SAVE_STATE_SIZE;
+			fwrite(&currentMovie.inputOffset, 4, 1, videoFile); // 0018: offset of input data
 
-			packetSize = sizeof(MastInput);
-			fwrite(&packetSize, 4, 1, videoFile);  // 001c: size of input packet
+			currentMovie.packetSize = sizeof(MastInput);
+			fwrite(&currentMovie.packetSize, 4, 1, videoFile);  // 001c: size of input packet
 
-			memset(videoAuthor, 0, sizeof(videoAuthor));
-			fwrite(videoAuthor, sizeof(videoAuthor), 1, videoFile); // 0020-005f: author
+			memset(currentMovie.videoAuthor, 0, sizeof(currentMovie.videoAuthor));
+			fwrite(currentMovie.videoAuthor, sizeof(currentMovie.videoAuthor), 1, videoFile); // 0020-005f: author
 
-			vidFlags = 0;
+			currentMovie.vidFlags = 0;
 			if (MastEx & MX_PAL) {
-				vidFlags |= VIDFLAG_PAL;
+				currentMovie.vidFlags |= VIDFLAG_PAL;
 			}
 			if (MastEx & MX_JAPAN) {
-				vidFlags |= VIDFLAG_JAPAN;
+				currentMovie.vidFlags |= VIDFLAG_JAPAN;
 			}
-			fwrite(&vidFlags, 4, 1, videoFile);    // 0060: flags
+			fwrite(&currentMovie.vidFlags, 4, 1, videoFile);    // 0060: flags
+
+			memcpy(currentMovie.vidRomName, MastRomName, 128);
+			fwrite(MastRomName, 128, 1, videoFile); // 0064-00e3: rom name
+
+			MastGetRomDigest(currentMovie.vidDigest);
+			fwrite(currentMovie.vidDigest, 16, 1, videoFile);      // 00e4-00f3: rom digest
 
 			if (reset) {
 				MastHardReset();
@@ -149,17 +182,15 @@ int MvidStart(char *filename, int mode, int reset) {
 		perror("while opening video file: fopen");
 	}
 
-	beginReset = reset;
-
-	return vidFrameCount;
+	return currentMovie.vidFrameCount;
 }
 
 int MvidGetFrameCount() {
-	return vidFrameCount;
+	return currentMovie.vidFrameCount;
 }
 
 int MvidGetRerecordCount() {
-	return rerecordCount;
+	return currentMovie.rerecordCount;
 }
 
 void MvidStop() {
@@ -167,6 +198,7 @@ void MvidStop() {
 		MastInput[0] = MastInput[1] = 0;
 		fclose(videoFile);
 		videoFile = NULL;
+		MvidMovieStopped();
 	}
 }
 
@@ -177,19 +209,20 @@ int MvidSetAuthor(char *author) {
 		return 0;
 	}
 
-	memset(videoAuthor, 0, sizeof(videoAuthor));
-	strncpy(videoAuthor, author, sizeof(videoAuthor));
+	memset(currentMovie.videoAuthor, 0, sizeof(currentMovie.videoAuthor));
+	strncpy(currentMovie.videoAuthor, author, sizeof(currentMovie.videoAuthor));
 
+	if (videoFile) fflush(videoFile);
 	rwVideoFile = fopen(videoFilename, "r+b");
 	fseek(rwVideoFile, 0x20, SEEK_SET);
-	fwrite(videoAuthor, sizeof(videoAuthor), 1, rwVideoFile);
+	fwrite(currentMovie.videoAuthor, sizeof(currentMovie.videoAuthor), 1, rwVideoFile);
 	fclose(rwVideoFile);
 
 	return 1;
 }
 
 char *MvidGetAuthor() {
-	return videoAuthor;
+	return currentMovie.videoAuthor;
 }
 
 int MvidGotProperties() {
@@ -215,16 +248,17 @@ void MvidPreFrame() {
 				if (result == 0) {
 					MvidStop();
 				} else {
-					fseek(videoFile, packetSize-sizeof(MastInput), SEEK_CUR);
+					fseek(videoFile, currentMovie.packetSize-sizeof(MastInput), SEEK_CUR);
 				}
 
 				break;
 			case RECORD_MODE:
 				fwrite(MastInput, sizeof(MastInput), 1, videoFile);
-				for (i = 0; i < packetSize-sizeof(MastInput); i++) {
+				for (i = 0; i < currentMovie.packetSize-sizeof(MastInput); i++) {
 					fwrite(&zero, 1, 1, videoFile);
 				}
 
+				currentMovie.vidFrameCount=frameCount;
 				fseek(videoFile, 0x8, SEEK_SET);
 				fwrite(&frameCount, 4, 1, videoFile);
 				fseek(videoFile, 0, SEEK_END);
@@ -253,7 +287,7 @@ static void Truncate(FILE *file, int size) {
 
 static void MvidOldPostLoadState(int readonly) {
 	if (videoFile != NULL) {
-		int newPosition = inputOffset + frameCount*packetSize;
+		int newPosition = currentMovie.inputOffset + frameCount*currentMovie.packetSize;
 
 		if (readonly != 0 && videoMode == PLAYBACK_MODE) {
 			fseek(videoFile, newPosition, SEEK_SET);
@@ -262,10 +296,10 @@ static void MvidOldPostLoadState(int readonly) {
 
 			videoFile = fopen(videoFilename, "r+b");
 			Truncate(videoFile, newPosition);
-			rerecordCount++;
+			currentMovie.rerecordCount++;
 
 			fseek(videoFile, 0xc, SEEK_SET);
-			fwrite(&rerecordCount, 4, 1, videoFile);
+			fwrite(&currentMovie.rerecordCount, 4, 1, videoFile);
 
 			fseek(videoFile, 0, SEEK_END);
 			videoMode = RECORD_MODE;
@@ -283,7 +317,7 @@ void MvidPostLoadState(int readonly) {
 			return;
 		}
 
-		size = inputOffset + frameCount*packetSize;
+		size = currentMovie.inputOffset + frameCount*currentMovie.packetSize;
 
 		if (readonly != 0) {
 			if (videoMode == RECORD_MODE) {
@@ -304,7 +338,7 @@ void MvidPostLoadState(int readonly) {
 			return;
 		}
 
-		embInputOffset = *(int *)(data + 0x18); if (embInputOffset == 0) embInputOffset = beginReset ? 0x60 : 0x60+25088;
+		embInputOffset = *(int *)(data + 0x18); if (embInputOffset == 0) embInputOffset = currentMovie.beginReset ? 0x60 : 0x60+25088;
 		embPacketSize = *(int *)(data + 0x1c); if (embPacketSize == 0) embPacketSize = 2;
 
 		free(data);
@@ -317,21 +351,21 @@ void MvidPostLoadState(int readonly) {
 		ma.Len = frameCount*embPacketSize; ma.Data = data;
 		MastAcb(&ma);
 
-		rerecordCount++;
+		currentMovie.rerecordCount++;
 
-		vidFrameCount = frameCount;
+		currentMovie.vidFrameCount = frameCount;
 
 		fclose(videoFile);
 		videoFile = fopen(videoFilename, "r+b");
-		Truncate(videoFile, inputOffset);
+		Truncate(videoFile, currentMovie.inputOffset);
 
 		fseek(videoFile, 0x8, SEEK_SET);
 		fwrite(&frameCount, 4, 1, videoFile);
-		fwrite(&rerecordCount, 4, 1, videoFile);
+		fwrite(&currentMovie.rerecordCount, 4, 1, videoFile);
 
-		packetSize = embPacketSize;
+		currentMovie.packetSize = embPacketSize;
 		fseek(videoFile, 0x1c, SEEK_SET);
-		fwrite(&packetSize, 4, 1, videoFile);
+		fwrite(&currentMovie.packetSize, 4, 1, videoFile);
 
 		fseek(videoFile, 0, SEEK_END);
 		fwrite(data, frameCount*embPacketSize, 1, videoFile);
@@ -348,7 +382,7 @@ void MvidPostSaveState() {
 		int size;
 		FILE *readVideoFile;
 
-		size = inputOffset + frameCount*packetSize;
+		size = currentMovie.inputOffset + frameCount*currentMovie.packetSize;
 		data = (unsigned char *)malloc(size);
 
 		readVideoFile = fopen(videoFilename, "rb");

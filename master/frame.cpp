@@ -45,7 +45,7 @@ static LRESULT CALLBACK WindowProc(HWND hWnd,UINT Msg,WPARAM wParam,LPARAM lPara
     if (Item==ID_STATE_IMPORT) { MenuStatePort(0); return 0; }
     if (Item==ID_STATE_EXPORT) { MenuStatePort(1); return 0; }
     if (Item==ID_SOUND_VGMLOG_START) { MenuVgmStart(); return 0; }
-    if (Item==ID_VIDEO_PLAYBACK || Item==ID_VIDEO_RECORD || Item==ID_VIDEO_RESETRECORD)
+    if (Item==ID_VIDEO_PLAYBACK || Item==ID_VIDEO_RECORD)
       { MenuVideo(Item); return 0; }
     if (Item==ID_VIDEO_PROPERTIES) { VideoProperties(); return 0; }
     if (Item==ID_INPUT_KEYMAPPING) { KeyMapping(); return 0; }

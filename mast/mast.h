@@ -32,6 +32,9 @@ extern int MastDrawDo; // 1 to draw image
 int MastInit();
 int MastExit();
 int MastSetRom(unsigned char *Rom,int RomLen);
+extern char MastRomName[128];
+void MastSetRomName(char *romname);
+void MastGetRomDigest(unsigned char *digest);
 int MastReset();
 int MastHardReset();
 
@@ -79,8 +82,23 @@ extern FILE *VgmFile;
 extern int VgmAccurate; // 1=Sample accurate
 
 // video.cpp
+struct MvidHeader {
+  int vidFrameCount;
+  int rerecordCount;
+  int beginReset;
+  int stateOffset;
+  int inputOffset;
+  int packetSize;
+  char videoAuthor[64];
+  int vidFlags;
+  char vidRomName[128];
+  unsigned char vidDigest[16];
+};
 #define PLAYBACK_MODE 0
 #define RECORD_MODE 1
+#define VIDFLAG_PAL   (1<<1)
+#define VIDFLAG_JAPAN (1<<2)
+int MvidReadHeader(FILE *file, struct MvidHeader *header);
 int MvidStart(char *videoFilename, int mode, int reset);
 void MvidStop();
 void MvidPostLoadState(int readonly);
@@ -93,6 +111,7 @@ int MvidGotProperties();
 int MvidInVideo();
 // defined by implementation
 void MvidModeChanged();
+void MvidMovieStopped();
 
 // osd.cpp
 #define OSD_BUTTONS 1
