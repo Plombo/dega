@@ -351,6 +351,7 @@ int main(int argc, char** argv)
 			scrlock();
 			MastFrame();
 			scrunlock();
+			MastInput[0]&=~0x40;
 			if(sound)
 			{
 				SDL_LockAudio();
@@ -379,7 +380,11 @@ Handler:		switch (event.type)
                                 if(key==SDLK_RIGHT) {MastInput[0]|=0x08;break;}
                                 if(key==SDLK_z || key==SDLK_y) {MastInput[0]|=0x10;break;}
                                 if(key==SDLK_x) {MastInput[0]|=0x20;break;}
-                                if(key==SDLK_c) {MastInput[0]|=0x80;break;}
+                                if(key==SDLK_c) {
+				  MastInput[0]|=0x80;
+				  if ((MastEx&MX_GG)==0)
+				    MastInput[0]|=0x40;
+				  break;}
 
                                 if(key==SDLK_u) {MastInput[1]|=0x01;break;}
                                 if(key==SDLK_j) {MastInput[1]|=0x02;break;}
@@ -411,7 +416,7 @@ Handler:		switch (event.type)
                                 if(key==SDLK_RIGHT) {MastInput[0]&=0xf7;break;}
                                 if(key==SDLK_z || key==SDLK_y) {MastInput[0]&=0xef;break;}
                                 if(key==SDLK_x) {MastInput[0]&=0xdf;break;}
-                                if(key==SDLK_c) {MastInput[0]&=0x7f;break;}
+                                if(key==SDLK_c) {MastInput[0]&=0x3f;break;}
 
                                 if(key==SDLK_u) {MastInput[1]&=0xfe;break;}
                                 if(key==SDLK_j) {MastInput[1]&=0xfd;break;}
