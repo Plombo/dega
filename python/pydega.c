@@ -9,6 +9,10 @@ typedef struct {
 	size_t datalen;
 } UCharArray;
 
+static PyTypeObject uchararray_type;
+
+static PyObject *uchararray_create(unsigned char *data, size_t datalen);
+
 static void uchararray_dealloc(PyObject *self) {
 	self->ob_type->tp_free(self);
 }
@@ -22,18 +26,31 @@ static PyObject *uchararray_item(PyObject *self, int index) {
 	UCharArray *uself = (UCharArray *)self;
 
 	if (index < 0 || index >= uself->datalen) {
-		PyErr_SetString(PyExc_IndexError, "Index out of bounds");
+		PyErr_SetString(PyExc_IndexError, "index out of bounds");
 		return NULL;
 	}
 
 	return Py_BuildValue("i", uself->data[index]);
 }
 
+static PyObject *uchararray_slice(PyObject *self, int lo, int hi) {
+	UCharArray *uself = (UCharArray *)self;
+
+	if (hi == INT_MAX) hi = uself->datalen;
+
+	if (lo < 0 || hi > uself->datalen || lo > hi) {
+		PyErr_SetString(PyExc_IndexError, "index out of bounds");
+		return NULL;
+	}
+
+	return uchararray_create(uself->data+lo, hi-lo);
+}
+
 static int uchararray_ass_item(PyObject *self, int index, PyObject *value) {
 	UCharArray *uself = (UCharArray *)self;
 
 	if (index < 0 || index >= uself->datalen) {
-		PyErr_SetString(PyExc_IndexError, "Index out of bounds");
+		PyErr_SetString(PyExc_IndexError, "index out of bounds");
 		return -1;
 	}
 
@@ -44,13 +61,112 @@ static int uchararray_ass_item(PyObject *self, int index, PyObject *value) {
 	return 0;
 }
 
+static int uchararray_ass_slice(PyObject *self, int lo, int hi, PyObject *other) {
+	UCharArray *uself = (UCharArray *)self;
+	unsigned char *ptr;
+	int t, size=hi-lo;
+
+	if (hi == INT_MAX) hi = uself->datalen;
+
+	if (lo < 0 || hi > uself->datalen || lo > hi) {
+		PyErr_SetString(PyExc_IndexError, "index out of bounds");
+		return -1;
+	}
+
+	if (!PySequence_Check(other)) {
+		PyErr_SetString(PyExc_TypeError, "replacement must be a sequence");
+		return -1;
+	}
+
+	if (PySequence_Size(other) != size) {
+		PyErr_SetString(PyExc_IndexError, "sequence has incorrect size");
+		return -1;
+	}
+
+	if ((t = PyObject_TypeCheck(other, &uchararray_type))) {
+		UCharArray *uother = (UCharArray *)other;
+		ptr = uother->data;
+	} else {
+		int i;
+		ptr = malloc(size);
+
+		for (i = 0; i < size; i++) {
+			PyObject *value = PySequence_GetItem(other, i);
+			if (!value) {
+				free(ptr);
+				return -1;
+			}
+
+			if (!PyArg_Parse(value, "B", &ptr[i])) {
+				free(ptr);
+				return -1;
+			}
+		}
+	}
+
+	memmove(uself->data+lo, ptr, size);
+
+	if (!t) {
+		free(ptr);
+	}
+
+	return 0;
+}
+
+static int uchararray_contains(PyObject *self, PyObject *value) {
+	unsigned char ch;
+	UCharArray *uself = (UCharArray *)self;
+	unsigned char *data = uself->data;
+	int len = uself->datalen, i;
+
+	if (!PyArg_Parse(value, "B", &ch)) {
+		return -1;
+	}
+
+	for (i = 0; i < len; i++) {
+		if (data[i] == ch) {
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+static PyObject *uchararray_repr(PyObject *self) {
+	UCharArray *uself = (UCharArray *)self;
+	unsigned char *data = uself->data;
+	size_t size = uself->datalen, i;
+	char *str = malloc(size*5 + 20);
+	char *strpos = str;
+	PyObject *strobj;
+
+#define STRCONST(c) strcpy(strpos, c), strpos += sizeof(c)-1
+
+	STRCONST("<uchararray> [");
+	if (size > 0) {
+		strpos += sprintf(strpos, "%d", data[0]);
+	}
+	for (i = 1; i < size; i++) {
+		strpos += sprintf(strpos, ", %d", data[i]);
+	}
+	STRCONST("]");
+
+#undef STRCONST
+
+	strobj = PyString_FromString(str);
+	free(str);
+	return strobj;
+}
+
 static PySequenceMethods uchararray_as_sequence = {
 	uchararray_length,         /* sq_length */
 	0,                         /* sq_concat */
 	0,                         /* sq_repeat */
 	uchararray_item,           /* sq_item */
-	0,                         /* sq_slice */
+	uchararray_slice,          /* sq_slice */
 	uchararray_ass_item,       /* sq_ass_item */
+	uchararray_ass_slice,      /* sq_ass_slice */
+	uchararray_contains,       /* sq_contains */
 };
 
 static PyTypeObject uchararray_type = {
@@ -64,7 +180,7 @@ static PyTypeObject uchararray_type = {
 	0,                         /*tp_getattr*/
 	0,                         /*tp_setattr*/
 	0,                         /*tp_compare*/
-	0,                         /*tp_repr*/
+	uchararray_repr,           /*tp_repr*/
 	0,                         /*tp_as_number*/
 	&uchararray_as_sequence,   /*tp_as_sequence*/
 	0,                         /*tp_as_mapping*/
