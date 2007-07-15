@@ -7,7 +7,9 @@
 #include "mast.h"
 
 // Do everything as extern "C" to simplify linking
+#ifdef __cplusplus
 extern "C" {
+#endif
 
 // Make the INLINE macro
 #undef INLINE
@@ -140,4 +142,6 @@ void MvidPreFrame();
 void MdrawOsdInit();
 void MdrawOsd();
 
+#ifdef __cplusplus
 } // End of extern "C"
+#endif
