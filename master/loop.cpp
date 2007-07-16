@@ -22,6 +22,7 @@ static int MediaInit(int Level)
   if (Level<=15) // Mast library
   {
     Ret=EmuInit(); if (Ret!=0) { AppError("EmuInit Failed",0); return 1; }
+    PythonInit();
   }
 
   if (Level<=20) // Game load
@@ -201,6 +202,7 @@ static int MediaExit(int Level)
   if (Level<=15)
   {
     VgmStop(NULL);
+    PythonExit();
     EmuExit();
   }
 
@@ -358,6 +360,7 @@ int LoopDo()
       if (Msg.wParam==ID_SETUP_STATUSHIDE) { SetStatusMode(STATUS_HIDE); }
       if (Msg.wParam==ID_SETUP_STATUSAUTO) { SetStatusMode(STATUS_AUTO); }
       if (Msg.wParam==ID_SETUP_STATUSSHOW) { SetStatusMode(STATUS_SHOW); }
+      if (Msg.wParam==ID_PYTHON_MEMORY) { PythonRunning=1; }
     }
     if (Msg.message==WMU_STATELOAD)   { StateLoad(0); }
     if (Msg.message==WMU_STATESAVE)   { StateSave(0); }
@@ -418,6 +421,7 @@ int LoopDo()
         if (Msg.wParam==ID_SETUP_STATUSHIDE)   { InitLevel=70; break; }
         if (Msg.wParam==ID_SETUP_STATUSAUTO)   { InitLevel=70; break; }
         if (Msg.wParam==ID_SETUP_STATUSSHOW)   { InitLevel=70; break; }
+        if (Msg.wParam==ID_PYTHON_MEMORY)      { InitLevel=60; break; }
 
         if (Msg.wParam==ID_INPUT_HOLD_UP   ) AutoHold[0]^=0x01;
         if (Msg.wParam==ID_INPUT_HOLD_DOWN ) AutoHold[0]^=0x02;

@@ -32,6 +32,11 @@ int RunFrame(int Draw,short *pSound)
   return 0;
 }
 
+void MimplFrame()
+{
+  RunFrame(1,NULL);
+}
+
 // Display text for a period of time in the status bar
 int RunText(char *Text,int Len)
 {
@@ -141,6 +146,11 @@ static DWORD WINAPI RunThreadProc(void *pParam)
   LastSecond=timeGetTime(); FramesDone=0; // Remember start time
   DSoundGetNextSound=FrameWithSound; // Use our callback to make sound
 
+  if (PythonRunning)
+  {
+    PythonRun();
+  }
+
   for (;;)
   {
     Ret=PeekMessage(&Msg,NULL,0,0,PM_REMOVE);
@@ -178,6 +188,11 @@ int RunStart()
 int RunStop()
 {
   int Ret=0;
+
+  if (PythonRunning)
+  {
+    MessageBox(0, "Uh oh.  You're in deep shit now.", "Error", 0);
+  }
 
   if (hRunThread!=NULL)
   {

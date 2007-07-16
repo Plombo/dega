@@ -26,7 +26,9 @@ ifeq ($(P),unix)
 	NASM_FORMAT = elf
 	EXEEXT =
 	SOEXT = .so
-	PLATOBJ = sdl/main.o
+	PLATOBJ =
+	PLATPYOBJ = sdl/main.o
+	PLATPYOBJCXX =
 	EXTRA_LIBS = $(shell sdl-config --libs)
 	DOZE_FIXUP = sed -f doze/doze.cmd.sed <doze/dozea.asm >doze/dozea.asm.new && mv doze/dozea.asm.new doze/dozea.asm
 	EXTRA_LDFLAGS =
@@ -40,15 +42,17 @@ else ifeq ($(P),win)
 	EXEEXT = .exe
 	SOEXT = .dll
 	PLATOBJ = master/app.o master/conf.o master/dinp.o master/disp.o master/dsound.o master/emu.o master/frame.o master/input.o master/load.o master/loop.o master/main.o master/misc.o master/render.o master/run.o master/shot.o master/state.o master/video.o master/zipfn.o master/keymap.o zlib/libz.a
+	PLATPYOBJ =
+	PLATPYOBJCXX = master/python.o
 	EXTRA_LIBS = -ldsound -ldinput -lddraw -ldxguid -lcomdlg32 -lcomctl32 -luser32 -lwinmm
 	DOZE_FIXUP =
-	EXTRA_LDFLAGS = -mno-cygwin
+	EXTRA_LDFLAGS = -specs=$(shell pwd)/specs -mno-cygwin
 	GUI_LDFLAGS = -Wl,--subsystem,windows
 	SPECS = specs
 	PYTHON_PREFIX = /home/peter/pytest/winpython
 	PYTHON_CFLAGS = -I$(PYTHON_PREFIX)/include $(CFLAGS)
 	PYTHON_CXXFLAGS = -I$(PYTHON_PREFIX)/include $(CFLAGS)
-	PYTHON_LDFLAGS = -specs=$(shell pwd)/specs $(PYTHON_PREFIX)/libs/python24.dll
+	PYTHON_LDFLAGS = $(PYTHON_PREFIX)/libs/python24.dll
 endif
 
 ifeq ($(P),unix)
@@ -80,13 +84,13 @@ all:
 
 endif
 
-dega$(EXEEXT): $(PLATOBJ) $(DOZEOBJ) $(MASTOBJ) $(PYEMBOBJ)
-	$(CC) $(EXTRA_LDFLAGS) $(GUI_LDFLAGS) -o dega$(EXEEXT) $(PLATOBJ) $(DOZEOBJ) $(MASTOBJ) $(PYEMBOBJ) $(EXTRA_LIBS)
+dega$(EXEEXT): $(PLATOBJ) $(PLATPYOBJ) $(PLATPYOBJCXX) $(DOZEOBJ) $(MASTOBJ) $(PYEMBOBJ) $(SPECS)
+	$(CC) $(EXTRA_LDFLAGS) $(GUI_LDFLAGS) -o dega$(EXEEXT) $(PLATOBJ) $(PLATPYOBJ) $(PLATPYOBJCXX) $(DOZEOBJ) $(MASTOBJ) $(PYEMBOBJ) $(EXTRA_LIBS)
 
 degavi$(EXEEXT): tools/degavi.o $(DOZEOBJ) $(MASTOBJ)
 	$(CC) $(EXTRA_LDFLAGS) -o degavi$(EXEEXT) tools/degavi.o $(DOZEOBJ) $(MASTOBJ) -lm
 
-mmvconv$(EXEEXT): tools/mmvconv.o
+mmvconv$(EXEEXT): tools/mmvconv.o $(SPECS)
 	$(CC) $(EXTRA_LDFLAGS) -o mmvconv$(EXEEXT) tools/mmvconv.o
 
 pydega$(SOEXT): $(PYOBJ) $(DOZEOBJ) $(MASTOBJ) $(SPECS)
@@ -111,14 +115,17 @@ specs:
 $(PYOBJ): %.o: %.c
 	$(CC) -c -o $@ $< $(PYTHON_CFLAGS)
 
-$(PLATOBJ): %.o: %.c
+$(PLATPYOBJ): %.o: %.c
 	$(CC) -c -o $@ $< -DEMBEDDED $(PYTHON_CFLAGS)
+
+$(PLATPYOBJCXX): %.o: %.cpp
+	$(CXX) -c -o $@ $< -DEMBEDDED $(PYTHON_CXXFLAGS)
 
 %.emb.o: %.c
 	$(CC) -c -o $@ $< -DEMBEDDED $(PYTHON_CFLAGS)
 
 clean:
-	rm -f $(DOZEOBJ) $(DAMOBJ) $(MASTOBJ) $(PLATOBJ) tools/degavi.o tools/mmvconv.o doze/dozea.asm* doze/dam doze/dam.exe dega dega.exe degavi degavi.exe mmvconv mmvconv.exe specs
+	rm -f $(DOZEOBJ) $(DAMOBJ) $(MASTOBJ) $(PLATOBJ) $(PYOBJ) $(PYEMBOBJ) $(PLATPYOBJ) $(PLATPYOBJCXX) tools/degavi.o tools/mmvconv.o doze/dozea.asm* doze/dam doze/dam.exe dega dega.exe degavi degavi.exe mmvconv mmvconv.exe specs
 	make -Czlib clean
 
 distclean: clean

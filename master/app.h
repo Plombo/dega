@@ -30,6 +30,7 @@ extern int ScrnWidth,ScrnHeight;
 extern int Fullscreen;
 extern HACCEL hAccel; // Key accelerators
 extern int StartInFullscreen;
+extern int PythonLoaded;
 
 // loop.cpp
 extern int AppShowCmd;
@@ -170,6 +171,14 @@ void VideoProperties();
 // keymap.cpp
 extern unsigned short KeyMappings[KMAPCOUNT];
 void KeyMapping();
+
+// python.cpp
+extern int PythonLoaded, PythonRunning;
+void PythonLoad(int argc, char **argv);
+void PythonInit();
+void PythonExit();
+void PythonRun();
+// void MenuPython();
 
 // zipfn.cpp
 int ZipOpen(char *ZipName);

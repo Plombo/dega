@@ -87,6 +87,7 @@
 #define ID_INPUT_P2_HOLD_DOWN           40110
 #define ID_INPUT_P2_HOLD_LEFT           40111
 #define ID_INPUT_P2_HOLD_RIGHT          40112
+#define ID_PYTHON_MEMORY                40113
 
 // Next default values for new objects
 // 

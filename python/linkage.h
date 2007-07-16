@@ -4,8 +4,9 @@
 #ifndef LINKAGE_H_ONCE
 /* First inclusion (before Python.h) */
 #ifdef EMBEDDED
-/* change this list if the symbols used by pydega changes */
+#define Py_NO_ENABLE_SHARED 1
 #ifdef PYDEGA_C
+/* change this list if the symbols used by pydega changes */
 #define PyArg_Parse (*pPyArg_Parse)
 #define PyArg_ParseTuple (*pPyArg_ParseTuple)
 #define PyErr_SetFromErrno (*pPyErr_SetFromErrno)
@@ -60,6 +61,7 @@
 #endif /* unix */
 
 #ifdef WIN32
+#include <windows.h>
 #define LNK_INIT \
 	HMODULE handle = LoadLibrary("python24.dll"); \
 	if (!handle) return 0;
@@ -106,8 +108,14 @@ int initlinkage(void) {
 #undef LNK_FINI
 
 #else /* !PYDEGA_C */
+#ifdef __cplusplus
+extern "C" {
+#endif
 int initlinkage(void);
 PyMODINIT_FUNC initpydega(void);
+#ifdef __cplusplus
+}
+#endif
 #endif /* PYDEGA_C */
 
 #else /* !EMBEDDED */

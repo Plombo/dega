@@ -39,6 +39,7 @@ extern "C" int dprintf (char *Format,...)
 int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE,LPSTR pCmdLine,INT)
 {
   char *CmdRom=NULL;
+  char *argv[] = { "dega", 0 }; // for python
   hAppInst=hInstance;
   InitCommonControls();
 
@@ -49,6 +50,8 @@ int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE,LPSTR pCmdLine,INT)
   hAccel=LoadAccelerators(hAppInst,MAKEINTRESOURCE(IDR_ACCELERATOR1));
 
   ConfLoad(); // Load config
+
+  PythonLoad(1, argv);
 
   // Get rom name from command line:
   EmuRomName[0]=0;

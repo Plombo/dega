@@ -157,6 +157,10 @@ BEGIN
 
         END
     END
+    POPUP "&Python"
+    BEGIN
+        MENUITEM "Run memory viewer",            ID_PYTHON_MEMORY
+    END
 END
 
 
