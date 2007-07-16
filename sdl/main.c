@@ -11,6 +11,10 @@
 #include <langinfo.h>
 #include <locale.h>
 
+#include "../python/linkage.h"
+#include <Python.h>
+#include "../python/linkage.h"
+
 SDL_Surface *thescreen;
 SDL_Color themap[256];
 
@@ -22,6 +26,8 @@ int framerate=60;
 int mult=0;
 
 int readonly;
+
+int python;
 
 int scrlock()
 {
@@ -169,6 +175,27 @@ void HandleSetAuthor(void) {
 	MvidSetAuthor(buffer_utf8);
 }
 
+void HandlePython(void) {
+	char buffer[64];
+	FILE *fp;
+	
+	if (!python) {
+		puts("Python not available!");
+		return;
+	}
+
+	puts("Enter name of Python script to execute:");
+	chompgets(buffer, sizeof(buffer), stdin);
+
+	fp = fopen(buffer, "r");
+	if (!fp) {
+		perror("fopen");
+		return;
+	}
+	PyRun_SimpleFile(fp, buffer);
+	fclose(fp);
+}
+
 void SetRateMult() {
 	int newrate = mult>0 ? framerate<<mult : framerate>>-mult;
 	if (newrate < 1) newrate = 1;
@@ -185,6 +212,12 @@ void MvidModeChanged() {
 
 void MvidMovieStopped() {}
 
+void MimplFrame() {
+	scrlock();
+	MastFrame();
+	scrunlock();
+}
+	
 void usage(void)
 {
 	printf("\nUsage: %s [OPTION]... [ROM file]\n",APPNAME);
@@ -223,6 +256,13 @@ int main(int argc, char** argv)
 	setlocale(LC_CTYPE, "");
 
 	readonly = 0;
+
+	python = initlinkage();
+	printf("python = %d\n", python);
+	if (python) {
+		Py_Initialize();
+		PySys_SetArgv(argc, argv);
+	}
 
 	while(1)
 	{
@@ -343,6 +383,10 @@ int main(int argc, char** argv)
 		pMsndOut=NULL;
 	}
 
+	if (python) {
+		initpydega();
+	}
+
 	MastDrawDo=1;
 	while(!done)
 	{
@@ -402,6 +446,8 @@ Handler:		switch (event.type)
 				if(key==SDLK_s) {HandleSaveState();break;}
 				if(key==SDLK_l) {HandleLoadState();break;}
 				if(key==SDLK_a) {HandleSetAuthor();break;}
+				if(key==SDLK_n) {HandlePython();break;}
+				if(key==SDLK_m) {if (python) PyRun_AnyFile(stdin, "stdin");break;}
 				if(key==SDLK_b) {MdrawOsdOptions^=OSD_BUTTONS;break;}
 				if(key==SDLK_f) {MdrawOsdOptions^=OSD_FRAMECOUNT;break;}
 				if(key==SDLK_EQUALS) {mult++;SetRateMult();break;}
@@ -436,6 +482,9 @@ Handler:		switch (event.type)
 		{
 			if(sound) while(audio_len>aspec.samples*aspec.channels*2*4) usleep(5);
 		}
+	}
+	if (python) {
+		Py_Finalize();
 	}
 	return 0;
 }

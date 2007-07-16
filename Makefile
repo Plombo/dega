@@ -19,7 +19,8 @@ CXXFLAGS= $(CFLAGS) -fno-exceptions
 DOZEOBJ = doze/doze.o doze/dozea.o
 DAMOBJ = doze/dam.o doze/dama.o doze/damc.o doze/dame.o doze/damf.o doze/damj.o doze/damm.o doze/damo.o doze/damt.o
 MASTOBJ = mast/area.o mast/dpsg.o mast/draw.o mast/emu2413.o mast/frame.o mast/load.o mast/map.o mast/mast.o mast/mem.o mast/samp.o mast/snd.o mast/vgm.o mast/video.o mast/osd.o mast/md5.o
-PYOBJ = python/pydega.o
+PYOBJ = python/pydega.o python/stdalone.o
+PYEMBOBJ = python/pydega.emb.o
 
 ifeq ($(P),unix)
 	NASM_FORMAT = elf
@@ -79,8 +80,8 @@ all:
 
 endif
 
-dega$(EXEEXT): $(PLATOBJ) $(DOZEOBJ) $(MASTOBJ)
-	$(CC) $(EXTRA_LDFLAGS) $(GUI_LDFLAGS) -o dega$(EXEEXT) $(PLATOBJ) $(DOZEOBJ) $(MASTOBJ) $(EXTRA_LIBS)
+dega$(EXEEXT): $(PLATOBJ) $(DOZEOBJ) $(MASTOBJ) $(PYEMBOBJ)
+	$(CC) $(EXTRA_LDFLAGS) $(GUI_LDFLAGS) -o dega$(EXEEXT) $(PLATOBJ) $(DOZEOBJ) $(MASTOBJ) $(PYEMBOBJ) $(EXTRA_LIBS)
 
 degavi$(EXEEXT): tools/degavi.o $(DOZEOBJ) $(MASTOBJ)
 	$(CC) $(EXTRA_LDFLAGS) -o degavi$(EXEEXT) tools/degavi.o $(DOZEOBJ) $(MASTOBJ) -lm
@@ -109,6 +110,12 @@ specs:
 
 $(PYOBJ): %.o: %.c
 	$(CC) -c -o $@ $< $(PYTHON_CFLAGS)
+
+$(PLATOBJ): %.o: %.c
+	$(CC) -c -o $@ $< -DEMBEDDED $(PYTHON_CFLAGS)
+
+%.emb.o: %.c
+	$(CC) -c -o $@ $< -DEMBEDDED $(PYTHON_CFLAGS)
 
 clean:
 	rm -f $(DOZEOBJ) $(DAMOBJ) $(MASTOBJ) $(PLATOBJ) tools/degavi.o tools/mmvconv.o doze/dozea.asm* doze/dam doze/dam.exe dega dega.exe degavi degavi.exe mmvconv mmvconv.exe specs

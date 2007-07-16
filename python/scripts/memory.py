@@ -15,7 +15,7 @@ class MemoryViewer:
 			dega.frame_advance()
 		self.button.configure(text=repr(dega.ram[0:64]))
 
-dega.load_rom(sys.argv[1])
+# dega.load_rom(sys.argv[1])
 
 root = Tk()
 app = MemoryViewer(root)

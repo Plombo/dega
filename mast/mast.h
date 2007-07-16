@@ -118,6 +118,9 @@ void MvidMovieStopped();
 #define OSD_FRAMECOUNT 2
 extern int MdrawOsdOptions;
 
+// implementation
+void MimplFrame();
+
 #ifdef __cplusplus
 } // End of extern "C"
 #endif

@@ -1,5 +1,11 @@
+#define PYDEGA_C
+
+#include "linkage.h"
+
 #include <Python.h>
 #include <structmember.h>
+
+#include "linkage.h"
 
 #include <mastint.h>
 
@@ -265,7 +271,7 @@ static PyObject *pydega_load_rom(PyObject *self, PyObject *args) {
 }
 
 static PyObject *pydega_frame_advance(PyObject *self, PyObject *args) {
-	MastFrame();
+	MimplFrame();
 	Py_RETURN_NONE;
 }
 
@@ -368,13 +374,11 @@ static PyMethodDef pydega_mod_methods[] = {
 	{ NULL, NULL, 0, NULL }
 };
 
-void MdrawCall() {}
-void MvidModeChanged() {}
-void MvidMovieStopped() {}
-
 PyMODINIT_FUNC initpydega(void) {
 	PyObject *mod, *dega;
+#ifndef EMBEDDED
 	MastInit();
+#endif
 
 	if (PyType_Ready(&pydega_type) < 0)
 		return;
