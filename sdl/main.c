@@ -212,12 +212,69 @@ void MvidModeChanged() {
 
 void MvidMovieStopped() {}
 
-void MimplFrame() {
+void MimplFrame(int input) {
+	if (input) {
+		SDL_Event event;
+		int key;
+
+                while(SDL_PollEvent(&event))
+                {
+		switch (event.type)
+                        {
+                        case SDL_KEYDOWN:
+                                key=event.key.keysym.sym;
+                                if(key==SDLK_UP) {MastInput[0]|=0x01;break;}
+                                if(key==SDLK_DOWN) {MastInput[0]|=0x02;break;}
+                                if(key==SDLK_LEFT) {MastInput[0]|=0x04;break;}
+                                if(key==SDLK_RIGHT) {MastInput[0]|=0x08;break;}
+                                if(key==SDLK_z || key==SDLK_y) {MastInput[0]|=0x10;break;}
+                                if(key==SDLK_x) {MastInput[0]|=0x20;break;}
+                                if(key==SDLK_c) {
+				  MastInput[0]|=0x80;
+				  if ((MastEx&MX_GG)==0)
+				    MastInput[0]|=0x40;
+				  break;}
+
+                                if(key==SDLK_u) {MastInput[1]|=0x01;break;}
+                                if(key==SDLK_j) {MastInput[1]|=0x02;break;}
+                                if(key==SDLK_h) {MastInput[1]|=0x04;break;}
+                                if(key==SDLK_k) {MastInput[1]|=0x08;break;}
+                                if(key==SDLK_f) {MastInput[1]|=0x10;break;}
+                                if(key==SDLK_g) {MastInput[1]|=0x20;break;}
+
+                                break;
+                        case SDL_KEYUP:
+                                key=event.key.keysym.sym;
+                                if(key==SDLK_UP) {MastInput[0]&=0xfe;break;}
+                                if(key==SDLK_DOWN) {MastInput[0]&=0xfd;break;}
+                                if(key==SDLK_LEFT) {MastInput[0]&=0xfb;break;}
+                                if(key==SDLK_RIGHT) {MastInput[0]&=0xf7;break;}
+                                if(key==SDLK_z || key==SDLK_y) {MastInput[0]&=0xef;break;}
+                                if(key==SDLK_x) {MastInput[0]&=0xdf;break;}
+                                if(key==SDLK_c) {MastInput[0]&=0x3f;break;}
+
+                                if(key==SDLK_u) {MastInput[1]&=0xfe;break;}
+                                if(key==SDLK_j) {MastInput[1]&=0xfd;break;}
+                                if(key==SDLK_h) {MastInput[1]&=0xfb;break;}
+                                if(key==SDLK_k) {MastInput[1]&=0xf7;break;}
+                                if(key==SDLK_f) {MastInput[1]&=0xef;break;}
+                                if(key==SDLK_g) {MastInput[1]&=0xdf;break;}
+                                break;
+                        default:
+                                break;
+                        }
+		}
+	}
+
 	scrlock();
 	MastFrame();
 	scrunlock();
+
+	if (input) {
+		MastInput[0]&=~0x40;
+	}
 }
-	
+
 void usage(void)
 {
 	printf("\nUsage: %s [OPTION]... [ROM file]\n",APPNAME);

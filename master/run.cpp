@@ -9,11 +9,12 @@ static DWORD RunId=0,MainId=0;
 
 int StatusMode=STATUS_AUTO;
 static int StatusCount=-1;
+static int NoInput=0;
 
 // Run a frame (with or without sound)
 int RunFrame(int Draw,short *pSound)
 {
-  InputGet();
+  if (!NoInput) InputGet();
   MastDrawDo=Draw; pMsndOut=pSound;
 
   // Run frame
@@ -32,9 +33,11 @@ int RunFrame(int Draw,short *pSound)
   return 0;
 }
 
-void MimplFrame()
+void MimplFrame(int ReadInput)
 {
+  if (!ReadInput) NoInput=1;
   RunFrame(1,NULL);
+  NoInput=0;
 }
 
 // Display text for a period of time in the status bar

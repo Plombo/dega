@@ -5,6 +5,6 @@ void MdrawCall() {}
 void MvidModeChanged() {}
 void MvidMovieStopped() {}
 
-void MimplFrame() {
+void MimplFrame(int input) {
 	MastFrame();
 }

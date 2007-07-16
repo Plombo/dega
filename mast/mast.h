@@ -119,7 +119,7 @@ void MvidMovieStopped();
 extern int MdrawOsdOptions;
 
 // implementation
-void MimplFrame();
+void MimplFrame(int ReadInput);
 
 #ifdef __cplusplus
 } // End of extern "C"

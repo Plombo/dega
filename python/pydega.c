@@ -271,7 +271,12 @@ static PyObject *pydega_load_rom(PyObject *self, PyObject *args) {
 }
 
 static PyObject *pydega_frame_advance(PyObject *self, PyObject *args) {
-	MimplFrame();
+	int read_input = 0;
+
+	if (!PyArg_ParseTuple(args, "|i", &read_input))
+		return NULL;
+
+	MimplFrame(read_input);
 	Py_RETURN_NONE;
 }
 
@@ -303,7 +308,7 @@ static int setter_global_ui(PyObject *self, PyObject *val, void *data) {
 
 static PyMethodDef pydega_methods[] = {
 	{ "load_rom", pydega_load_rom, METH_VARARGS, "Load a rom" },
-	{ "frame_advance", pydega_frame_advance, METH_NOARGS, "Compute the next frame" },
+	{ "frame_advance", pydega_frame_advance, METH_VARARGS, "Compute the next frame" },
 	{ NULL, NULL, 0, NULL }
 };
 
@@ -389,6 +394,12 @@ PyMODINIT_FUNC initpydega(void) {
 	mod = Py_InitModule("pydega", pydega_mod_methods);
 	if (mod == NULL)
 		return;
+	
+#ifdef EMBEDDED
+	PyModule_AddIntConstant(mod, "EMBEDDED", 1);
+#else
+	PyModule_AddIntConstant(mod, "EMBEDDED", 0);
+#endif
 
 	PyModule_AddIntConstant(mod, "MX_GG", MX_GG);
 	PyModule_AddIntConstant(mod, "MX_PAL", MX_PAL);

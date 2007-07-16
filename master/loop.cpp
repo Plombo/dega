@@ -373,6 +373,7 @@ int LoopDo()
 
     Ret=MediaInit(InitLevel); if (Ret!=0) { InitLevel=0; goto Error; }
 
+MainLoop:
     for (;;)
     {
       int Ret=0;
@@ -454,10 +455,15 @@ int LoopDo()
     }
 
   Error:
-    // Exit everything
-    MediaExit(InitLevel);
+    if (InitLevel<=60 && PythonRunning) {
+       MessageBox(hFrameWnd, "You cannot perform this action because a Python script is running.", "Error", MB_OK | MB_ICONERROR);
+       goto MainLoop;
+    } else {
+      // Exit everything
+      MediaExit(InitLevel);
 
-    if (InitLevel<=0) break; // Quit program
+      if (InitLevel<=0) break; // Quit program
+    }
   }
   return 0;
 }
