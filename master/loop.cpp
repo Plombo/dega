@@ -370,7 +370,7 @@ int LoopDo()
 
     if (Msg.message==WMU_VIDEORECORD)      { VideoRecord(); }
     if (Msg.message==WMU_VIDEOPLAYBACK)    { VideoPlayback(); }
-    if (Msg.message==WMU_PYTHON) { PythonRunning=1; MessageBox(0, "about to run script", "msg", 0); }
+    if (Msg.message==WMU_PYTHON) { PythonRunning=1; }
 
     Ret=MediaInit(InitLevel); if (Ret!=0) { InitLevel=0; goto Error; }
 
@@ -447,7 +447,7 @@ MainLoop:
 
       if (Msg.message==WMU_VIDEORECORD)      { InitLevel=60; break; }
       if (Msg.message==WMU_VIDEOPLAYBACK)    { InitLevel=50; break; }
-      if (Msg.message==WMU_PYTHON)           { MessageBox(0, "changing init level", "msg", 0); InitLevel=60; break; }
+      if (Msg.message==WMU_PYTHON)           { InitLevel=60; break; }
 
       if (hAccel!=NULL) TranslateAccelerator(hFrameWnd,hAccel,&Msg);
       TranslateCustomKeys(hFrameWnd,mymap,&Msg);

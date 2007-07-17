@@ -40,7 +40,7 @@ class HexView(Canvas):
 		width = self.fwidth*(4 + columns*3) # header + data columns
 		height = self.fheight*len(offsets)
 
-		Canvas.__init__(self, master, width=width, height=self.fheight*8,
+		Canvas.__init__(self, master, width=width, height=self.fheight*16,
 			background="white",
 			scrollregion=(0, 0, width, height))
 

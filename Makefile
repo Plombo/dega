@@ -72,9 +72,9 @@ zlib/libz.a:
 release: all
 	rm -rf dega-$(R)-win32
 	mkdir dega-$(R)-win32
-	cp dega.exe mmvconv.exe dega.txt dega-$(R)-win32/
+	cp dega.exe mmvconv.exe dega.txt python/scripts/*.py dega-$(R)-win32/
 	$(STRIP) dega-$(R)-win32/dega.exe dega-$(R)-win32/mmvconv.exe
-	cd dega-$(R)-win32 && zip -9 ../dega-$(R)-win32.zip dega.exe mmvconv.exe dega.txt
+	cd dega-$(R)-win32 && zip -9 ../dega-$(R)-win32.zip dega.exe mmvconv.exe dega.txt *.py
 
 else
 
