@@ -9,7 +9,7 @@ int ZipOpen(char *ZipName)
   int Len=0;
   Len=strlen(ZipName);
   if (Len<4) return 1;
-  if (stricmp(ZipName+Len-4,".zip")!=0) return 1; // Not a zip file
+  if (PortMemicmp(ZipName+Len-4,".zip",4)!=0) return 1; // Not a zip file
 
   Zip=unzOpen(ZipName);
   if (Zip==NULL) return 1;
@@ -44,8 +44,8 @@ int ZipRead(unsigned char **pMem,int *pLen)
     int Len=0;
     unzGetCurrentFileInfo(Zip,&Info,Name,sizeof(Name),NULL,0,NULL,0);
     Len=strlen(Name);
-    if (Len>=4) if (stricmp(Name+Len-4,".sms")==0) { RomPos=i; break; }
-    if (Len>=3) if (stricmp(Name+Len-3,".gg" )==0) { RomPos=i; MastEx|=MX_GG; break; }
+    if (Len>=4) if (PortMemicmp(Name+Len-4,".sms",4)==0) { RomPos=i; break; }
+    if (Len>=3) if (PortMemicmp(Name+Len-3,".gg",3 )==0) { RomPos=i; MastEx|=MX_GG; break; }
 
     Ret=unzGoToNextFile(Zip); if (Ret!=UNZ_OK) break;
   }

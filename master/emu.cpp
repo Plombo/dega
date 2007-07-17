@@ -10,11 +10,20 @@ char *EmuTitle=NULL;
 static unsigned char *EmuRom=NULL;
 static int EmuRomLen=0;
 
+int PortMemicmp(char *s1, char *s2, size_t len) {
+	while (len > 0) {
+		int c1 = tolower(*s1), c2 = tolower(*s2);
+		if (c1 != c2) return c1-c2;
+		s1++, s2++, len--;
+	}
+	return 0;
+}
+
 static int GameGearRom()
 {
   int Len=0;
   Len=strlen(EmuRomName); if (Len<3) return 0;
-  if (memicmp(".gg",EmuRomName+Len-3,3)==0) return 1;
+  if (PortMemicmp(".gg",EmuRomName+Len-3,3)==0) return 1;
   return 0;
 }
 

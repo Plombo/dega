@@ -66,6 +66,7 @@ int StatusHeight();
 // emu.cpp
 extern char EmuRomName[];
 extern char *EmuTitle;
+int PortMemicmp(char *s1, char *s2, size_t len);
 int EmuInit();
 int EmuExit();
 int EmuLoad();
