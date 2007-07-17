@@ -35,6 +35,7 @@ extern int PythonLoaded;
 // loop.cpp
 extern int AppShowCmd;
 extern int SetupPal;
+extern int LoopPause;
 int LoopDo();
 
 // misc.cpp
@@ -126,10 +127,13 @@ int DirInputFind();
 extern char RomFolder[];
 extern char StateFolder[256];
 extern char VgmName[];
+extern char PythonScriptName[];
 int MenuLoadRom();
 int MenuStatePort(int Export);
 int MenuStateLoad(int Save);
 int MenuVgmStart();
+int MenuPython();
+void MenuPythonFixed(char *script);
 #define WMU_TOGGLEMENU       (WM_APP+0)
 #define WMU_CHANGEDROM       (WM_APP+1)
 #define WMU_COMMAND          (WM_APP+2)
@@ -139,7 +143,8 @@ int MenuVgmStart();
 #define WMU_STATEEXPORT      (WM_APP+6)
 #define WMU_VGMSTART         (WM_APP+7)
 #define WMU_VIDEOPLAYBACK    (WM_APP+8)
-#define WMU_VIDEORECORD      (WM_APP+9)
+#define WMU_VIDEORECORD      (WM_APP+10)
+#define WMU_PYTHON           (WM_APP+9)
 
 // conf.cpp
 int ConfLoad();
@@ -178,7 +183,6 @@ void PythonLoad(int argc, char **argv);
 void PythonInit();
 void PythonExit();
 void PythonRun();
-// void MenuPython();
 
 // zipfn.cpp
 int ZipOpen(char *ZipName);

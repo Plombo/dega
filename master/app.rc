@@ -159,7 +159,9 @@ BEGIN
     END
     POPUP "&Python"
     BEGIN
-        MENUITEM "Run memory viewer",            ID_PYTHON_MEMORY
+        MENUITEM "Memory viewer/trainer",     ID_PYTHON_MEMORY
+	MENUITEM SEPARATOR
+        MENUITEM "Load script...",            ID_PYTHON_LOAD
     END
 END
 

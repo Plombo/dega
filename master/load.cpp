@@ -3,6 +3,7 @@
 char RomFolder[256]=".";
 char StateFolder[256]=".";
 char VgmName[256]="";
+char PythonScriptName[256]="";
 
 int MenuLoadRom()
 {
@@ -168,4 +169,51 @@ int MenuVgmStart()
   // Post to main message loop
   PostMessage(NULL,WMU_VGMSTART,0,0);
   return 0;
+}
+
+int MenuPython()
+{
+  char Name[256];
+  char msg[128];
+  OPENFILENAME Ofn; int Ret=0;
+
+  memset(Name,0,sizeof(Name));
+  memset(&Ofn,0,sizeof(Ofn));
+
+  Ofn.lStructSize=sizeof(Ofn);
+  Ofn.hwndOwner=hFrameWnd;
+  Ofn.lpstrFilter="Python scripts (.py)\0*.py\0All Files\0*.*\0\0";
+  Ofn.lpstrFile=Name;
+  Ofn.nMaxFile=sizeof(Name);
+  Ofn.lpstrInitialDir=".";
+  Ofn.lpstrTitle="Load Rom";
+  Ofn.Flags=OFN_HIDEREADONLY;
+  Ofn.lpstrDefExt="py";
+
+  Ret=GetOpenFileName(&Ofn);
+
+  // Return to the application folder
+  AppDirectory();
+
+  if (Ret==0) return 1; // Cancel/error
+
+  // Remember the script name
+  memcpy(PythonScriptName,Name,sizeof(Name));
+  if (!PostMessage(NULL,WMU_PYTHON,0,0)) { // Post to main message loop. for some fucking crazy reason if I don't check the return value the messae is never sent
+    sprintf(msg, "error = %d", GetLastError());
+    MessageBox(0, msg, "msg", 0);
+  }
+
+  return 0;
+}
+
+void MenuPythonFixed(char *name) {
+  char msg[128];
+  AppDirectory();
+  strncpy(PythonScriptName,name,sizeof(PythonScriptName));
+  PythonScriptName[sizeof(PythonScriptName)-1] = 0;
+  if (!PostMessage(NULL,WMU_PYTHON,0,0)) { // Post to main message loop
+    sprintf(msg, "error = %d", GetLastError());
+    MessageBox(0, msg, "msg", 0);
+  }
 }

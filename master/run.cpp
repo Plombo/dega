@@ -154,18 +154,21 @@ static DWORD WINAPI RunThreadProc(void *pParam)
     PythonRun();
   }
 
-  for (;;)
+  if (LoopPause==0)
   {
-    Ret=PeekMessage(&Msg,NULL,0,0,PM_REMOVE);
-    if (Ret!=0)
+    for (;;)
     {
-      // A message is waiting to be processed
-      if (Msg.message==WM_QUIT) break; // Quit thread
-    }
-    else
-    {
-      // No messages are waiting
-      RunIdle();
+      Ret=PeekMessage(&Msg,NULL,0,0,PM_REMOVE);
+      if (Ret!=0)
+      {
+        // A message is waiting to be processed
+        if (Msg.message==WM_QUIT) break; // Quit thread
+      }
+      else
+      {
+        // No messages are waiting
+        RunIdle();
+      }
     }
   }
   AttachThreadInput(RunId,MainId,0); // Detach from main thread

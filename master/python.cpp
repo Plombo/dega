@@ -13,7 +13,6 @@ void PythonLoad(int _argc, char **_argv) {
 	if (PythonLoaded) {
 		argc = _argc;
 		argv = _argv;
-		MessageBox(0, "Python loaded!", "Python", 0);
 	}
 }
 
@@ -32,10 +31,9 @@ void PythonExit() {
 }
 
 void PythonRun() {
-	MessageBox(0, "PythonRun called", "Message", 0);
 	if (PythonLoaded) {
-		FILE *fp = fopen("memory.py", "r");
-		PyRun_SimpleFile(fp, "memory.py");
+		FILE *fp = fopen(PythonScriptName, "r");
+		PyRun_SimpleFile(fp, PythonScriptName);
 		fclose(fp);
 	}
 	PythonRunning = 0;

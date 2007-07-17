@@ -3,7 +3,7 @@
 
 static int ShowMenu=1;
 int SetupPal=0;
-static int LoopPause=0;
+int LoopPause=0;
 static MSG Msg;
 
 // Reinit the media, going down to a certain level
@@ -19,10 +19,11 @@ static int MediaInit(int Level)
     DirInputInit(hAppInst,hFrameWnd); // not critical if it fails
   }
 
-  if (Level<=15) // Mast library
+  if (Level<=15) // Mast library and Python
   {
     Ret=EmuInit(); if (Ret!=0) { AppError("EmuInit Failed",0); return 1; }
     PythonInit();
+    EnableMenuItem(hFrameMenu, 7, (PythonLoaded ? MF_ENABLED : MF_GRAYED) | MF_BYPOSITION); // XXX hardcoded (7 = Python)
   }
 
   if (Level<=20) // Game load
@@ -108,10 +109,10 @@ static int MediaInit(int Level)
     }
 
     // Start the Run thread
-    if (LoopPause==0)
+    if (LoopPause==0 || PythonRunning)
     {
       RunStart();
-      DSoundPlay();
+      if (LoopPause==0) DSoundPlay();
     }
   }
 
@@ -360,7 +361,6 @@ int LoopDo()
       if (Msg.wParam==ID_SETUP_STATUSHIDE) { SetStatusMode(STATUS_HIDE); }
       if (Msg.wParam==ID_SETUP_STATUSAUTO) { SetStatusMode(STATUS_AUTO); }
       if (Msg.wParam==ID_SETUP_STATUSSHOW) { SetStatusMode(STATUS_SHOW); }
-      if (Msg.wParam==ID_PYTHON_MEMORY) { PythonRunning=1; }
     }
     if (Msg.message==WMU_STATELOAD)   { StateLoad(0); }
     if (Msg.message==WMU_STATESAVE)   { StateSave(0); }
@@ -370,6 +370,7 @@ int LoopDo()
 
     if (Msg.message==WMU_VIDEORECORD)      { VideoRecord(); }
     if (Msg.message==WMU_VIDEOPLAYBACK)    { VideoPlayback(); }
+    if (Msg.message==WMU_PYTHON) { PythonRunning=1; MessageBox(0, "about to run script", "msg", 0); }
 
     Ret=MediaInit(InitLevel); if (Ret!=0) { InitLevel=0; goto Error; }
 
@@ -422,7 +423,6 @@ MainLoop:
         if (Msg.wParam==ID_SETUP_STATUSHIDE)   { InitLevel=70; break; }
         if (Msg.wParam==ID_SETUP_STATUSAUTO)   { InitLevel=70; break; }
         if (Msg.wParam==ID_SETUP_STATUSSHOW)   { InitLevel=70; break; }
-        if (Msg.wParam==ID_PYTHON_MEMORY)      { InitLevel=60; break; }
 
         if (Msg.wParam==ID_INPUT_HOLD_UP   ) AutoHold[0]^=0x01;
         if (Msg.wParam==ID_INPUT_HOLD_DOWN ) AutoHold[0]^=0x02;
@@ -447,6 +447,7 @@ MainLoop:
 
       if (Msg.message==WMU_VIDEORECORD)      { InitLevel=60; break; }
       if (Msg.message==WMU_VIDEOPLAYBACK)    { InitLevel=50; break; }
+      if (Msg.message==WMU_PYTHON)           { MessageBox(0, "changing init level", "msg", 0); InitLevel=60; break; }
 
       if (hAccel!=NULL) TranslateAccelerator(hFrameWnd,hAccel,&Msg);
       TranslateCustomKeys(hFrameWnd,mymap,&Msg);
