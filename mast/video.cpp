@@ -102,7 +102,7 @@ int MvidStart(char *filename, int mode, int reset) {
 			if (result==0) {
 			 	fclose(videoFile);
 				videoFile=0;
-				return 0;
+				return -1;
 			}
 
 			changed = ((currentMovie.vidFlags & VIDFLAG_PAL) != 0) ^ ((MastEx & MX_PAL) != 0);
@@ -180,7 +180,7 @@ int MvidStart(char *filename, int mode, int reset) {
 
 	if (videoFile == NULL) {
 		/* perror("while opening video file: fopen"); */
-		return 0;
+		return -1;
 	}
 
 	return currentMovie.vidFrameCount;

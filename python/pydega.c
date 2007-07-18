@@ -298,7 +298,7 @@ static PyObject *pydega_movie_start(PyObject *self, PyObject *args, PyObject *kw
 	}
 
 	rv = MvidStart(movie, mode, reset);
-	if (rv == 0) {
+	if (rv == -1) {
 		return PyErr_SetFromErrno(PyExc_IOError);
 	}
 		
