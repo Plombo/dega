@@ -59,6 +59,8 @@ unsigned short KeyMappings[KMAPCOUNT] = {
   0,            /* P2 Hold Down */
   0,            /* P2 Hold Left */
   0,            /* P2 Hold Right */
+  0,            /* Button State Toggle */
+  0,            /* Frame Counter Toggle */
 };
 
 static unsigned short NewKeyMappings[KMAPCOUNT];
