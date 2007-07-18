@@ -45,6 +45,7 @@ int ConfLoad()
     VAR(TryOverlay)
     VAR(StartInFullscreen)
     VAR(StatusMode)
+    VAR(MdrawOsdOptions)
 
     VAR(DSoundSamRate)
     VAR(DpsgEnhance)
@@ -93,6 +94,7 @@ int ConfSave()
     VAR(TryOverlay)
     VAR(StartInFullscreen)
     VAR(StatusMode)
+    VAR(MdrawOsdOptions)
 
     fprintf (h,"\n// Sound\n");
     VAR(DSoundSamRate)
