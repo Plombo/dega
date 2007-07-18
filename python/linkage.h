@@ -9,6 +9,7 @@
 /* change this list if the symbols used by pydega changes */
 #define PyArg_Parse (*pPyArg_Parse)
 #define PyArg_ParseTuple (*pPyArg_ParseTuple)
+#define PyArg_ParseTupleAndKeywords (*pPyArg_ParseTupleAndKeywords)
 #define PyErr_SetFromErrno (*pPyErr_SetFromErrno)
 #define PyErr_SetString (*pPyErr_SetString)
 #define PyExc_IOError (*pPyExc_IOError)
@@ -79,6 +80,7 @@ int initlinkage(void) {
 /* change this list if the symbols used by pydega changes */
 	LNK_SYM(PyArg_Parse)
 	LNK_SYM(PyArg_ParseTuple)
+	LNK_SYM(PyArg_ParseTupleAndKeywords)
 	LNK_SYM(PyErr_SetFromErrno)
 	LNK_SYM(PyErr_SetString)
 	LNK_SYM(PyExc_IOError)

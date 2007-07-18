@@ -179,7 +179,8 @@ int MvidStart(char *filename, int mode, int reset) {
 	}
 
 	if (videoFile == NULL) {
-		perror("while opening video file: fopen");
+		/* perror("while opening video file: fopen"); */
+		return 0;
 	}
 
 	return currentMovie.vidFrameCount;
@@ -382,6 +383,7 @@ void MvidPostSaveState() {
 		int size;
 		FILE *readVideoFile;
 
+		fflush(videoFile); /* ensure video file fully written to disk */
 		size = currentMovie.inputOffset + frameCount*currentMovie.packetSize;
 		data = (unsigned char *)malloc(size);
 

@@ -228,13 +228,9 @@ static PyObject *uchararray_create(unsigned char *data, size_t datalen) {
 
 typedef struct {
 	PyObject_HEAD
-	PyObject *input, *ram;
+	PyObject *input, *ram, *battery;
+	char readonly;
 } Dega;
-
-static PyObject *pydega_hello(PyObject *self, PyObject *args) {
-	printf("hello world! %d\n", 42);
-	Py_RETURN_NONE;
-}
 
 #if 0
 static PyObject *pydega_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
@@ -280,6 +276,40 @@ static PyObject *pydega_frame_advance(PyObject *self, PyObject *args) {
 	Py_RETURN_NONE;
 }
 
+static PyObject *pydega_reset(PyObject *self, PyObject *args) {
+	MastReset();
+	Py_RETURN_NONE;
+}
+
+static PyObject *pydega_hard_reset(PyObject *self, PyObject *args) {
+	MastHardReset();
+	Py_RETURN_NONE;
+}
+
+static PyObject *pydega_movie_start(PyObject *self, PyObject *args, PyObject *kwds) {
+	static char *kwlist[] = { "movie", "mode", "reset", 0 };
+	char *movie;
+	int mode = RECORD_MODE, reset = 0;
+	int rv;
+
+	if (!PyArg_ParseTupleAndKeywords(args, kwds, "s|ii", kwlist,
+			&movie, &mode, &reset)) {
+		return NULL;
+	}
+
+	rv = MvidStart(movie, mode, reset);
+	if (rv == 0) {
+		return PyErr_SetFromErrno(PyExc_IOError);
+	}
+		
+	return Py_BuildValue("i", rv);
+}
+
+static PyObject *pydega_movie_stop(PyObject *self, PyObject *args) {
+	MvidStop();
+	Py_RETURN_NONE;
+}
+
 /*
 static PyObject *pydega_getattr(PyObject *self, PyObject *args) {
 	char *attr;
@@ -306,20 +336,78 @@ static int setter_global_ui(PyObject *self, PyObject *val, void *data) {
 	return 0;
 }
 
+static unsigned char *memdata;
+static int memdatalen;
+
+static int MemSaveAcb(struct MastArea *area) {
+	if (memdatalen == 0) {
+		memdata = malloc(area->Len);
+	} else {
+		memdata = realloc(memdata, memdatalen+area->Len);
+	}
+	memcpy(memdata+memdatalen, area->Data, area->Len);
+	memdatalen += area->Len;
+	return area->Len;
+}
+
+static int MemLoadAcb(struct MastArea *area) {
+	int len = area->Len < memdatalen ? area->Len : memdatalen;
+	if (len > 0) memcpy(area->Data, memdata, len);
+	memdata += len;
+	memdatalen -= len;
+	return len;
+}
+
+static PyObject *state_getter(PyObject *self, void *data) {
+	PyObject *obj;
+
+	memdatalen = 0;
+	MastAcb = MemSaveAcb;
+	MastAreaDega();
+	MvidPostSaveState();
+	MastAcb = MastAcbNull;
+	
+	obj = Py_BuildValue("s#", (char *)memdata, memdatalen);
+	free(memdata);
+	return obj;
+}
+
+static int state_setter(PyObject *self, PyObject *val, void *data) {
+	Dega *dself = (Dega *)self;
+
+	if (!PyArg_Parse(val, "s#", (char **)&memdata, &memdatalen)) {
+		return -1;
+	}
+
+	MastAcb = MemLoadAcb;
+	MastAreaDega();
+	MvidPostLoadState(dself->readonly);
+	MastAcb = MastAcbNull;
+
+	return 0;
+}
+
 static PyMethodDef pydega_methods[] = {
 	{ "load_rom", pydega_load_rom, METH_VARARGS, "Load a rom" },
 	{ "frame_advance", pydega_frame_advance, METH_VARARGS, "Compute the next frame" },
+	{ "reset", pydega_reset, METH_NOARGS, "Reset the machine" },
+	{ "hard_reset", pydega_hard_reset, METH_NOARGS, "Hard reset the machine" },
+	{ "movie_start", (PyCFunction)pydega_movie_start, METH_VARARGS|METH_KEYWORDS, "Start recording/playback of movie" },
+	{ "movie_stop", pydega_movie_stop, METH_NOARGS, "Stop recording/playback of movie" },
 	{ NULL, NULL, 0, NULL }
 };
 
 static PyMemberDef pydega_members[] = {
 	{ "input", T_OBJECT, offsetof(Dega, input), READONLY, "Joypad input data" },
 	{ "ram", T_OBJECT, offsetof(Dega, ram), READONLY, "RAM data" },
+	{ "battery", T_OBJECT, offsetof(Dega, battery), READONLY, "SRAM data" },
+	{ "readonly", T_BYTE, offsetof(Dega, readonly), 0, "Continue playback when a movie state is loaded?" },
 	{ NULL }
 };
 
 static PyGetSetDef pydega_getset[] = {
 	{ "flags", getter_global_ui, setter_global_ui, "Emulation flags", &MastEx },
+	{ "state", state_getter, state_setter, "Emulation state", 0 },
 	{ NULL }
 };
 
@@ -371,11 +459,12 @@ static PyObject *pydega_create(void) {
 	Dega *dega = (Dega *)pydega_type.tp_alloc(&pydega_type, 0);
 	dega->input = uchararray_create(MastInput, sizeof(MastInput));
 	dega->ram = uchararray_create(pMastb->Ram, sizeof(pMastb->Ram));
+	dega->battery = uchararray_create(pMastb->Sram, sizeof(pMastb->Sram));
+	dega->readonly = 0;
 	return (PyObject *)dega;
 }
 
 static PyMethodDef pydega_mod_methods[] = {
-	{ "hello", pydega_hello, METH_NOARGS, "Say hello" },
 	{ NULL, NULL, 0, NULL }
 };
 
@@ -400,6 +489,9 @@ PyMODINIT_FUNC initpydega(void) {
 #else
 	PyModule_AddIntConstant(mod, "EMBEDDED", 0);
 #endif
+
+	PyModule_AddIntConstant(mod, "PLAYBACK_MODE", PLAYBACK_MODE);
+	PyModule_AddIntConstant(mod, "RECORD_MODE", RECORD_MODE);
 
 	PyModule_AddIntConstant(mod, "MX_GG", MX_GG);
 	PyModule_AddIntConstant(mod, "MX_PAL", MX_PAL);
