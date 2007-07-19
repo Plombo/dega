@@ -230,7 +230,10 @@ typedef struct {
 	PyObject_HEAD
 	PyObject *input, *ram, *battery;
 	char readonly;
+	PyObject *postframe;
 } Dega;
+
+static Dega *dega;
 
 #if 0
 static PyObject *pydega_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
@@ -323,6 +326,20 @@ static PyObject *pydega_getattr(PyObject *self, PyObject *args) {
 }
 */
 
+void pydega_cbpostframe(PyThreadState *threadstate) {
+	PyObject *cb;
+	PyEval_AcquireThread(threadstate);
+	cb = dega->postframe;
+	if (cb != NULL && PyCallable_Check(cb)) {
+		PyObject *rv = PyObject_CallObject(cb, NULL);
+		Py_XDECREF(rv);
+		if (rv == NULL) {
+			PyErr_Print();
+		}
+	}
+	PyEval_ReleaseThread(threadstate);
+}
+
 static PyObject *getter_global_ui(PyObject *self, void *data) {
 	long int data_l = *(unsigned int *)data;
 
@@ -402,6 +419,7 @@ static PyMemberDef pydega_members[] = {
 	{ "ram", T_OBJECT, offsetof(Dega, ram), READONLY, "RAM data" },
 	{ "battery", T_OBJECT, offsetof(Dega, battery), READONLY, "SRAM data" },
 	{ "readonly", T_BYTE, offsetof(Dega, readonly), 0, "Continue playback when a movie state is loaded?" },
+	{ "postframe", T_OBJECT, offsetof(Dega, postframe), 0, "Post-frame callback" },
 	{ NULL }
 };
 
@@ -461,6 +479,7 @@ static PyObject *pydega_create(void) {
 	dega->ram = uchararray_create(pMastb->Ram, sizeof(pMastb->Ram));
 	dega->battery = uchararray_create(pMastb->Sram, sizeof(pMastb->Sram));
 	dega->readonly = 0;
+	dega->postframe = 0;
 	return (PyObject *)dega;
 }
 
@@ -469,7 +488,7 @@ static PyMethodDef pydega_mod_methods[] = {
 };
 
 PyMODINIT_FUNC initpydega(void) {
-	PyObject *mod, *dega;
+	PyObject *mod;
 #ifndef EMBEDDED
 	MastInit();
 #endif
@@ -513,7 +532,7 @@ PyMODINIT_FUNC initpydega(void) {
 	Py_INCREF(&uchararray_type);
 	PyModule_AddObject(mod, "uchararray", (PyObject *)&uchararray_type);
 
-	dega = pydega_create();
-	PyModule_AddObject(mod, "dega", dega);
+	dega = (Dega *)pydega_create();
+	PyModule_AddObject(mod, "dega", (PyObject *)dega);
 }
 

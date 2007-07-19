@@ -10,6 +10,8 @@
 #define PyArg_Parse (*pPyArg_Parse)
 #define PyArg_ParseTuple (*pPyArg_ParseTuple)
 #define PyArg_ParseTupleAndKeywords (*pPyArg_ParseTupleAndKeywords)
+#define PyCallable_Check (*pPyCallable_Check)
+#define PyErr_Print (*pPyErr_Print)
 #define PyErr_SetFromErrno (*pPyErr_SetFromErrno)
 #define PyErr_SetString (*pPyErr_SetString)
 #define PyExc_IOError (*pPyExc_IOError)
@@ -17,6 +19,7 @@
 #define PyExc_TypeError (*pPyExc_TypeError)
 #define PyModule_AddIntConstant (*pPyModule_AddIntConstant)
 #define PyModule_AddObject (*pPyModule_AddObject)
+#define PyObject_CallObject (*pPyObject_CallObject)
 #define PySequence_Check (*pPySequence_Check)
 #define PySequence_GetItem (*pPySequence_GetItem)
 #define PySequence_Size (*pPySequence_Size)
@@ -31,9 +34,16 @@
 
 #define Py_Initialize (*pPy_Initialize)
 #define Py_Finalize (*pPy_Finalize)
+#define PyEval_AcquireThread (*pPyEval_AcquireThread)
+#define PyEval_InitThreads (*pPyEval_InitThreads)
+#define PyEval_ReleaseThread (*pPyEval_ReleaseThread)
+#define PyEval_RestoreThread (*pPyEval_RestoreThread)
+#define PyEval_SaveThread (*pPyEval_SaveThread)
 #define PyRun_SimpleFile (*pPyRun_SimpleFile)
 #define PyRun_AnyFile (*pPyRun_AnyFile)
 #define PySys_SetArgv (*pPySys_SetArgv)
+#define PyThreadState_New (*pPyThreadState_New)
+#define PyThreadState_Delete (*pPyThreadState_Delete)
 #ifndef PYDEGA_C
 #define PyAPI_FUNC(RTYPE) extern RTYPE
 #endif
@@ -81,6 +91,8 @@ int initlinkage(void) {
 	LNK_SYM(PyArg_Parse)
 	LNK_SYM(PyArg_ParseTuple)
 	LNK_SYM(PyArg_ParseTupleAndKeywords)
+	LNK_SYM(PyCallable_Check)
+	LNK_SYM(PyErr_Print)
 	LNK_SYM(PyErr_SetFromErrno)
 	LNK_SYM(PyErr_SetString)
 	LNK_SYM(PyExc_IOError)
@@ -88,6 +100,7 @@ int initlinkage(void) {
 	LNK_SYM(PyExc_TypeError)
 	LNK_SYM(PyModule_AddIntConstant)
 	LNK_SYM(PyModule_AddObject)
+	LNK_SYM(PyObject_CallObject)
 	LNK_SYM(PySequence_Check)
 	LNK_SYM(PySequence_GetItem)
 	LNK_SYM(PySequence_Size)
@@ -99,9 +112,16 @@ int initlinkage(void) {
 	LNK_SYM(_Py_NoneStruct)
 	LNK_SYM(Py_Initialize)
 	LNK_SYM(Py_Finalize)
+	LNK_SYM(PyEval_AcquireThread)
+	LNK_SYM(PyEval_InitThreads)
+	LNK_SYM(PyEval_ReleaseThread)
+	LNK_SYM(PyEval_RestoreThread)
+	LNK_SYM(PyEval_SaveThread)
 	LNK_SYM(PyRun_SimpleFile)
 	LNK_SYM(PyRun_AnyFile)
 	LNK_SYM(PySys_SetArgv)
+	LNK_SYM(PyThreadState_New)
+	LNK_SYM(PyThreadState_Delete)
 	LNK_FINI
 }
 
@@ -115,6 +135,7 @@ extern "C" {
 #endif
 int initlinkage(void);
 PyMODINIT_FUNC initpydega(void);
+void pydega_cbpostframe(PyThreadState *threadstate);
 #ifdef __cplusplus
 }
 #endif

@@ -10,6 +10,8 @@
 #include <getopt.h>
 #include <langinfo.h>
 #include <locale.h>
+#include <pthread.h>
+#include <time.h>
 
 #include "../python/linkage.h"
 #include <Python.h>
@@ -28,6 +30,9 @@ int mult=0;
 int readonly;
 
 int python;
+
+pthread_t pythread;
+PyThreadState *mainstate;
 
 int scrlock()
 {
@@ -192,8 +197,57 @@ void HandlePython(void) {
 		perror("fopen");
 		return;
 	}
+	PyEval_AcquireThread(mainstate);
 	PyRun_SimpleFile(fp, buffer);
+	PyEval_ReleaseThread(mainstate);
 	fclose(fp);
+}
+
+void HandlePythonREPL(void) {
+	if (!python) {
+		puts("Python not available!");
+		return;
+	}
+	
+	PyEval_AcquireThread(mainstate);
+	PyRun_AnyFile(stdin, "stdin");
+	PyEval_ReleaseThread(mainstate);
+}
+
+void *PythonThreadRun(void *pbuf) {
+	char *buffer = pbuf;
+	PyThreadState *threadstate = PyThreadState_New(mainstate->interp);
+
+	FILE *fp = fopen(buffer, "r");
+	if (!fp) {
+		perror("fopen");
+		return 0;
+	}
+	PyEval_AcquireThread(threadstate);
+	PyRun_SimpleFile(fp, buffer);
+	PyEval_ReleaseThread(threadstate);
+	fclose(fp);
+
+	free(buffer);
+
+	PyThreadState_Delete(threadstate);
+
+	return 0;
+}
+
+void HandlePythonThread(void) {
+	char *buffer = malloc(64);
+	FILE *fp;
+	
+	if (!python) {
+		puts("Python not available!");
+		return;
+	}
+
+	puts("Enter name of Python script to execute (thread):");
+	chompgets(buffer, 64, stdin);
+
+	pthread_create(&pythread, 0, PythonThreadRun, buffer);
 }
 
 void SetRateMult() {
@@ -270,6 +324,8 @@ void MimplFrame(int input) {
 	MastFrame();
 	scrunlock();
 
+	pydega_cbpostframe(mainstate);
+
 	if (input) {
 		MastInput[0]&=~0x40;
 	}
@@ -317,8 +373,10 @@ int main(int argc, char** argv)
 	python = initlinkage();
 	printf("python = %d\n", python);
 	if (python) {
+		PyEval_InitThreads();
 		Py_Initialize();
 		PySys_SetArgv(argc, argv);
+		mainstate = PyEval_SaveThread();
 	}
 
 	while(1)
@@ -441,7 +499,9 @@ int main(int argc, char** argv)
 	}
 
 	if (python) {
+		PyEval_AcquireThread(mainstate);
 		initpydega();
+		PyEval_ReleaseThread(mainstate);
 	}
 
 	MastDrawDo=1;
@@ -449,9 +509,16 @@ int main(int argc, char** argv)
 	{
 		if (!paused || frameadvance)
 		{
+			struct timespec t1, t2;
 			scrlock();
 			MastFrame();
 			scrunlock();
+
+			clock_gettime(CLOCK_REALTIME, &t1);
+			pydega_cbpostframe(mainstate);
+			clock_gettime(CLOCK_REALTIME, &t2);
+			printf("postframe took %d ns\n", t2.tv_nsec-t1.tv_nsec);
+
 			MastInput[0]&=~0x40;
 			if(sound)
 			{
@@ -504,7 +571,8 @@ Handler:		switch (event.type)
 				if(key==SDLK_l) {HandleLoadState();break;}
 				if(key==SDLK_a) {HandleSetAuthor();break;}
 				if(key==SDLK_n) {HandlePython();break;}
-				if(key==SDLK_m) {if (python) PyRun_AnyFile(stdin, "stdin");break;}
+				if(key==SDLK_m) {HandlePythonREPL();break;}
+				if(key==SDLK_i) {HandlePythonThread();break;}
 				if(key==SDLK_b) {MdrawOsdOptions^=OSD_BUTTONS;break;}
 				if(key==SDLK_f) {MdrawOsdOptions^=OSD_FRAMECOUNT;break;}
 				if(key==SDLK_EQUALS) {mult++;SetRateMult();break;}
@@ -541,6 +609,7 @@ Handler:		switch (event.type)
 		}
 	}
 	if (python) {
+		PyEval_RestoreThread(mainstate);
 		Py_Finalize();
 	}
 	return 0;
