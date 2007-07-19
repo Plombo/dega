@@ -4,7 +4,11 @@ from pydega import *
 
 class HexView(Canvas):
 
+	def getdata(self):
+		return getattr(self.data[0], self.data[1])
+
 	def builditems(self):
+		data = self.getdata()
 		width = self.fwidth*(4 + self.columns*3) # header + data columns
 		height = self.fheight*len(self.offsets)
 		self.configure(scrollregion=(0, 0, width, height))
@@ -20,16 +24,17 @@ class HexView(Canvas):
 			y = o*self.fheight
 			self.colitems.append(self.create_text((0, y), anchor=NW, text=("%04X" % (self.offset+off)), font=self.font))
 			for i in range(self.columns):
-				self.hexitems.append(self.create_text((self.fwidth*(5+3*i), y), anchor=NW, text=("%02X" % self.data[off+i]), font=self.font))
-		self.olddata = list(self.data)
+				self.hexitems.append(self.create_text((self.fwidth*(5+3*i), y), anchor=NW, text=("%02X" % data[off+i]), font=self.font))
+		self.olddata = data
 
 	def updateitems(self):
+		data = self.getdata()
 		for o in range(len(self.offsets)):
 			off = self.offsets[o]
 			for i in range(self.columns):
-				if self.olddata[off+i] <> self.data[off+i]:
-					self.itemconfig(self.hexitems[o*self.columns+i], text=("%02X" % self.data[off+i]))
-					self.olddata[off+i] = self.data[off+i]
+				if self.olddata[off+i] <> data[off+i]:
+					self.itemconfig(self.hexitems[o*self.columns+i], text=("%02X" % data[off+i]))
+					self.olddata[off+i] = data[off+i]
 
 	def __init__(self, master, offsets, data, columns, offset=0):
 		self.font = tkFont.Font(family="Courier",size=12)
@@ -55,18 +60,24 @@ class HexView(Canvas):
 
 class Trainer:
 
+	def getdata(self):
+		return getattr(self.data[0], self.data[1])
+
 	def __init__(self, data):
 		self.data = data
-		self.olddata = list(data)
-		self.addresses = range(len(data))
+		ddata = self.getdata()
+		self.olddata = ddata
+		self.addresses = range(len(ddata))
 
 	def reset(self):
-		self.olddata = list(self.data)
-		self.addresses = range(len(self.data))
+		data = self.getdata()
+		self.olddata = data
+		self.addresses = range(len(data))
 
 	def apply(self, fn):
-		self.addresses = filter(lambda a: fn(self.data[a], self.olddata[a]), self.addresses)
-		self.olddata = list(self.data)
+		data = self.getdata()
+		self.addresses = filter(lambda a: fn(data[a], self.olddata[a]), self.addresses)
+		self.olddata = data
 
 	def gt(self):
 		self.apply(lambda x,y: x>y)
@@ -138,7 +149,7 @@ class MemoryViewer:
 		self.brun = Button(self.emuframe, text="Run", command=self.start_run)
 		self.brun.pack(side=LEFT)
 
-		self.ramtrain = Trainer(self.frame_ram)
+		self.ramtrain = Trainer((self, "frame_ram"))
 		dp = lambda fn: lambda: self.doprint(fn)
 
 		self.trainframe = Frame(master)
@@ -168,13 +179,13 @@ class MemoryViewer:
 		b = Button(self.trainframe, text="Reset", command=dp(self.ramtrain.reset))
 		b.pack(side=LEFT)
 
-		self.wv = HexView(self.frame, offsets=[], data=self.frame_ram, columns=1, offset=0xc000)
+		self.wv = HexView(self.frame, offsets=[], data=(self, "frame_ram"), columns=1, offset=0xc000)
 		self.wv.pack(side=RIGHT, fill=Y)
 
 		self.sb = Scrollbar(self.frame, orient=VERTICAL)
 		self.sb.pack(side=RIGHT, fill=Y)
 
-		self.hv = HexView(self.frame, offsets=range(0, len(self.frame_ram), 16), data=self.frame_ram, columns=16, offset=0xc000)
+		self.hv = HexView(self.frame, offsets=range(0, len(self.frame_ram), 16), data=(self, "frame_ram"), columns=16, offset=0xc000)
 		self.hv.pack(side=LEFT, fill=Y)
 
 		self.hv['yscrollcommand'] = self.sb.set
@@ -235,9 +246,9 @@ class MemoryViewer:
 		self.do_frame_advance()
 	
 	def post_frame(self):
-		self.curframe = (self.curframe+1)%self.frameskip
-		if self.curframe == 0:
-			self.frame_ram[0:] = dega.ram
+#		self.curframe = (self.curframe+1)%self.frameskip
+#		if self.curframe == 0:
+			self.frame_ram = list(dega.ram)
 			self.frame_update = True
 
 root = Tk()
