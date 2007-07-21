@@ -9,6 +9,10 @@
 
 #include <mastint.h>
 
+#ifdef EMBEDDED
+#include "embed.h"
+#endif
+
 typedef struct {
 	PyObject_HEAD
 	unsigned char *data;
@@ -230,7 +234,6 @@ typedef struct {
 	PyObject_HEAD
 	PyObject *input, *ram, *battery;
 	char readonly;
-	PyObject *postframe;
 } Dega;
 
 static Dega *dega;
@@ -326,6 +329,7 @@ static PyObject *pydega_getattr(PyObject *self, PyObject *args) {
 }
 */
 
+/*
 void pydega_cbpostframe(PyThreadState *threadstate) {
 	PyObject *cb;
 	PyEval_AcquireThread(threadstate);
@@ -339,6 +343,7 @@ void pydega_cbpostframe(PyThreadState *threadstate) {
 	}
 	PyEval_ReleaseThread(threadstate);
 }
+*/
 
 static PyObject *getter_global_ui(PyObject *self, void *data) {
 	long int data_l = *(unsigned int *)data;
@@ -404,6 +409,25 @@ static int state_setter(PyObject *self, PyObject *val, void *data) {
 	return 0;
 }
 
+#ifdef EMBEDDED
+static PyObject *postframe_getter(PyObject *self, void *data) {
+	PyObject *obj = MPyEmbed_GetPostFrame();
+	if (obj == NULL) {
+		PyErr_SetString(PyExc_AttributeError, "no postframe set");
+	}
+	return obj;	
+}
+
+static int postframe_setter(PyObject *self, PyObject *val, void *data) {
+	int rv = MPyEmbed_SetPostFrame();
+	if (rv == 0) {
+		PyErr_SetString(PyExc_AttributeError, "not in threaded interpreter");
+		return -1;
+	}
+	return 0;
+}
+#endif
+
 static PyMethodDef pydega_methods[] = {
 	{ "load_rom", pydega_load_rom, METH_VARARGS, "Load a rom" },
 	{ "frame_advance", pydega_frame_advance, METH_VARARGS, "Compute the next frame" },
@@ -419,13 +443,16 @@ static PyMemberDef pydega_members[] = {
 	{ "ram", T_OBJECT, offsetof(Dega, ram), READONLY, "RAM data" },
 	{ "battery", T_OBJECT, offsetof(Dega, battery), READONLY, "SRAM data" },
 	{ "readonly", T_BYTE, offsetof(Dega, readonly), 0, "Continue playback when a movie state is loaded?" },
-	{ "postframe", T_OBJECT, offsetof(Dega, postframe), 0, "Post-frame callback" },
+/*	{ "postframe", T_OBJECT, offsetof(Dega, postframe), 0, "Post-frame callback" },*/
 	{ NULL }
 };
 
 static PyGetSetDef pydega_getset[] = {
 	{ "flags", getter_global_ui, setter_global_ui, "Emulation flags", &MastEx },
 	{ "state", state_getter, state_setter, "Emulation state", 0 },
+#ifdef EMBEDDED
+	{ "postframe", postframe_getter, postframe_setter, "Post-frame callback", 0 },
+#endif
 	{ NULL }
 };
 
