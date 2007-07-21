@@ -171,7 +171,7 @@ int MenuVgmStart()
   return 0;
 }
 
-int MenuPython()
+int MenuPython(int thread)
 {
   char Name[256];
   char msg[128];
@@ -186,7 +186,7 @@ int MenuPython()
   Ofn.lpstrFile=Name;
   Ofn.nMaxFile=sizeof(Name);
   Ofn.lpstrInitialDir=".";
-  Ofn.lpstrTitle="Load Rom";
+  Ofn.lpstrTitle="Run Python Script";
   Ofn.Flags=OFN_HIDEREADONLY;
   Ofn.lpstrDefExt="py";
 
@@ -199,7 +199,7 @@ int MenuPython()
 
   // Remember the script name
   memcpy(PythonScriptName,Name,sizeof(Name));
-  if (!PostMessage(NULL,WMU_PYTHON,0,0)) { // Post to main message loop. for some fucking crazy reason if I don't check the return value the messae is never sent
+  if (!PostMessage(NULL,thread ? WMU_PYTHON_THREAD : WMU_PYTHON,0,0)) { // Post to main message loop. for some fucking crazy reason if I don't check the return value the messae is never sent
     sprintf(msg, "error = %d", GetLastError());
     MessageBox(0, msg, "msg", 0);
   }
@@ -207,12 +207,12 @@ int MenuPython()
   return 0;
 }
 
-void MenuPythonFixed(char *name) {
+void MenuPythonFixed(char *name, int thread) {
   char msg[128];
   AppDirectory();
   strncpy(PythonScriptName,name,sizeof(PythonScriptName));
   PythonScriptName[sizeof(PythonScriptName)-1] = 0;
-  if (!PostMessage(NULL,WMU_PYTHON,0,0)) { // Post to main message loop
+  if (!PostMessage(NULL,thread ? WMU_PYTHON_THREAD : WMU_PYTHON,0,0)) { // Post to main message loop
     sprintf(msg, "error = %d", GetLastError());
     MessageBox(0, msg, "msg", 0);
   }

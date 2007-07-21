@@ -20,14 +20,14 @@ DOZEOBJ = doze/doze.o doze/dozea.o
 DAMOBJ = doze/dam.o doze/dama.o doze/damc.o doze/dame.o doze/damf.o doze/damj.o doze/damm.o doze/damo.o doze/damt.o
 MASTOBJ = mast/area.o mast/dpsg.o mast/draw.o mast/emu2413.o mast/frame.o mast/load.o mast/map.o mast/mast.o mast/mem.o mast/samp.o mast/snd.o mast/vgm.o mast/video.o mast/osd.o mast/md5.o
 PYOBJ = python/pydega.o python/stdalone.o
-PYEMBOBJ = python/pydega.emb.o python/embed.o
+PYEMBOBJ = python/pydega.emb.o python/embed.emb.o
 
 ifeq ($(P),unix)
 	NASM_FORMAT = elf
 	EXEEXT =
 	SOEXT = .so
-	PLATOBJ =
-	PLATPYOBJ = sdl/main.o
+	PLATOBJ = sdl/main.o
+	PLATPYOBJ =
 	PLATPYOBJCXX =
 	EXTRA_LIBS = $(shell sdl-config --libs)
 	DOZE_FIXUP = sed -f doze/doze.cmd.sed <doze/dozea.asm >doze/dozea.asm.new && mv doze/dozea.asm.new doze/dozea.asm
@@ -41,9 +41,9 @@ else ifeq ($(P),win)
 	NASM_FORMAT = win32
 	EXEEXT = .exe
 	SOEXT = .dll
-	PLATOBJ = master/app.o master/conf.o master/dinp.o master/disp.o master/dsound.o master/emu.o master/frame.o master/input.o master/load.o master/loop.o master/main.o master/misc.o master/render.o master/run.o master/shot.o master/state.o master/video.o master/zipfn.o master/keymap.o zlib/libz.a
+	PLATOBJ = master/app.o master/conf.o master/dinp.o master/disp.o master/dsound.o master/emu.o master/frame.o master/input.o master/load.o master/loop.o master/main.o master/misc.o master/python.o master/render.o master/run.o master/shot.o master/state.o master/video.o master/zipfn.o master/keymap.o zlib/libz.a
 	PLATPYOBJ =
-	PLATPYOBJCXX = master/python.o
+	PLATPYOBJCXX =
 	EXTRA_LIBS = -ldsound -ldinput -lddraw -ldxguid -lcomdlg32 -lcomctl32 -luser32 -lwinmm
 	DOZE_FIXUP =
 	EXTRA_LDFLAGS = -specs=$(shell pwd)/specs -mno-cygwin

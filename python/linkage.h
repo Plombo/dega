@@ -44,6 +44,21 @@
 #define PySys_SetArgv (*pPySys_SetArgv)
 #define PyThreadState_New (*pPyThreadState_New)
 #define PyThreadState_Delete (*pPyThreadState_Delete)
+#define PyCallable_Check (*pPyCallable_Check)
+#define PyErr_Print (*pPyErr_Print)
+#define PyEval_AcquireLock (*pPyEval_AcquireLock)
+#define PyEval_ReleaseLock (*pPyEval_ReleaseLock)
+#define PyObject_CallObject (*pPyObject_CallObject)
+#define PyThreadState_Clear (*pPyThreadState_Clear)
+#define PyThreadState_Get (*pPyThreadState_Get)
+#define PyThread_acquire_lock (*pPyThread_acquire_lock)
+#define PyThread_allocate_lock (*pPyThread_allocate_lock)
+#define PyThread_free_lock (*pPyThread_free_lock)
+#define PyThread_get_thread_ident (*pPyThread_get_thread_ident)
+#define PyThread_release_lock (*pPyThread_release_lock)
+#define Py_EndInterpreter (*pPy_EndInterpreter)
+#define Py_NewInterpreter (*pPy_NewInterpreter)
+#define _PyImport_FixupExtension (*p_PyImport_FixupExtension)
 #ifndef PYDEGA_C
 #define PyAPI_FUNC(RTYPE) extern RTYPE
 #endif
@@ -122,6 +137,21 @@ int initlinkage(void) {
 	LNK_SYM(PySys_SetArgv)
 	LNK_SYM(PyThreadState_New)
 	LNK_SYM(PyThreadState_Delete)
+	LNK_SYM(PyCallable_Check)
+	LNK_SYM(PyErr_Print)
+	LNK_SYM(PyEval_AcquireLock)
+	LNK_SYM(PyEval_ReleaseLock)
+	LNK_SYM(PyObject_CallObject)
+	LNK_SYM(PyThreadState_Clear)
+	LNK_SYM(PyThreadState_Get)
+	LNK_SYM(PyThread_acquire_lock)
+	LNK_SYM(PyThread_allocate_lock)
+	LNK_SYM(PyThread_free_lock)
+	LNK_SYM(PyThread_get_thread_ident)
+	LNK_SYM(PyThread_release_lock)
+	LNK_SYM(Py_EndInterpreter)
+	LNK_SYM(Py_NewInterpreter)
+	LNK_SYM(_PyImport_FixupExtension)
 	LNK_FINI
 }
 
@@ -135,7 +165,10 @@ extern "C" {
 #endif
 int initlinkage(void);
 PyMODINIT_FUNC initpydega(void);
+/*
 void pydega_cbpostframe(PyThreadState *threadstate);
+*/
+extern int pydega_exiting;
 #ifdef __cplusplus
 }
 #endif

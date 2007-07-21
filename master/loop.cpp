@@ -373,6 +373,7 @@ int LoopDo()
     if (Msg.message==WMU_VIDEORECORD)      { VideoRecord(); }
     if (Msg.message==WMU_VIDEOPLAYBACK)    { VideoPlayback(); }
     if (Msg.message==WMU_PYTHON) { PythonRunning=1; }
+    if (Msg.message==WMU_PYTHON_THREAD) { PythonRunThread(); }
 
     Ret=MediaInit(InitLevel); if (Ret!=0) { InitLevel=0; goto Error; }
 
@@ -450,6 +451,7 @@ MainLoop:
       if (Msg.message==WMU_VIDEORECORD)      { InitLevel=60; break; }
       if (Msg.message==WMU_VIDEOPLAYBACK)    { InitLevel=50; break; }
       if (Msg.message==WMU_PYTHON)           { InitLevel=60; break; }
+      if (Msg.message==WMU_PYTHON_THREAD)    { InitLevel=70; break; }
 
       if (hAccel!=NULL) TranslateAccelerator(hFrameWnd,hAccel,&Msg);
       TranslateCustomKeys(hFrameWnd,mymap,&Msg);

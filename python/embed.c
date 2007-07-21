@@ -10,6 +10,8 @@ static PyThreadState *mainstate;
 static int argc;
 static char **argv;
 
+unsigned int MPyEmbed_Exiting = 0;
+
 #define THREADS 8
 
 struct MPyEmbed_ThreadData {
@@ -36,6 +38,9 @@ void MPyEmbed_Init(void) {
 	}
 	PyEval_InitThreads();
 	Py_Initialize();
+
+	initpydega();
+
 	PySys_SetArgv(argc, argv);
 	mainstate = PyEval_SaveThread();
 	memset(threaddata, 0, sizeof(threaddata));
@@ -44,7 +49,10 @@ void MPyEmbed_Init(void) {
 
 void MPyEmbed_Fini(void) {
 	int i;
-	pydega_exiting = 1;
+	if (!PythonAvailable) {
+		return;
+	}
+	MPyEmbed_Exiting = 1;
 	for (i = 0; i < THREADS; i++) {
 		if (VALID(threaddata[i])) {
 			PyThread_acquire_lock(threaddata[i].exitlock, WAIT_LOCK);
@@ -56,7 +64,9 @@ void MPyEmbed_Fini(void) {
 	}
 	memset(threaddata, 0, sizeof(threaddata));
 
+	PyEval_RestoreThread(mainstate);
 	Py_Finalize();
+	MPyEmbed_Exiting = 0;
 }
  
 int MPyEmbed_Available(void) {
@@ -64,7 +74,11 @@ int MPyEmbed_Available(void) {
 }
 
 int MPyEmbed_Run(char *file) {
-	FILE *fp = fopen(file, "r");
+	FILE *fp;
+	if (!PythonAvailable) {
+		return 0;
+	}
+	fp = fopen(file, "r");
 	if (!fp) {
 		perror("fopen");
 		return 0;
@@ -78,6 +92,9 @@ int MPyEmbed_Run(char *file) {
 }
 
 int MPyEmbed_Repl(void) {
+	if (!PythonAvailable) {
+		return 0;
+	}
 	mainstate->thread_id = PyThread_get_thread_ident();
 	PyEval_AcquireThread(mainstate);
 	PyRun_AnyFile(stdin, "<stdin>");
@@ -87,7 +104,11 @@ int MPyEmbed_Repl(void) {
 
 int MPyEmbed_RunThread(char *file) {
 	int i;
-	FILE *fp = fopen(file, "r");
+	FILE *fp;
+	if (!PythonAvailable) {
+		return 0;
+	}
+	fp = fopen(file, "r");
 	if (!fp) {
 		perror("fopen");
 		return 0;
@@ -103,6 +124,10 @@ int MPyEmbed_RunThread(char *file) {
 
 			PyEval_AcquireLock();
 			threaddata[i].threadstate = Py_NewInterpreter();
+
+			initpydega();
+			PySys_SetArgv(argc, argv);
+
 			PyEval_ReleaseThread(threaddata[i].threadstate);
 			
 			threaddata[i].mainstate = PyThreadState_New(threaddata[i].threadstate->interp);
@@ -144,6 +169,7 @@ int MPyEmbed_RunThread(char *file) {
 
 static struct MPyEmbed_ThreadData *get_current_data(void) {
 	PyThreadState *ts = PyThreadState_Get();
+	int i;
 
 	for (i = 0; i < THREADS; i++) {
 		if (VALID(threaddata[i]) &&
@@ -166,7 +192,7 @@ PyObject *MPyEmbed_GetPostFrame(void) {
 		PyThread_release_lock(threaddatalock);
 		return 0;
 	}
-	postframe = threaddata[i].postframe;
+	postframe = td->postframe;
 	PyThread_release_lock(threaddatalock);
 	Py_XINCREF(postframe);
 	return postframe;
@@ -183,8 +209,8 @@ int MPyEmbed_SetPostFrame(PyObject *postframe) {
 		PyThread_release_lock(threaddatalock);
 		return 0;
 	}
-	old_postframe = threaddata[i].postframe;
-	threaddata[i].postframe = postframe;
+	old_postframe = td->postframe;
+	td->postframe = postframe;
 	Py_XINCREF(postframe);
 	PyThread_release_lock(threaddatalock);
 	Py_XDECREF(old_postframe);
@@ -192,10 +218,14 @@ int MPyEmbed_SetPostFrame(PyObject *postframe) {
 }
 
 void MPyEmbed_CBPostFrame(void) {
+	int i;
+	if (!PythonAvailable) {
+		return;
+	}
 	PyThread_acquire_lock(threaddatalock, WAIT_LOCK);
 	for (i = 0; i < THREADS; i++) {
 		if (VALID(threaddata[i])) {
-			PyObject *cb = threaddata[i].callback;
+			PyObject *cb = threaddata[i].postframe;
 			PyThreadState *ts = threaddata[i].mainstate;
 			PyObject *rv;
 

@@ -1,40 +1,38 @@
-#include "../python/linkage.h"
-#include <Python.h>
-#include "../python/linkage.h"
+#include "../python/embed.h"
 
 #include "app.h"
 
-int PythonLoaded=0, PythonRunning=0;
-static int argc;
-static char **argv;
+int PythonLoaded=0, PythonRunning=0, PythonThread;
 
 void PythonLoad(int _argc, char **_argv) {
-	PythonLoaded = initlinkage();
-	if (PythonLoaded) {
-		argc = _argc;
-		argv = _argv;
-	}
+	MPyEmbed_SetArgv(_argc, _argv);
 }
 
 void PythonInit() {
-	if (PythonLoaded) {
-		Py_Initialize();
-		PySys_SetArgv(argc, argv);
-		initpydega();
-	}
+	MPyEmbed_Init();
+	PythonLoaded = MPyEmbed_Available();
 }
 
 void PythonExit() {
-	if (PythonLoaded) {
-		Py_Finalize();
-	}
+	MPyEmbed_Fini();
 }
 
 void PythonRun() {
-	if (PythonLoaded) {
-		FILE *fp = fopen(PythonScriptName, "r");
-		PyRun_SimpleFile(fp, PythonScriptName);
-		fclose(fp);
-	}
+	MPyEmbed_Run(PythonScriptName);
 	PythonRunning = 0;
+}
+
+static DWORD WINAPI PythonThreadProc(void *pParam) {
+	MPyEmbed_RunThread(PythonScriptName);
+	ExitThread(0);
+	return 0;
+}
+
+void PythonRunThread() {
+	DWORD RunId;
+	CreateThread(NULL,0,PythonThreadProc,NULL,0,&RunId);
+}
+
+void PythonPostFrame() {
+	MPyEmbed_CBPostFrame();
 }

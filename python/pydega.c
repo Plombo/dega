@@ -3,6 +3,7 @@
 #include "linkage.h"
 
 #include <Python.h>
+#include <pythread.h>
 #include <structmember.h>
 
 #include "linkage.h"
@@ -236,7 +237,7 @@ typedef struct {
 	char readonly;
 } Dega;
 
-static Dega *dega;
+static Dega *dega = 0;
 
 #if 0
 static PyObject *pydega_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
@@ -419,13 +420,14 @@ static PyObject *postframe_getter(PyObject *self, void *data) {
 }
 
 static int postframe_setter(PyObject *self, PyObject *val, void *data) {
-	int rv = MPyEmbed_SetPostFrame();
+	int rv = MPyEmbed_SetPostFrame(val);
 	if (rv == 0) {
 		PyErr_SetString(PyExc_AttributeError, "not in threaded interpreter");
 		return -1;
 	}
 	return 0;
 }
+
 #endif
 
 static PyMethodDef pydega_methods[] = {
@@ -452,6 +454,7 @@ static PyGetSetDef pydega_getset[] = {
 	{ "state", state_getter, state_setter, "Emulation state", 0 },
 #ifdef EMBEDDED
 	{ "postframe", postframe_getter, postframe_setter, "Post-frame callback", 0 },
+	{ "exiting", getter_global_ui, 0, "Set if thread is exiting", &MPyEmbed_Exiting },
 #endif
 	{ NULL }
 };
@@ -506,7 +509,6 @@ static PyObject *pydega_create(void) {
 	dega->ram = uchararray_create(pMastb->Ram, sizeof(pMastb->Ram));
 	dega->battery = uchararray_create(pMastb->Sram, sizeof(pMastb->Sram));
 	dega->readonly = 0;
-	dega->postframe = 0;
 	return (PyObject *)dega;
 }
 
@@ -520,11 +522,13 @@ PyMODINIT_FUNC initpydega(void) {
 	MastInit();
 #endif
 
-	if (PyType_Ready(&pydega_type) < 0)
-		return;
+	if (!dega) {
+		if (PyType_Ready(&pydega_type) < 0)
+			return;
 
-	if (PyType_Ready(&uchararray_type) < 0)
-		return;
+		if (PyType_Ready(&uchararray_type) < 0)
+			return;
+	}
 
 	mod = Py_InitModule("pydega", pydega_mod_methods);
 	if (mod == NULL)
@@ -559,7 +563,11 @@ PyMODINIT_FUNC initpydega(void) {
 	Py_INCREF(&uchararray_type);
 	PyModule_AddObject(mod, "uchararray", (PyObject *)&uchararray_type);
 
-	dega = (Dega *)pydega_create();
+	if (dega) {
+		Py_INCREF(dega);
+	} else {
+		dega = (Dega *)pydega_create();
+	}
 	PyModule_AddObject(mod, "dega", (PyObject *)dega);
 }
 

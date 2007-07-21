@@ -30,6 +30,9 @@ int RunFrame(int Draw,short *pSound)
   }
 
   if (Draw) DispDraw();
+
+  PythonPostFrame();
+
   return 0;
 }
 

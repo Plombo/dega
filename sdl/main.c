@@ -13,9 +13,7 @@
 #include <pthread.h>
 #include <time.h>
 
-#include "../python/linkage.h"
-#include <Python.h>
-#include "../python/linkage.h"
+#include "../python/embed.h"
 
 SDL_Surface *thescreen;
 SDL_Color themap[256];
@@ -30,9 +28,6 @@ int mult=0;
 int readonly;
 
 int python;
-
-pthread_t pythread;
-PyThreadState *mainstate;
 
 int scrlock()
 {
@@ -189,18 +184,10 @@ void HandlePython(void) {
 		return;
 	}
 
-	puts("Enter name of Python script to execute:");
+	puts("Enter name of Python control script to execute:");
 	chompgets(buffer, sizeof(buffer), stdin);
 
-	fp = fopen(buffer, "r");
-	if (!fp) {
-		perror("fopen");
-		return;
-	}
-	PyEval_AcquireThread(mainstate);
-	PyRun_SimpleFile(fp, buffer);
-	PyEval_ReleaseThread(mainstate);
-	fclose(fp);
+	MPyEmbed_Run(buffer);
 }
 
 void HandlePythonREPL(void) {
@@ -209,42 +196,27 @@ void HandlePythonREPL(void) {
 		return;
 	}
 	
-	PyEval_AcquireThread(mainstate);
-	PyRun_AnyFile(stdin, "stdin");
-	PyEval_ReleaseThread(mainstate);
+	MPyEmbed_Repl();
 }
 
 void *PythonThreadRun(void *pbuf) {
 	char *buffer = pbuf;
-	PyThreadState *threadstate = PyThreadState_New(mainstate->interp);
-
-	FILE *fp = fopen(buffer, "r");
-	if (!fp) {
-		perror("fopen");
-		return 0;
-	}
-	PyEval_AcquireThread(threadstate);
-	PyRun_SimpleFile(fp, buffer);
-	PyEval_ReleaseThread(threadstate);
-	fclose(fp);
-
+	MPyEmbed_RunThread(buffer);
 	free(buffer);
-
-	PyThreadState_Delete(threadstate);
-
 	return 0;
 }
 
 void HandlePythonThread(void) {
 	char *buffer = malloc(64);
 	FILE *fp;
+	pthread_t pythread;
 	
 	if (!python) {
 		puts("Python not available!");
 		return;
 	}
 
-	puts("Enter name of Python script to execute (thread):");
+	puts("Enter name of Python viewer script to execute:");
 	chompgets(buffer, 64, stdin);
 
 	pthread_create(&pythread, 0, PythonThreadRun, buffer);
@@ -324,7 +296,11 @@ void MimplFrame(int input) {
 	MastFrame();
 	scrunlock();
 
+#if 0
 	pydega_cbpostframe(mainstate);
+#else
+	MPyEmbed_CBPostFrame();
+#endif
 
 	if (input) {
 		MastInput[0]&=~0x40;
@@ -370,14 +346,7 @@ int main(int argc, char** argv)
 
 	readonly = 0;
 
-	python = initlinkage();
-	printf("python = %d\n", python);
-	if (python) {
-		PyEval_InitThreads();
-		Py_Initialize();
-		PySys_SetArgv(argc, argv);
-		mainstate = PyEval_SaveThread();
-	}
+	MPyEmbed_SetArgv(argc, argv);
 
 	while(1)
 	{
@@ -416,7 +385,7 @@ int main(int argc, char** argv)
 			
 			case 'm':
 				autodetect=0;
-				MastEx &= !MX_GG;
+				MastEx &= ~MX_GG;
 				break;
 			
 			case 'p':
@@ -498,11 +467,8 @@ int main(int argc, char** argv)
 		pMsndOut=NULL;
 	}
 
-	if (python) {
-		PyEval_AcquireThread(mainstate);
-		initpydega();
-		PyEval_ReleaseThread(mainstate);
-	}
+	MPyEmbed_Init();
+	python = MPyEmbed_Available();
 
 	MastDrawDo=1;
 	while(!done)
@@ -514,10 +480,14 @@ int main(int argc, char** argv)
 			MastFrame();
 			scrunlock();
 
+#if 0
 			clock_gettime(CLOCK_REALTIME, &t1);
 			pydega_cbpostframe(mainstate);
 			clock_gettime(CLOCK_REALTIME, &t2);
 			printf("postframe took %d ns\n", t2.tv_nsec-t1.tv_nsec);
+#else
+			MPyEmbed_CBPostFrame();
+#endif
 
 			MastInput[0]&=~0x40;
 			if(sound)
@@ -609,8 +579,7 @@ Handler:		switch (event.type)
 		}
 	}
 	if (python) {
-		PyEval_RestoreThread(mainstate);
-		Py_Finalize();
+		MPyEmbed_Fini();
 	}
 	return 0;
 }

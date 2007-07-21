@@ -231,6 +231,8 @@ class MemoryViewer:
 
 	def update_controls(self):
 		self.frame.after(100, self.update_controls)
+		if dega.exiting:
+			sys.exit(0)
 		if self.frame_update:
 			self.frame_update = False
 			self.hv.updateitems()

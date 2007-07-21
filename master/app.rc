@@ -161,7 +161,8 @@ BEGIN
     BEGIN
         MENUITEM "Memory viewer/trainer",     ID_PYTHON_MEMORY
 	MENUITEM SEPARATOR
-        MENUITEM "Load script...",            ID_PYTHON_LOAD
+        MENUITEM "Load control script...",           ID_PYTHON_LOAD
+        MENUITEM "Load viewer script...",            ID_PYTHON_LOAD_THREAD
     END
 END
 
