@@ -1,5 +1,6 @@
 from Tkinter import *
 import tkFont
+import tkSimpleDialog
 from pydega import *
 
 class HexView(Canvas):
@@ -7,6 +8,14 @@ class HexView(Canvas):
 	def getdata(self):
 		return getattr(self.data[0], self.data[1])
 
+	def userchange(self, index, event):
+		v = tkSimpleDialog.askinteger("Enter value", "Please enter new value for address %04X" % (self.offset+index))
+		if v != None:
+			self.realdata[index] = v
+			x = self.canvasx(event.x)
+			y = self.canvasy(event.y)
+			self.itemconfig(self.find_closest(x, y), text=("%02X" % v))
+		
 	def builditems(self):
 		data = self.getdata()
 		width = self.fwidth*(4 + self.columns*3) # header + data columns
@@ -24,7 +33,10 @@ class HexView(Canvas):
 			y = o*self.fheight
 			self.colitems.append(self.create_text((0, y), anchor=NW, text=("%04X" % (self.offset+off)), font=self.font))
 			for i in range(self.columns):
-				self.hexitems.append(self.create_text((self.fwidth*(5+3*i), y), anchor=NW, text=("%02X" % data[off+i]), font=self.font))
+				uc = lambda addr: lambda e: self.userchange(addr, e)
+				text = self.create_text((self.fwidth*(5+3*i), y), anchor=NW, text=("%02X" % data[off+i]), font=self.font)
+				self.tag_bind(text, "<Button-1>", uc(off+i))
+				self.hexitems.append(text)
 		self.olddata = data
 
 	def updateitems(self):
@@ -34,9 +46,9 @@ class HexView(Canvas):
 			for i in range(self.columns):
 				if self.olddata[off+i] <> data[off+i]:
 					self.itemconfig(self.hexitems[o*self.columns+i], text=("%02X" % data[off+i]))
-					self.olddata[off+i] = data[off+i]
+		self.olddata = data
 
-	def __init__(self, master, offsets, data, columns, offset=0):
+	def __init__(self, master, offsets, data, realdata, columns, offset=0):
 		self.font = tkFont.Font(family="Courier",size=12)
 
 		self.fwidth = self.font.measure("A")
@@ -51,6 +63,7 @@ class HexView(Canvas):
 
 		self.offsets = offsets
 		self.data = data
+		self.realdata = realdata
 		self.columns = columns
 		self.offset = offset
 
@@ -74,10 +87,18 @@ class Trainer:
 		self.olddata = data
 		self.addresses = range(len(data))
 
+	def debug(self, fn, a, b):
+		# print "%d %d\n" % (a, b)
+		f = fn(a, b)
+		# print f
+		return f
+
 	def apply(self, fn):
 		data = self.getdata()
-		self.addresses = filter(lambda a: fn(data[a], self.olddata[a]), self.addresses)
+		print "%d %d" % (id(data), id(self.olddata))
+		self.addresses = filter(lambda a: self.debug(fn, data[a], self.olddata[a]), self.addresses)
 		self.olddata = data
+		print "mark"
 
 	def gt(self):
 		self.apply(lambda x,y: x>y)
@@ -100,6 +121,9 @@ class Trainer:
 	def eqv(self, v):
 		self.apply(lambda x,y: x==v)
 
+	def nev(self, v):
+		self.apply(lambda x,y: x<>v)
+
 
 class MemoryViewer:
 
@@ -107,50 +131,14 @@ class MemoryViewer:
 		# self.frame = Frame(master)
 		# self.frame.pack()
 
-		self.frame_ram = list(dega.ram)
+		self.frame_ram = tuple(dega.ram)
 		self.frame_update = False
 
 		self.frame = master
 
-		self.btnframe = Frame(master)
-		self.btnframe.pack(side=BOTTOM)
-
-		btncmd = lambda btn: lambda: self.inputtoggle(btn)
-
-		self.btnup = Button(self.btnframe, text="Up", command=btncmd(BTN_UP))
-		self.btnup.pack(side=LEFT)
-
-		self.btndown = Button(self.btnframe, text="Down", command=btncmd(BTN_DOWN))
-		self.btndown.pack(side=LEFT)
-
-		self.btnleft = Button(self.btnframe, text="Left", command=btncmd(BTN_LEFT))
-		self.btnleft.pack(side=LEFT)
-
-		self.btnright = Button(self.btnframe, text="Right", command=btncmd(BTN_RIGHT))
-		self.btnright.pack(side=LEFT)
-
-		self.btnone = Button(self.btnframe, text="1", command=btncmd(BTN_1))
-		self.btnone.pack(side=LEFT)
-
-		self.btntwo = Button(self.btnframe, text="2", command=btncmd(BTN_2))
-		self.btntwo.pack(side=LEFT)
-
-		self.inputupdate()
-
-		self.emuframe = Frame(master)
-		self.emuframe.pack(side=BOTTOM)
-
-		l = Label(self.emuframe, text="Emulation:")
-		l.pack(side=LEFT)
-
-		self.fadv = Button(self.emuframe, text="Frame advance", command=self.frame_advance)
-		self.fadv.pack(side=LEFT)
-
-		self.brun = Button(self.emuframe, text="Run", command=self.start_run)
-		self.brun.pack(side=LEFT)
-
 		self.ramtrain = Trainer((self, "frame_ram"))
 		dp = lambda fn: lambda: self.doprint(fn)
+		dpp = lambda fn: lambda: self.doprintprompt(fn)
 
 		self.trainframe = Frame(master)
 		self.trainframe.pack(side=BOTTOM)
@@ -176,16 +164,28 @@ class MemoryViewer:
 		b = Button(self.trainframe, text=">=", command=dp(self.ramtrain.gte))
 		b.pack(side=LEFT)
 
+		b = Button(self.trainframe, text="= value", command=dpp(self.ramtrain.eqv))
+		b.pack(side=LEFT)
+
+		b = Button(self.trainframe, text="<> value", command=dpp(self.ramtrain.nev))
+		b.pack(side=LEFT)
+
 		b = Button(self.trainframe, text="Reset", command=dp(self.ramtrain.reset))
 		b.pack(side=LEFT)
 
-		self.wv = HexView(self.frame, offsets=[], data=(self, "frame_ram"), columns=1, offset=0xc000)
-		self.wv.pack(side=RIGHT, fill=Y)
+		self.watchframe = Frame(master)
+		self.watchframe.pack(side=RIGHT, fill=Y)
+
+		self.wc = Label(self.watchframe, text="? matches")
+		self.wc.pack(side=TOP)
+
+		self.wv = HexView(self.watchframe, offsets=[], data=(self, "frame_ram"), realdata=dega.ram, columns=1, offset=0xc000)
+		self.wv.pack(side=BOTTOM, fill=Y)
 
 		self.sb = Scrollbar(self.frame, orient=VERTICAL)
 		self.sb.pack(side=RIGHT, fill=Y)
 
-		self.hv = HexView(self.frame, offsets=range(0, len(self.frame_ram), 16), data=(self, "frame_ram"), columns=16, offset=0xc000)
+		self.hv = HexView(self.frame, offsets=range(0, len(self.frame_ram), 16), data=(self, "frame_ram"), realdata=dega.ram, columns=16, offset=0xc000)
 		self.hv.pack(side=LEFT, fill=Y)
 
 		self.hv['yscrollcommand'] = self.sb.set
@@ -222,12 +222,13 @@ class MemoryViewer:
 			self.wv.offsets = self.ramtrain.addresses
 		else:
 			self.wv.offsets = []
+		self.wc['text'] = "%d matches" % len(self.ramtrain.addresses)
 		self.wv.builditems()
 
-	def frame_advance(self):
-		self.running = False
-		self.brun['relief'] = RAISED
-		self.do_frame_advance()
+	def doprintprompt(self, fn):
+		v = tkSimpleDialog.askinteger("Enter value", "Please enter value to compare memory to")
+		if v != None:
+			self.doprint(lambda: fn(v))
 
 	def update_controls(self):
 		self.frame.after(100, self.update_controls)
@@ -237,20 +238,11 @@ class MemoryViewer:
 			self.frame_update = False
 			self.hv.updateitems()
 			self.wv.updateitems()
-
-	def start_run(self):
-		if self.running:
-			self.running = False
-			self.brun['relief'] = RAISED
-			return None
-		self.running = True
-		self.brun['relief'] = SUNKEN
-		self.do_frame_advance()
 	
 	def post_frame(self):
 #		self.curframe = (self.curframe+1)%self.frameskip
 #		if self.curframe == 0:
-			self.frame_ram = list(dega.ram)
+			self.frame_ram = tuple(dega.ram)
 			self.frame_update = True
 
 root = Tk()
