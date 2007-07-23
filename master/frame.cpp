@@ -63,7 +63,7 @@ static LRESULT CALLBACK WindowProc(HWND hWnd,UINT Msg,WPARAM wParam,LPARAM lPara
     if (Item==ID_INPUT_KEYMAPPING) { KeyMapping(); return 0; }
     if (Item==ID_PYTHON_LOAD) { MenuPython(0); return 0; }
     if (Item==ID_PYTHON_LOAD_THREAD) { MenuPython(1); return 0; }
-    if (Item==ID_PYTHON_MEMORY) { MenuPythonFixed("memory2.py", 1); return 0; }
+    if (Item==ID_PYTHON_MEMORY) { MenuPythonFixed("memory.py", 1); return 0; }
     PostMessage(NULL,WMU_COMMAND,Item,0);
   }
 
