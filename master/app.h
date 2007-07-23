@@ -24,6 +24,13 @@
 
 #define APP_TITLE "Dega"
 
+#define SetWindowRect(hwnd,rect) MoveWindow(hwnd, \
+  (rect)->left, \
+  (rect)->top, \
+  (rect)->right-(rect)->left, \
+  (rect)->bottom-(rect)->top, \
+  1)
+
 // main.cpp
 extern HINSTANCE hAppInst;
 extern int ScrnWidth,ScrnHeight;
@@ -96,6 +103,8 @@ int FrameInit();
 int FrameExit();
 int FrameSize();
 extern HWND hFrameStatus; // Frame - status window
+extern int SizeMultiplier;
+extern DWORD MoveOK;
 
 // input.cpp
 extern int UseJoystick;
@@ -147,6 +156,7 @@ void MenuPythonFixed(char *script, int thread);
 #define WMU_VIDEORECORD      (WM_APP+10)
 #define WMU_PYTHON           (WM_APP+9)
 #define WMU_PYTHON_THREAD    (WM_APP+11)
+#define WMU_SIZE             (WM_APP+12)
 
 // conf.cpp
 int ConfLoad();

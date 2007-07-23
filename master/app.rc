@@ -128,6 +128,13 @@ BEGIN
         MENUITEM "Japan",                       ID_SETUP_JAPAN
         MENUITEM "FM Chip",                     ID_SETUP_FMCHIP
         MENUITEM SEPARATOR
+        POPUP "Scale"
+        BEGIN
+            MENUITEM "1x",                      ID_SETUP_SCALE_1X
+            MENUITEM "2x",                      ID_SETUP_SCALE_2X
+            MENUITEM "3x",                      ID_SETUP_SCALE_3X
+            MENUITEM "4x",                      ID_SETUP_SCALE_4X
+        END
         POPUP "Overlay"
         BEGIN
             MENUITEM "None",                        ID_SETUP_OVERLAY_NONE

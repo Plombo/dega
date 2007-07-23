@@ -6,6 +6,24 @@ int SetupPal=0;
 int LoopPause=0;
 static MSG Msg;
 
+static void MediaShowMenu() {
+    RECT oldclient, newclient;
+
+    MoveOK=timeGetTime();
+    GetClientRect(hFrameWnd,&oldclient);
+    if (ShowMenu) SetMenu(hFrameWnd,hFrameMenu);
+    else          SetMenu(hFrameWnd,NULL);
+    GetClientRect(hFrameWnd,&newclient);
+
+    if (oldclient.bottom != newclient.bottom)
+    {
+      RECT winrect;
+      GetWindowRect(hFrameWnd,&winrect);
+      winrect.top -= oldclient.bottom-newclient.bottom;
+      SetWindowRect(hFrameWnd,&winrect);
+    }
+}
+
 // Reinit the media, going down to a certain level
 static int MediaInit(int Level)
 {
@@ -153,9 +171,12 @@ static int MediaInit(int Level)
     CHK(ID_VIDEO_FRAMECOUNTER,MdrawOsdOptions&OSD_FRAMECOUNT)
     CHK(ID_INPUT_BUTTONS,MdrawOsdOptions&OSD_BUTTONS)
     for (i = 0; i < 10; i++) CHK(ID_STATE_SLOT(i), SaveSlot==i)
+    CHK(ID_SETUP_SCALE_1X,SizeMultiplier==1)
+    CHK(ID_SETUP_SCALE_2X,SizeMultiplier==2)
+    CHK(ID_SETUP_SCALE_3X,SizeMultiplier==3)
+    CHK(ID_SETUP_SCALE_4X,SizeMultiplier==4)
 
-    if (ShowMenu) SetMenu(hFrameWnd,hFrameMenu);
-    else          SetMenu(hFrameWnd,NULL);
+    MediaShowMenu();
 
     if (Fullscreen && ShowMenu==0) { while (ShowCursor(0)>=0) ; } // Hide mouse
   }
@@ -363,6 +384,11 @@ int LoopDo()
       if (Msg.wParam==ID_SETUP_STATUSHIDE) { SetStatusMode(STATUS_HIDE); }
       if (Msg.wParam==ID_SETUP_STATUSAUTO) { SetStatusMode(STATUS_AUTO); }
       if (Msg.wParam==ID_SETUP_STATUSSHOW) { SetStatusMode(STATUS_SHOW); }
+      if (Msg.wParam>=ID_SETUP_SCALE_1X && Msg.wParam<=ID_SETUP_SCALE_4X)
+      {
+        SizeMultiplier=Msg.wParam-ID_SETUP_SCALE_1X+1;
+	FrameSize();
+      }
     }
     if (Msg.message==WMU_STATELOAD)   { StateLoad(0); }
     if (Msg.message==WMU_STATESAVE)   { StateSave(0); }
@@ -427,6 +453,9 @@ MainLoop:
         if (Msg.wParam==ID_SETUP_STATUSAUTO)   { InitLevel=70; break; }
         if (Msg.wParam==ID_SETUP_STATUSSHOW)   { InitLevel=70; break; }
 
+        if (Msg.wParam>=ID_SETUP_SCALE_1X && Msg.wParam<=ID_SETUP_SCALE_4X)
+          { InitLevel=70; break; }
+
         if (Msg.wParam==ID_INPUT_HOLD_UP   ) AutoHold[0]^=0x01;
         if (Msg.wParam==ID_INPUT_HOLD_DOWN ) AutoHold[0]^=0x02;
         if (Msg.wParam==ID_INPUT_HOLD_LEFT ) AutoHold[0]^=0x04;
@@ -452,6 +481,7 @@ MainLoop:
       if (Msg.message==WMU_VIDEOPLAYBACK)    { InitLevel=50; break; }
       if (Msg.message==WMU_PYTHON)           { InitLevel=60; break; }
       if (Msg.message==WMU_PYTHON_THREAD)    { InitLevel=70; break; }
+      if (Msg.message==WMU_SIZE)             { InitLevel=70; break; }
 
       if (hAccel!=NULL) TranslateAccelerator(hFrameWnd,hAccel,&Msg);
       TranslateCustomKeys(hFrameWnd,mymap,&Msg);

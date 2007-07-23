@@ -1,7 +1,22 @@
 from Tkinter import *
 import tkFont
 import tkSimpleDialog
+import tkMessageBox
 from pydega import *
+
+def askhex(prompt, validate = lambda v: None):
+	v = None
+	while v == None:
+		s = tkSimpleDialog.askstring("Enter value", prompt+"\nFor hexadecimal prefix with 0x")
+		if s == None:
+			break
+		try:
+			v = int(eval(s))
+			validate(v)
+		except:
+			tkMessageBox.showerror("Invalid Value", "Could not parse value: %s (%s)" % (s, sys.exc_info()[1]))
+			v = None
+	return v
 
 class HexView(Canvas):
 
@@ -9,7 +24,7 @@ class HexView(Canvas):
 		return getattr(self.data[0], self.data[1])
 
 	def userchange(self, index, event):
-		v = tkSimpleDialog.askinteger("Enter value", "Please enter new value for address %04X" % (self.offset+index))
+		v = askhex("Please enter new value for address %04X" % (self.offset+index))
 		if v != None:
 			self.realdata[index] = v
 			x = self.canvasx(event.x)
@@ -87,18 +102,10 @@ class Trainer:
 		self.olddata = data
 		self.addresses = range(len(data))
 
-	def debug(self, fn, a, b):
-		# print "%d %d\n" % (a, b)
-		f = fn(a, b)
-		# print f
-		return f
-
 	def apply(self, fn):
 		data = self.getdata()
-		print "%d %d" % (id(data), id(self.olddata))
-		self.addresses = filter(lambda a: self.debug(fn, data[a], self.olddata[a]), self.addresses)
+		self.addresses = filter(lambda a: fn(data[a], self.olddata[a]), self.addresses)
 		self.olddata = data
-		print "mark"
 
 	def gt(self):
 		self.apply(lambda x,y: x>y)
@@ -173,48 +180,35 @@ class MemoryViewer:
 		b = Button(self.trainframe, text="Reset", command=dp(self.ramtrain.reset))
 		b.pack(side=LEFT)
 
-		self.watchframe = Frame(master)
-		self.watchframe.pack(side=RIGHT, fill=Y)
-
-		self.wc = Label(self.watchframe, text="? matches")
-		self.wc.pack(side=TOP)
-
-		self.wv = HexView(self.watchframe, offsets=[], data=(self, "frame_ram"), realdata=dega.ram, columns=1, offset=0xc000)
-		self.wv.pack(side=BOTTOM, fill=Y)
-
-		self.sb = Scrollbar(self.frame, orient=VERTICAL)
-		self.sb.pack(side=RIGHT, fill=Y)
+		b = Button(self.trainframe, text="Add Watch", command=self.addwatch)
+		b.pack(side=LEFT)
 
 		self.hv = HexView(self.frame, offsets=range(0, len(self.frame_ram), 16), data=(self, "frame_ram"), realdata=dega.ram, columns=16, offset=0xc000)
-		self.hv.pack(side=LEFT, fill=Y)
+		self.hv.pack(side=LEFT, fill=BOTH, expand=1)
+
+		self.sb = Scrollbar(self.frame, orient=VERTICAL)
+		self.sb.pack(side=LEFT, fill=Y)
 
 		self.hv['yscrollcommand'] = self.sb.set
 		self.sb['command'] = self.hv.yview
 
-		self.running = False
+		self.wc = Label(self.frame, text="8192 matches")
+		self.wc.pack(side=TOP)
+
+		self.wv = HexView(self.frame, offsets=[], data=(self, "frame_ram"), realdata=dega.ram, columns=1, offset=0xc000)
+		self.wv.pack(side=LEFT, fill=Y)
+
+		self.sb2 = Scrollbar(self.frame, orient=VERTICAL)
+		self.sb2.pack(side=RIGHT, fill=Y)
+
+		self.wv['yscrollcommand'] = self.sb2.set
+		self.sb2['command'] = self.wv.yview
+
 		self.frameskip = 3
 		self.curframe = 0
 
 		dega.postframe = self.post_frame
 		self.update_controls()
-
-	def inputtoggle(self, flag):
-		dega.input[0] ^= flag
-		self.inputupdate()
-
-	def inputupdatebtn(self, btn, flag):
-		if dega.input[0] & flag:
-			btn['relief'] = SUNKEN
-		else:
-			btn['relief'] = RAISED
-
-	def inputupdate(self):
-		self.inputupdatebtn(self.btnup, BTN_UP)
-		self.inputupdatebtn(self.btndown, BTN_DOWN)
-		self.inputupdatebtn(self.btnleft, BTN_LEFT)
-		self.inputupdatebtn(self.btnright, BTN_RIGHT)
-		self.inputupdatebtn(self.btnone, BTN_1)
-		self.inputupdatebtn(self.btntwo, BTN_2)
 
 	def doprint(self, fn):
 		fn()
@@ -226,9 +220,21 @@ class MemoryViewer:
 		self.wv.builditems()
 
 	def doprintprompt(self, fn):
-		v = tkSimpleDialog.askinteger("Enter value", "Please enter value to compare memory to")
+		v = askhex("Please enter value to compare memory to")
 		if v != None:
 			self.doprint(lambda: fn(v))
+
+	def ramcheck(self, v):
+		if v < 0xC000 or v >= 0xDFFF:
+			raise Exception, "value outside of RAM range"
+
+	def addwatch(self):
+		v = askhex("Please enter RAM address to watch", self.ramcheck)
+		if v != None:
+			if len(self.ramtrain.addresses) >= 128:
+				self.ramtrain.addresses = []
+			self.ramtrain.addresses.append(v-0xC000)
+			self.doprint(lambda: None)
 
 	def update_controls(self):
 		self.frame.after(100, self.update_controls)

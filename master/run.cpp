@@ -11,6 +11,26 @@ int StatusMode=STATUS_AUTO;
 static int StatusCount=-1;
 static int NoInput=0;
 
+static int OldHeight;
+
+void RunPreChangeStatus()
+{
+  OldHeight = StatusHeight();
+}
+
+void RunPostChangeStatus()
+{
+  int NewHeight = StatusHeight();
+  if (OldHeight != NewHeight)
+  {
+    RECT winrect;
+    GetWindowRect(hFrameWnd,&winrect);
+    winrect.bottom += NewHeight-OldHeight;
+    MoveOK=timeGetTime();
+    SetWindowRect(hFrameWnd,&winrect);
+  }
+}
+
 // Run a frame (with or without sound)
 int RunFrame(int Draw,short *pSound)
 {
@@ -20,6 +40,7 @@ int RunFrame(int Draw,short *pSound)
   // Run frame
   EmuFrame();
 
+  RunPreChangeStatus();
   // Update status window
   StatusCount--;
   if (StatusCount==0)
@@ -28,6 +49,7 @@ int RunFrame(int Draw,short *pSound)
     SetWindowText(hFrameStatus,"");
     StatusCount=-1;
   }
+  RunPostChangeStatus();
 
   if (Draw) DispDraw();
 
@@ -46,18 +68,22 @@ void MimplFrame(int ReadInput)
 // Display text for a period of time in the status bar
 int RunText(char *Text,int Len)
 {
+  RunPreChangeStatus();
   SetWindowText(hFrameStatus,Text);
   if (StatusMode==STATUS_AUTO) ShowWindow(hFrameStatus,SW_NORMAL);
   StatusCount=Len;
+  RunPostChangeStatus();
   return 0;
 }
 
 void SetStatusMode(int NewMode)
 {
+  RunPreChangeStatus();
        if (NewMode==STATUS_HIDE) ShowWindow(hFrameStatus,SW_HIDE);
   else if (NewMode==STATUS_SHOW) ShowWindow(hFrameStatus,SW_NORMAL);
   else if (NewMode==STATUS_AUTO) ShowWindow(hFrameStatus,StatusCount>0?SW_NORMAL:SW_HIDE);
   StatusMode=NewMode;
+  RunPostChangeStatus();
 }
 
 int StatusHeight()

@@ -4,6 +4,7 @@ static char *ClassName="Frame";
 HWND hFrameWnd=NULL; // Frame - Window handle
 HMENU hFrameMenu=NULL;
 HWND hFrameStatus=NULL; // Frame - status window
+DWORD MoveOK=0;
 
 // The window procedure
 static LRESULT CALLBACK WindowProc(HWND hWnd,UINT Msg,WPARAM wParam,LPARAM lParam)
@@ -18,8 +19,19 @@ static LRESULT CALLBACK WindowProc(HWND hWnd,UINT Msg,WPARAM wParam,LPARAM lPara
   if (Msg==WM_SIZE)
   {
     RECT Rect={0,0,0,0};
+    DWORD time = timeGetTime();
+    if (time-MoveOK > 2000) /* This is a stupid way to handle this,
+                             * but is the only way I can think of given
+                             * the seemingly random number of WM_SIZE
+                             * messages Windows sends us.
+                             * Thanks Microsoft!
+                             */
+    {
+      SizeMultiplier=0;
+    }
     GetWindowRect(hWnd,&Rect);
     MoveWindow(hFrameStatus,Rect.left,Rect.bottom,Rect.right,Rect.bottom,1);
+    PostMessage(NULL,WMU_SIZE,0,0);
     return 0;
   }
 
@@ -79,7 +91,7 @@ int FrameInit()
   if (Atom==0) return 1;
 
   hFrameWnd=CreateWindow(ClassName,"",WS_OVERLAPPEDWINDOW|WS_CLIPCHILDREN,
-    0,0,0,0,NULL,NULL,hAppInst,NULL);
+    100,100,0,0,NULL,NULL,hAppInst,NULL);
   if (hFrameWnd==NULL) return 1;
 
   // Load the menu from the resource
@@ -87,6 +99,7 @@ int FrameInit()
   return 0;
 }
 
+#if 0
 int FrameSize()
 {
   RECT WorkArea={0,0,640,480}; // Work area on the desktop
@@ -110,6 +123,42 @@ int FrameSize()
   MoveWindow(hFrameWnd,x,y,w,h,1);
   return 0;
 }
+#else
+int SizeMultiplier = 2;
+
+int FrameSize()
+{
+  RECT size, client;
+  int diffx=-42, diffy=-42, newdiffx, newdiffy;
+  if (SizeMultiplier == 0) return 0;
+
+  /* The loop is necessary because the size of the non-client area
+   * may change when we resize (because of the menu)
+   */
+  while (1)
+  {
+    GetWindowRect(hFrameWnd,&size);
+    GetClientRect(hFrameWnd,&client);
+
+    newdiffx = (size.right-size.left) - client.right;
+    newdiffy = (size.bottom-size.top) - client.bottom;
+
+    if (diffx==newdiffx && diffy==newdiffy) break;
+
+    diffx = newdiffx;
+    diffy = newdiffy;
+
+    MoveOK = timeGetTime();
+    MoveWindow(hFrameWnd,
+        size.left,
+        size.top,
+        diffx + ScrnWidth*SizeMultiplier,
+        diffy + ScrnHeight*SizeMultiplier+StatusHeight(),
+    1);
+  }
+  return 0;
+}
+#endif
 
 int FrameExit()
 {

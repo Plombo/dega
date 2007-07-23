@@ -154,12 +154,18 @@ int MPyEmbed_RunThread(char *file) {
 	PyThread_acquire_lock(threaddatalock, WAIT_LOCK);
 	
 	PyEval_AcquireThread(threaddata[i].threadstate);
+
+	PyThread_release_lock(threaddatalock);
+	Py_XDECREF(threaddata[i].postframe);
+	PyThread_acquire_lock(threaddatalock, WAIT_LOCK);
+
 	PyThreadState_Clear(threaddata[i].mainstate);
 	PyThreadState_Delete(threaddata[i].mainstate);
 	Py_EndInterpreter(threaddata[i].threadstate);
 	PyEval_ReleaseLock();
 
 	threaddata[i].mainstate = threaddata[i].threadstate = 0;
+	threaddata[i].postframe = 0;
 	PyThread_release_lock(threaddatalock);
 
 	PyThread_release_lock(threaddata[i].exitlock);

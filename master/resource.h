@@ -90,13 +90,17 @@
 #define ID_PYTHON_MEMORY                40113
 #define ID_PYTHON_LOAD                  40114
 #define ID_PYTHON_LOAD_THREAD           40115
+#define ID_SETUP_SCALE_1X               40116
+#define ID_SETUP_SCALE_2X               40117
+#define ID_SETUP_SCALE_3X               40118
+#define ID_SETUP_SCALE_4X               40119
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        107
-#define _APS_NEXT_COMMAND_VALUE         40113
+#define _APS_NEXT_COMMAND_VALUE         40120
 #define _APS_NEXT_CONTROL_VALUE         1005
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

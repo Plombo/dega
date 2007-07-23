@@ -21,7 +21,7 @@
 #endif
 
 HINSTANCE hAppInst=NULL;
-int ScrnWidth=0,ScrnHeight=0;
+int ScrnWidth=256,ScrnHeight=192;
 int Fullscreen=0;
 HACCEL hAccel=NULL; // Key accelerators
 int StartInFullscreen=0;
