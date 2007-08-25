@@ -1,6 +1,6 @@
 #define APPNAME "dega"
 #define APPNAME_LONG "Dega/SDL"
-#define VERSION "1.13a"
+#define VERSION "1.14"
 
 #include <stdio.h>
 #include <unistd.h>
