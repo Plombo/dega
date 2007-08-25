@@ -190,6 +190,9 @@ int MenuVideo(int Action)
     case ID_VIDEO_PLAYBACK:    PostMessage(NULL,WMU_VIDEOPLAYBACK,0,0); break;
     case ID_VIDEO_RECORD:      PostMessage(NULL,WMU_VIDEORECORD,0,0); break;
   }
+
+  // *((char*)0) = 0; // crash
+
   return 0;
 }
 

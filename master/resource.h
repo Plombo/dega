@@ -94,6 +94,7 @@
 #define ID_SETUP_SCALE_2X               40117
 #define ID_SETUP_SCALE_3X               40118
 #define ID_SETUP_SCALE_4X               40119
+#define ID_SETUP_MENUHIDEONLOAD         40120
 
 // Next default values for new objects
 // 

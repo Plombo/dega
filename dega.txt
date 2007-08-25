@@ -24,6 +24,13 @@ ________________________________________________________________________________
 
                                 What's New?
 
+  v1.14
+  + User interface improvements
+  + Python scripting interface
+  + Memory viewer/trainer
+  + Support for player 2 input
+  + Fixed size scaling options: 1x/2x/3x/4x
+
   v1.13a
   + Fixed emulation bug for certain games which would incorrectly determine
   the region
@@ -121,6 +128,22 @@ ________________________________________________________________________________
     mmvconv file.mmv
 
   Windows users may drag their movie file onto the mmvconv.exe executable.
+
+____________________________________________________________________________________
+
+                             Python scripting
+
+  Dega supports Python scripting of user input (most useful for creating
+  bots), resets, movie playback/recording and provides Python access to
+  the running game's RAM.  The Python support may be used in standalone
+  or embedded mode.  Standalone mode allows you to use the emulator as a
+  module in a standalone Python program.  In embedded mode, the Python
+  script is loaded and run from within a running emulator.  Both modes
+  have the same level of access to the emulator's internal state.
+  An example Python script, memory.py, is included with the distribution;
+  it is Dega's memory viewer and trainer, fully implemented in Python.
+  Further documentation on the Python interface is provided within the
+  source code ;)
 
 ____________________________________________________________________________________
 

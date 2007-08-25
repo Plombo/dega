@@ -121,6 +121,7 @@ BEGIN
             MENUITEM "Auto",                      ID_SETUP_STATUSAUTO
             MENUITEM "Show",                      ID_SETUP_STATUSSHOW
         END
+        MENUITEM "Auto-Hide Menu Bar",            ID_SETUP_MENUHIDEONLOAD
     END
     POPUP "&Graphics"
     BEGIN

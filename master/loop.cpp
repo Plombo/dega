@@ -2,6 +2,7 @@
 #include "app.h"
 
 static int ShowMenu=1;
+int MenuHideOnLoad=1;
 int SetupPal=0;
 int LoopPause=0;
 static MSG Msg;
@@ -49,7 +50,7 @@ static int MediaInit(int Level)
     unsigned int Enabled=MF_GRAYED;
     char WinName[128]="";
     Ret=EmuLoad();
-    if (Ret==0) { ShowMenu=0; Enabled=MF_ENABLED; LoopPause=0; }
+    if (Ret==0) { if (MenuHideOnLoad) ShowMenu=0; Enabled=MF_ENABLED; LoopPause=0; }
     else EmuFree();
     EnableMenuItem(hFrameMenu,ID_FILE_RESET    ,Enabled);
     EnableMenuItem(hFrameMenu,ID_FILE_FREEROM  ,Enabled);
@@ -155,6 +156,7 @@ static int MediaInit(int Level)
     CHK(ID_SETUP_STATUSHIDE, StatusMode==STATUS_HIDE)
     CHK(ID_SETUP_STATUSAUTO, StatusMode==STATUS_AUTO)
     CHK(ID_SETUP_STATUSSHOW, StatusMode==STATUS_SHOW)
+    CHK(ID_SETUP_MENUHIDEONLOAD, MenuHideOnLoad)
     CHK(ID_INPUT_KEYBOARD,UseJoystick==0)
     CHK(ID_INPUT_JOYSTICK,UseJoystick!=0)
     CHK(ID_STATE_AUTOLOADSAVE,AutoLoadSave!=0)
@@ -384,6 +386,7 @@ int LoopDo()
       if (Msg.wParam==ID_SETUP_STATUSHIDE) { SetStatusMode(STATUS_HIDE); }
       if (Msg.wParam==ID_SETUP_STATUSAUTO) { SetStatusMode(STATUS_AUTO); }
       if (Msg.wParam==ID_SETUP_STATUSSHOW) { SetStatusMode(STATUS_SHOW); }
+      if (Msg.wParam==ID_SETUP_MENUHIDEONLOAD) { MenuHideOnLoad=!MenuHideOnLoad; }
       if (Msg.wParam>=ID_SETUP_SCALE_1X && Msg.wParam<=ID_SETUP_SCALE_4X)
       {
         SizeMultiplier=Msg.wParam-ID_SETUP_SCALE_1X+1;
@@ -452,6 +455,7 @@ MainLoop:
         if (Msg.wParam==ID_SETUP_STATUSHIDE)   { InitLevel=70; break; }
         if (Msg.wParam==ID_SETUP_STATUSAUTO)   { InitLevel=70; break; }
         if (Msg.wParam==ID_SETUP_STATUSSHOW)   { InitLevel=70; break; }
+        if (Msg.wParam==ID_SETUP_MENUHIDEONLOAD) { InitLevel=70; break; }
 
         if (Msg.wParam>=ID_SETUP_SCALE_1X && Msg.wParam<=ID_SETUP_SCALE_4X)
           { InitLevel=70; break; }
@@ -494,6 +498,7 @@ MainLoop:
        MessageBox(hFrameWnd, "You cannot perform this action because a Python script is running.", "Error", MB_OK | MB_ICONERROR);
        goto MainLoop;
     } else {
+      if (InitLevel<=0) MoveOK = timeGetTime();
       // Exit everything
       MediaExit(InitLevel);
 

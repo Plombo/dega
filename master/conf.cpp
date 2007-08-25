@@ -46,6 +46,7 @@ int ConfLoad()
     VAR(StartInFullscreen)
     VAR(StatusMode)
     VAR(MdrawOsdOptions)
+    VAR(MenuHideOnLoad)
 
     VAR(DSoundSamRate)
     VAR(DpsgEnhance)
@@ -96,6 +97,7 @@ int ConfSave()
     VAR(StartInFullscreen)
     VAR(StatusMode)
     VAR(MdrawOsdOptions)
+    VAR(MenuHideOnLoad)
 
     fprintf (h,"\n// Sound\n");
     VAR(DSoundSamRate)

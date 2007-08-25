@@ -43,6 +43,7 @@ extern int PythonLoaded;
 extern int AppShowCmd;
 extern int SetupPal;
 extern int LoopPause;
+extern int MenuHideOnLoad;
 int LoopDo();
 
 // misc.cpp
