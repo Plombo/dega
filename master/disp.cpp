@@ -11,6 +11,33 @@ int TryOverlay=2;
 static int OverlayColor=0;
 static RECT LastOver={0,0,0,0}; // Last overlay rectangle
 
+// courtesy http://mhaggag.wordpress.com/2007/04/14/directdraw-overlays-on-vista-part-ii/
+static void DisableDesktopWindowManager()
+{
+	HMODULE dwmModule = LoadLibrary("dwmapi.dll");
+	if(dwmModule)
+	{
+		typedef HRESULT (STDAPICALLTYPE *DwmIsCompositionEnabledFunc)(BOOL* enabled);
+		typedef HRESULT (STDAPICALLTYPE *DwmEnableCompositionFunc)(UINT action);
+
+		DwmIsCompositionEnabledFunc IsCompositionEnabled =
+			(DwmIsCompositionEnabledFunc)(
+			GetProcAddress(dwmModule, "DwmIsCompositionEnabled"));
+		
+		BOOL enabled;
+		IsCompositionEnabled(&enabled);
+		if(enabled)
+		{
+			DwmEnableCompositionFunc EnableComposition = 
+				(DwmEnableCompositionFunc)(
+				GetProcAddress(dwmModule, "DwmEnableComposition"));
+			EnableComposition(0);
+		}
+
+		FreeLibrary(dwmModule);
+	}
+}
+
 // Create the primary surface
 static int MakePrimarySurface()
 {
@@ -199,6 +226,8 @@ TryAgain:
 int DispInit()
 {
   int Ret=0,MemLen=0;
+
+  DisableDesktopWindowManager();
 
   // Create the DirectDraw interface
   pDD=NULL; Ret=DirectDrawCreate(NULL,&pDD,NULL);

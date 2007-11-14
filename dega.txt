@@ -24,6 +24,9 @@ ________________________________________________________________________________
 
                                 What's New?
 
+  v1.14a
+  + Overlays now work on Windows Vista
+
   v1.14
   + User interface improvements
   + Python scripting interface
