@@ -2,6 +2,9 @@
  * ugly ugly ugly...
  */
 #ifndef LINKAGE_H_ONCE
+
+#include <patchlevel.h>
+
 /* First inclusion (before Python.h) */
 #ifdef EMBEDDED
 #define Py_NO_ENABLE_SHARED 1
@@ -39,8 +42,13 @@
 #define PyEval_ReleaseThread (*pPyEval_ReleaseThread)
 #define PyEval_RestoreThread (*pPyEval_RestoreThread)
 #define PyEval_SaveThread (*pPyEval_SaveThread)
+#if (PY_VERSION_HEX >= 0x02050000)
+#define PyRun_SimpleFileExFlags (*pPyRun_SimpleFileExFlags)
+#define PyRun_AnyFileExFlags (*pPyRun_AnyFileExFlags)
+#else
 #define PyRun_SimpleFile (*pPyRun_SimpleFile)
 #define PyRun_AnyFile (*pPyRun_AnyFile)
+#endif
 #define PySys_SetArgv (*pPySys_SetArgv)
 #define PyThreadState_New (*pPyThreadState_New)
 #define PyThreadState_Delete (*pPyThreadState_Delete)
@@ -70,12 +78,16 @@
 #else /* LINKAGE_H_ONCE */
 /* Second inclusion (after python.h) */
 
+#define _STR(X) #X
+#define STR(X) _STR(X)
+
 #ifdef EMBEDDED
 #ifdef PYDEGA_C
 #ifdef unix
 #include <dlfcn.h>
+#define SO_NAME "libpython" STR(PY_MAJOR_VERSION) "." STR(PY_MINOR_VERSION) ".so"
 #define LNK_INIT \
-	void *handle = dlopen("libpython2.4.so", RTLD_LAZY|RTLD_GLOBAL); \
+	void *handle = dlopen(SO_NAME, RTLD_LAZY|RTLD_GLOBAL); \
 	if (!handle) return 0;
 
 #define LNK_SYM(sym) \
@@ -88,8 +100,9 @@
 
 #ifdef WIN32
 #include <windows.h>
+#define SO_NAME "python" STR(PY_MAJOR_VERSION) STR(PY_MINOR_VERSION) ".dll"
 #define LNK_INIT \
-	HMODULE handle = LoadLibrary("python24.dll"); \
+	HMODULE handle = LoadLibrary(SO_NAME); \
 	if (!handle) return 0;
 
 #define LNK_SYM(sym) \
@@ -132,8 +145,13 @@ int initlinkage(void) {
 	LNK_SYM(PyEval_ReleaseThread)
 	LNK_SYM(PyEval_RestoreThread)
 	LNK_SYM(PyEval_SaveThread)
+#if (PY_VERSION_HEX >= 0x02050000)
+	LNK_SYM(PyRun_SimpleFileExFlags)
+	LNK_SYM(PyRun_AnyFileExFlags)
+#else
 	LNK_SYM(PyRun_SimpleFile)
 	LNK_SYM(PyRun_AnyFile)
+#endif
 	LNK_SYM(PySys_SetArgv)
 	LNK_SYM(PyThreadState_New)
 	LNK_SYM(PyThreadState_Delete)
