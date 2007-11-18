@@ -28,6 +28,7 @@ int mult=0;
 int readonly;
 
 int python;
+int vidflags=0;
 
 int scrlock()
 {
@@ -124,32 +125,52 @@ static int StateSave(char *StateName)
   return 0;
 }
 
+static void LeaveFullScreen() {
+	if (vidflags&SDL_FULLSCREEN) {
+		thescreen = SDL_SetVideoMode(width, height, 8, SDL_SWSURFACE|(vidflags&~SDL_FULLSCREEN));
+	}
+}
+
+static void EnterFullScreen() {
+	if (vidflags&SDL_FULLSCREEN) {
+		thescreen = SDL_SetVideoMode(width, height, 8, SDL_SWSURFACE|vidflags);
+	}
+}
+
 void HandleSaveState() {
 	char buffer[64];
+	LeaveFullScreen();
 	puts("Enter name of state to save:");
 	chompgets(buffer, sizeof(buffer), stdin);
 	StateSave(buffer);
+	EnterFullScreen();
 }
 
 void HandleLoadState() {
 	char buffer[64];
+	LeaveFullScreen();
 	puts("Enter name of state to load:");
 	chompgets(buffer, sizeof(buffer), stdin);
 	StateLoad(buffer);
+	EnterFullScreen();
 }
 
 void HandleRecordMovie(int reset) {
 	char buffer[64];
+	LeaveFullScreen();
 	printf("Enter name of movie to begin recording%s:\n", reset ? " from reset" : "");
 	chompgets(buffer, sizeof(buffer), stdin);
 	MvidStart(buffer, RECORD_MODE, reset);
+	EnterFullScreen();
 }
 
 void HandlePlaybackMovie(void) {
 	char buffer[64];
+	LeaveFullScreen();
 	puts("Enter name of movie to begin playback:");
 	chompgets(buffer, sizeof(buffer), stdin);
 	MvidStart(buffer, PLAYBACK_MODE, 0);
+	EnterFullScreen();
 }
 
 void HandleSetAuthor(void) {
@@ -157,6 +178,7 @@ void HandleSetAuthor(void) {
 	char *pbuffer = buffer, *pbuffer_utf8 = buffer_utf8;
 	size_t buffersiz, buffersiz_utf8 = sizeof(buffer_utf8), bytes;
 	iconv_t cd;
+	LeaveFullScreen();
 	puts("Enter name of author:");
 	chompgets(buffer, sizeof(buffer), stdin);
 	buffersiz = strlen(buffer);
@@ -173,11 +195,13 @@ void HandleSetAuthor(void) {
 	*pbuffer_utf8 = '\0';
 
 	MvidSetAuthor(buffer_utf8);
+
+	EnterFullScreen();
 }
 
 void HandlePython(void) {
 	char buffer[64];
-	FILE *fp;
+	LeaveFullScreen();
 	
 	if (!python) {
 		puts("Python not available!");
@@ -187,6 +211,8 @@ void HandlePython(void) {
 	puts("Enter name of Python control script to execute:");
 	chompgets(buffer, sizeof(buffer), stdin);
 
+	EnterFullScreen();
+
 	MPyEmbed_Run(buffer);
 }
 
@@ -195,8 +221,9 @@ void HandlePythonREPL(void) {
 		puts("Python not available!");
 		return;
 	}
-	
+	LeaveFullScreen();
 	MPyEmbed_Repl();
+	EnterFullScreen();
 }
 
 void *PythonThreadRun(void *pbuf) {
@@ -208,8 +235,8 @@ void *PythonThreadRun(void *pbuf) {
 
 void HandlePythonThread(void) {
 	char *buffer = malloc(64);
-	FILE *fp;
 	pthread_t pythread;
+	LeaveFullScreen();
 	
 	if (!python) {
 		puts("Python not available!");
@@ -218,6 +245,8 @@ void HandlePythonThread(void) {
 
 	puts("Enter name of Python viewer script to execute:");
 	chompgets(buffer, 64, stdin);
+
+	EnterFullScreen();
 
 	pthread_create(&pythread, 0, PythonThreadRun, buffer);
 }
@@ -340,7 +369,6 @@ int main(int argc, char** argv)
 	// options
 	int autodetect=1;
 	int sound=1;
-	int vidflags=0;
 
 	setlocale(LC_CTYPE, "");
 
@@ -475,7 +503,6 @@ int main(int argc, char** argv)
 	{
 		if (!paused || frameadvance)
 		{
-			struct timespec t1, t2;
 			scrlock();
 			MastFrame();
 			scrunlock();
