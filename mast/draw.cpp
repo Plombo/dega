@@ -111,6 +111,16 @@ static INLINE char MdrawBackground(unsigned short nPass)
     unsigned int t; char nPal; int ty;
     unsigned char *Dest;
 
+    if (Masta.v.Reg[0]&0x80 && x>=0xc8)
+    {
+      BackY=Mdraw.Line;
+
+      // Find name table
+      Name=pMastb->VRam + ((Masta.v.Reg[2]<<10)&0x3800);
+      // Find name table line
+      Name+=(BackY>>3)<<6;
+    }
+
     Dest=Mdraw.Data+8+x;
     // Find tile
     t=BackX+x-8; t>>=2; t&=0x3e; t=*((unsigned short *)(Name+t));
