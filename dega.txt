@@ -26,6 +26,7 @@ ________________________________________________________________________________
 
   v1.15
   + Fixed emulation bugs affecting Rygar and Golden Axe Warrior
+  + Saving/loading of memory watch list (courtesy Alden Sliter)
 
   v1.14a
   + Overlays now work on Windows Vista

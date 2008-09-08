@@ -2,6 +2,7 @@ from Tkinter import *
 import tkFont
 import tkSimpleDialog
 import tkMessageBox
+import tkFileDialog
 from pydega import *
 
 def askhex(prompt, validate = lambda v: None):
@@ -183,6 +184,12 @@ class MemoryViewer:
 		b = Button(self.trainframe, text="Add Watch", command=self.addwatch)
 		b.pack(side=LEFT)
 
+		b = Button(self.trainframe, text="Save List", command=self.savelist)
+		b.pack(side=LEFT)
+
+		b = Button(self.trainframe, text="Load List", command=self.loadlist)
+		b.pack(side=LEFT)
+
 		self.hv = HexView(self.frame, offsets=range(0, len(self.frame_ram), 16), data=(self, "frame_ram"), realdata=dega.ram, columns=16, offset=0xc000)
 		self.hv.pack(side=LEFT, fill=BOTH, expand=1)
 
@@ -235,6 +242,22 @@ class MemoryViewer:
 				self.ramtrain.addresses = []
 			self.ramtrain.addresses.append(v-0xC000)
 			self.doprint(lambda: None)
+
+	def savelist(self):
+		WriteFileName = tkFileDialog.asksaveasfilename()
+		WriteFile = open(WriteFileName, "w")
+		print >> WriteFile, self.ramtrain.addresses
+		WriteFile.close()
+
+        def loadlist(self):
+		self.ramtrain.addresses = []
+		ReadFileName = tkFileDialog.askopenfilename()
+		ReadFile = open(ReadFileName, "r")
+		invalue = eval(ReadFile.readline())
+		for s in invalue:
+			self.ramtrain.addresses.append(s)
+		self.doprint(lambda: None)
+		ReadFile.close()
 
 	def update_controls(self):
 		self.frame.after(100, self.update_controls)
