@@ -24,6 +24,9 @@ ________________________________________________________________________________
 
                                 What's New?
 
+  v1.15
+  + Fixed emulation bugs affecting Rygar and Golden Axe Warrior
+
   v1.14a
   + Overlays now work on Windows Vista
 

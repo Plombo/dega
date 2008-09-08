@@ -2,7 +2,7 @@
 #include "mastint.h"
 #include "md5.h"
 
-int MastVer=0x1140; // Version number of the library
+int MastVer=0x1150; // Version number of the library
 
 unsigned char MastInput[2]={0,0}; // Joypads
 unsigned int MastEx=0; // Extra options
