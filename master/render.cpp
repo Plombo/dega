@@ -1,9 +1,9 @@
 // Graphics Rendering
 #include "app.h"
 
-static unsigned int DispWholePal[0x200];
-static unsigned int DispRedPal  [0x200];
-static unsigned int DispCyanPal [0x200];
+static unsigned int DispWholePal[0x1000];
+static unsigned int DispRedPal  [0x1000];
+static unsigned int DispCyanPal [0x1000];
 static unsigned char *pLine=NULL; int Len=256;
 static unsigned char *ps=NULL;
 int RedBlue3D=1;
@@ -36,14 +36,14 @@ static void RgbToYuv(int& r,int& g,int& b,int& y,int& u,int& v)
 static int WholePalMake(unsigned int *pw,int Filter)
 {
   int i;
-  // Precalc the whole 512 color palette
-  for (i=0; i<0x200; i++,pw++)
+  // Precalc the whole 4096 color palette
+  for (i=0; i<0x1000; i++,pw++)
   {
-    int r,g,b,c; r=i&7; g=(i>>3)&7; b=(i>>6)&7;
+    int r,g,b,c; r=i&15; g=(i>>4)&15; b=(i>>8)&15;
     // Convert to maximum colors
     r*=0xff; g*=0xff; b*=0xff;
-    if (MastEx&MX_GG) { r/=7; g/=7; b/=7; }
-    else { r/=6; g/=6; b/=6; } // Colors e.g. 777 will overflow, but are unused
+    if (MastEx&MX_GG) { r/=15; g/=15; b/=15; }
+    else { r/=12; g/=12; b/=12; } // Colors e.g. 13,13,13 will overflow, but are unused
 
     ColAdjust(r,g,b,Filter);
 

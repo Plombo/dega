@@ -32,7 +32,7 @@ int ShotExit()
 void ShotLine()
 {
   unsigned char *pd,*pEnd,*ps;
-  int Divb=6;
+  int Divb=12;
 
   if (Scr==NULL) return;
 
@@ -43,7 +43,7 @@ void ShotLine()
     if (Mdraw.Line>=24+144) return;
     pd=Scr+1+(Mdraw.Line-24)*481; pEnd=pd+480;
     ps=Mdraw.Data+16+48;
-    Divb=7;
+    Divb=15;
   }
   else
   {
@@ -57,10 +57,10 @@ void ShotLine()
   do
   {
     int v;
-    v=Mdraw.Pal[*ps]; // (0000000r rrgggbbb)
+    v=Mdraw.Pal[*ps]; // (0000rrrr ggggbbbb)
     pd[0]=(unsigned char)((( v    &Divb)*255)/Divb);
-    pd[1]=(unsigned char)((((v>>3)&Divb)*255)/Divb);
-    pd[2]=(unsigned char)((((v>>6)&Divb)*255)/Divb);
+    pd[1]=(unsigned char)((((v>>4)&Divb)*255)/Divb);
+    pd[2]=(unsigned char)((((v>>8)&Divb)*255)/Divb);
     pd+=3; ps++;
   }
   while (pd<pEnd);

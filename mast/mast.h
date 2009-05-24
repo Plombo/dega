@@ -63,7 +63,7 @@ int MastLoadRom(char *Name,unsigned char **pRom,int *pRomLen);
 // Master system scanline
 struct Mdraw
 {
-  unsigned short Pal[0x100]; // Palette (0000000r rrgggbbb) (0x20 used)
+  unsigned short Pal[0x100]; // Palette (0000rrrr ggggbbbb) (0x1000 used)
   unsigned char Data[0x120]; // Pixel values
   unsigned char PalChange;
   int Line; // Image line

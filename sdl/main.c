@@ -621,9 +621,9 @@ void MdrawCall()
 #define p(x) Mdraw.Pal[x]
 		for(i=0;i<0x100;i++)
 		{
-			themap[i].r=(p(i)&7)<<5;
-			themap[i].g=(p(i)&56)<<2;
-			themap[i].b=(p(i)&448)>>1;
+			themap[i].r=(p(i)&0x00f)<<4;
+			themap[i].g=(p(i)&0x0f0);
+			themap[i].b=(p(i)&0xf00)>>4;
 		}
 		SDL_SetColors(thescreen, themap, 0, 256);
 	}
