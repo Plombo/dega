@@ -30,7 +30,11 @@
 #define PyType_IsSubtype (*pPyType_IsSubtype)
 #define PyType_Ready (*pPyType_Ready)
 #define Py_BuildValue (*pPy_BuildValue)
+#if defined(__x86_64) && (PY_VERSION_HEX >= 0x02050000)
+#define Py_InitModule4_64 (*pPy_InitModule4_64)
+#else
 #define Py_InitModule4 (*pPy_InitModule4)
+#endif
 #define _Py_NoneStruct (*p_Py_NoneStruct)
 #define PyAPI_DATA(RTYPE) static RTYPE
 #endif
@@ -136,7 +140,11 @@ int initlinkage(void) {
 	LNK_SYM(PyType_IsSubtype)
 	LNK_SYM(PyType_Ready)
 	LNK_SYM(Py_BuildValue)
+#if defined(__x86_64) && (PY_VERSION_HEX >= 0x02050000)
+	LNK_SYM(Py_InitModule4_64)
+#else
 	LNK_SYM(Py_InitModule4)
+#endif
 	LNK_SYM(_Py_NoneStruct)
 	LNK_SYM(Py_Initialize)
 	LNK_SYM(Py_Finalize)

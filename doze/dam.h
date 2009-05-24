@@ -8,7 +8,7 @@
 // dam.cpp
 extern char DamPc[];
 extern char DamCycles[];
-int ot(char *Format,...);
+int ot(const char *Format,...);
 void DamAlign();
 void DamVarToReg();
 void DamRegToVar();
@@ -59,3 +59,22 @@ int DamoOp(unsigned int op);
 
 // damt.cpp
 int DamTables();
+
+#ifdef __x86_64
+
+#define DPTR "dq"
+#define PTRSIZE "qword"
+#define PTRSIZEB "8"
+#define PTRREG "r"
+
+#else
+
+#define DPTR "dd"
+#define PTRSIZE "dword"
+#define PTRSIZEB "4"
+#define PTRREG "e"
+
+#endif
+
+#define RPUSH "push " PTRREG
+#define RPOP "pop " PTRREG

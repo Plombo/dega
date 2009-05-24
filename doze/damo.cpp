@@ -219,7 +219,7 @@ int DamoOp(unsigned int op)
     DamOpDone(4,1);
     DamFetch(0,1); DamAddPc(1);
     ot("  xor dh,dh\n");
-    ot("  jmp [JumpTabCB+edx*4]\n\n");
+    ot("  jmp [JumpTabCB+edx*" PTRSIZEB "]\n\n");
     return op;
   }
 
@@ -246,8 +246,8 @@ int DamoOp(unsigned int op)
     ot("  ; Fetch op, and skip the I?+nn byte:\n");
     DamFetch(1,1); DamAddPc(2);
     ot("  xor dh,dh\n");
-    if (op==0xfdcb) ot("  jmp [JumpTabFDCB+edx*4]\n");
-    else            ot("  jmp [JumpTabDDCB+edx*4]\n");
+    if (op==0xfdcb) ot("  jmp [JumpTabFDCB+edx*" PTRSIZEB "]\n");
+    else            ot("  jmp [JumpTabDDCB+edx*" PTRSIZEB "]\n");
     return op;
   }
 
@@ -307,7 +307,7 @@ int DamoOp(unsigned int op)
     DamOpDone(4,1);
     DamFetch(0,1); DamAddPc(1);
     ot("  xor dh,dh\n");
-    ot("  jmp [JumpTabDD+edx*4]\n\n");
+    ot("  jmp [JumpTabDD+edx*" PTRSIZEB "]\n\n");
     return op;
   }
 
@@ -330,7 +330,7 @@ int DamoOp(unsigned int op)
     DamOpDone(4,1);
     DamFetch(0,1); DamAddPc(1);
     ot("  xor dh,dh\n");
-    ot("  jmp [JumpTabED+edx*4]\n\n");
+    ot("  jmp [JumpTabED+edx*" PTRSIZEB "]\n\n");
     return op;
   }
 
@@ -398,7 +398,7 @@ int DamoOp(unsigned int op)
     DamOpDone(4,1);
     DamFetch(0,1); DamAddPc(1);
     ot("  xor dh,dh\n");
-    ot("  jmp [JumpTabFD+edx*4]\n");
+    ot("  jmp [JumpTabFD+edx*" PTRSIZEB "]\n");
     return op;
   }
 

@@ -30,7 +30,7 @@ int DamJumpTab()
       if (t==6) ot("JumpTabFDCB: ; FDCB__xx opcodes:\n");
     }
 
-    if (((i+0)&0x0f)==0) ot("dd ");
+    if (((i+0)&0x0f)==0) ot(DPTR " ");
 
     ot("Op%.2X",nTarget);
 

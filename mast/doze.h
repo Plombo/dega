@@ -39,9 +39,9 @@ struct DozeReg
 extern struct DozeReg Doze;
 extern int nDozeCycles;
 // Memory access:
-extern unsigned int DozeMemFetch[0x100];
-extern unsigned int DozeMemRead [0x100];
-extern unsigned int DozeMemWrite[0x100];
+extern unsigned long DozeMemFetch[0x100];
+extern unsigned long DozeMemRead [0x100];
+extern unsigned long DozeMemWrite[0x100];
 unsigned char __cdecl DozeAsmRead(unsigned short nAddr);
 
 // doze.cpp

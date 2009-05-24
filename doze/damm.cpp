@@ -100,11 +100,11 @@ int DamMacros()
 {
   ot(
   "%%macro SAVE_REGS 0\n"
-  "  push ebx\n  push ecx\n  push edx\n  push esi\n  push edi\n  push ebp\n"
+  "  " RPUSH "bx\n  " RPUSH "cx\n  " RPUSH "dx\n  " RPUSH "si\n  " RPUSH "di\n  " RPUSH "bp\n"
   "%%endmacro\n\n"
 
   "%%macro RESTORE_REGS 0\n"
-  "  pop ebp\n  pop edi\n  pop esi\n  pop edx\n  pop ecx\n  pop ebx\n"
+  "  " RPOP "bp\n  " RPOP "di\n  " RPOP "si\n  " RPOP "dx\n  " RPOP "cx\n  " RPOP "bx\n"
   "%%endmacro\n\n"
   );
 
@@ -144,33 +144,33 @@ int DamMacros()
   "; Fetch byte (esi) ==> dl\n"
   "  mov dx,si\n"
   "  shr dx,8\n"
-  "  mov ebp,dword[_DozeMemFetch+edx*4]\n"
+  "  mov " PTRREG "bp," PTRSIZE "[_DozeMemFetch+edx*" PTRSIZEB "]\n"
   "  xor edx,edx\n"
-  "  mov dl,byte [ebp+esi]\n"
-  "  xor ebp,ebp\n"
+  "  mov dl,byte [" PTRREG "bp+" PTRREG "si]\n"
+  "  xor " PTRREG "bp," PTRREG "bp\n"
   "%%endmacro\n\n"
 
   "%%macro DAM_FETCH16 0\n"
   "; Fetch word  (esi) ==> dx\n"
   "  mov dx,si\n"
   "  shr dx,8\n"
-  "  mov ebp,dword[_DozeMemFetch+edx*4]\n"
+  "  mov " PTRREG "bp," PTRSIZE "[_DozeMemFetch+edx*" PTRSIZEB "]\n"
   "  xor edx,edx\n"
-  "  mov dx,word [ebp+esi]\n"
-  "  xor ebp,ebp\n"
+  "  mov dx,word [" PTRREG "bp+" PTRREG "si]\n"
+  "  xor " PTRREG "bp," PTRREG "bp\n"
   "%%endmacro\n\n"
 
   "%%macro DAM_READ8 0\n"
   "; Read byte   (edi) ==> dl\n"
   "  mov ebp,edi\n"
   "  shr bp,8\n"
-  "  mov ebp,dword[_DozeMemRead+ebp*4]\n"
-  "  test ebp,ebp\n"
+  "  mov " PTRREG "bp," PTRSIZE "[_DozeMemRead+ebp*" PTRSIZEB "]\n"
+  "  test " PTRREG "bp," PTRREG "bp\n"
   "  jnz %%%%Direct\n"
   "  call Read\n"
   "  jmp %%%%Done\n"
   "%%%%Direct:\n"
-  "  mov dl,byte [ebp+edi]\n"
+  "  mov dl,byte [" PTRREG "bp+" PTRREG "di]\n"
   "%%%%Done:\n"
   "%%endmacro\n\n"
 
@@ -178,13 +178,13 @@ int DamMacros()
   "; Write byte  dl ==> (edi)\n"
   "  mov ebp,edi\n"
   "  shr bp,8\n"
-  "  mov ebp,dword[_DozeMemWrite+ebp*4]\n"
-  "  test ebp,ebp\n"
+  "  mov " PTRREG "bp," PTRSIZE "[_DozeMemWrite+ebp*" PTRSIZEB "]\n"
+  "  test " PTRREG "bp," PTRREG "bp\n"
   "  jnz %%%%Direct\n"
   "  call Write\n"
   "  jmp %%%%Done\n"
   "%%%%Direct:\n"
-  "  mov byte [ebp+edi],dl\n"
+  "  mov byte [" PTRREG "bp+" PTRREG "di],dl\n"
   "%%%%Done:\n"
   "%%endmacro\n\n"
 
@@ -216,7 +216,7 @@ int DamMacros()
   DamFetch(0,1); DamAddPc(1);
   ot(
   "  xor dh,dh\n"
-  "  jmp [JumpTab+edx*4]\n"
+  "  jmp [JumpTab+edx*" PTRSIZEB "]\n"
   "%%endmacro\n\n"
   );
 

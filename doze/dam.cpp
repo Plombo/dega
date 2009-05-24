@@ -7,7 +7,7 @@ static FILE *Out=NULL;
 char DamPc[]="si";
 char DamCycles[]="dword [_nDozeCycles]";
 
-int ot(char *Format,...)
+int ot(const char *Format,...)
 {
   va_list Arg; va_start(Arg,Format);
   if (Out!=NULL) vfprintf(Out,Format,Arg);
@@ -49,11 +49,11 @@ static int DamVariables()
   ot("TmpFlag: db 0\n");
   DamAlign();
   ot("global _DozeMemFetch\n");
-  ot("_DozeMemFetch: times 0x100 dd 0\n");
+  ot("_DozeMemFetch: times 0x100 " DPTR " 0\n");
   ot("global _DozeMemRead\n");
-  ot("_DozeMemRead:  times 0x100 dd 0\n");
+  ot("_DozeMemRead:  times 0x100 " DPTR " 0\n");
   ot("global _DozeMemWrite\n");
-  ot("_DozeMemWrite: times 0x100 dd 0\n");
+  ot("_DozeMemWrite: times 0x100 " DPTR " 0\n");
   return 0;
 }
 
@@ -85,11 +85,15 @@ static int DamCall()
   "extern _DozeRead\n"
   "Read:\n"
   "  REG_TO_DOZE\n"
-  "  push edx\n  push edi\n"
-  "  push edi\n"
+  "  " RPUSH "dx\n  " RPUSH "di\n"
+#ifndef __x86_64
+  "  " RPUSH "di\n"
+#endif
   "  call _DozeRead\n"
-  "  add esp,4\n"
-  "  pop edi\n  pop edx\n\n"
+#ifndef __x86_64
+  "  add esp," PTRSIZEB "\n"
+#endif
+  "  " RPOP "di\n  " RPOP "dx\n\n"
   "  mov dl,al\n"
   "  DOZE_TO_REG\n"
   "  ret\n\n"
@@ -100,12 +104,18 @@ static int DamCall()
   "extern _DozeWrite\n"
   "Write:\n"
   "  REG_TO_DOZE\n"
-  "  push edx\n  push edi\n"
-  "  push edx\n"
-  "  push edi\n"
+  "  " RPUSH "dx\n  " RPUSH "di\n"
+#ifdef __x86_64
+  "  mov rsi,rdx\n"
+#else
+  "  " RPUSH "dx\n"
+  "  " RPUSH "di\n"
+#endif
   "  call _DozeWrite\n"
-  "  add esp,8\n"
-  "  pop edi\n  pop edx\n\n"
+#ifndef __x86_64
+  "  add esp," PTRSIZEB "*2\n"
+#endif
+  "  " RPOP "di\n  " RPOP "dx\n\n"
   "  DOZE_TO_REG\n"
   "  ret\n\n"
   );
@@ -115,11 +125,15 @@ static int DamCall()
   "extern _DozeIn\n"
   "PortIn:\n"
   "  REG_TO_DOZE\n"
-  "  push edx\n  push edi\n"
-  "  push edi\n"
+  "  " RPUSH "dx\n  " RPUSH "di\n"
+#ifndef __x86_64
+  "  " RPUSH "di\n"
+#endif
   "  call _DozeIn\n"
-  "  add esp,4\n"
-  "  pop edi\n  pop edx\n\n"
+#ifndef __x86_64
+  "  add esp," PTRSIZEB "\n"
+#endif
+  "  " RPOP "di\n  " RPOP "dx\n\n"
   "  mov dl,al\n"
   "  DOZE_TO_REG\n"
   "  ret\n\n"
@@ -130,12 +144,18 @@ static int DamCall()
   "extern _DozeOut\n"
   "PortOut:\n"
   "  REG_TO_DOZE\n"
-  "  push edx\n  push edi\n"
-  "  push edx\n"
-  "  push edi\n"
+  "  " RPUSH "dx\n  " RPUSH "di\n"
+#ifdef __x86_64
+  "  mov rsi,rdx\n"
+#else
+  "  " RPUSH "dx\n"
+  "  " RPUSH "di\n"
+#endif
   "  call _DozeOut\n"
-  "  add esp,8\n"
-  "  pop edi\n  pop edx\n\n"
+#ifndef __x86_64
+  "  add esp," PTRSIZEB "*2\n"
+#endif
+  "  " RPOP "di\n  " RPOP "dx\n\n"
   "  DOZE_TO_REG\n"
   "  ret\n\n"
   );
@@ -145,7 +165,11 @@ static int DamCall()
   "; Call a routine\n"
   "global _DozeAsmCall\n"
   "_DozeAsmCall:\n"
-  "  mov ax,word[esp+4] ; Get address\n"
+#ifdef __x86_64
+  "  mov ax,di\n"
+#else
+  "  mov ax,word[esp+" PTRSIZEB "] ; Get address\n"
+#endif
   "  mov word[Tmp16],ax\n"
   "  SAVE_REGS\n"
   "  REG_BLANK\n"
@@ -167,7 +191,11 @@ static int DamCall()
   "; Read a byte from memory\n"
   "global _DozeAsmRead\n"
   "_DozeAsmRead:\n"
-  "  mov ax,word[esp+4] ; Get address\n"
+#ifdef __x86_64
+  "  mov ax,di\n"
+#else
+  "  mov ax,word[esp+" PTRSIZEB "] ; Get address\n"
+#endif
   "  mov word[Tmp16],ax\n"
   "  SAVE_REGS\n"
   "  REG_BLANK\n"
@@ -188,7 +216,11 @@ static int DamMain()
 {
   int i=0;
   ot("; Doze - Dave's Z80 Emulator - Assembler output\n\n");
+#ifdef __x86_64
+  ot("bits 64\n\n");
+#else
   ot("bits 32\n\n");
+#endif
 
   ot("section .data\n\n");
   DamVariables();

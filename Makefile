@@ -23,7 +23,11 @@ PYOBJ = python/pydega.o python/stdalone.o
 PYEMBOBJ = python/pydega.emb.o python/embed.emb.o
 
 ifeq ($(P),unix)
+ifeq ($(BITS),64)
+	NASM_FORMAT = elf64
+else
 	NASM_FORMAT = elf
+endif
 	EXEEXT =
 	SOEXT = .so
 	PLATOBJ = sdl/main.o
