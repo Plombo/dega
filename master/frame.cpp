@@ -85,7 +85,7 @@ int FrameInit()
   wc.lpfnWndProc=WindowProc;
   wc.hInstance=hAppInst;
   wc.hIcon=LoadIcon(hAppInst,MAKEINTRESOURCE(IDI_ICON1));
-  wc.hCursor=LoadCursor(NULL,MAKEINTRESOURCE(IDC_ARROW));
+  wc.hCursor=LoadCursor(NULL,IDC_ARROW);
   wc.lpszClassName=ClassName;
   Atom=RegisterClassEx(&wc);
   if (Atom==0) return 1;

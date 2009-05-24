@@ -56,19 +56,29 @@ else ifeq ($(P),win)
 	PYTHON_PREFIX = /home/peter/pytest/winpython
 	PYTHON_CFLAGS = -I$(PYTHON_PREFIX)/include $(CFLAGS)
 	PYTHON_CXXFLAGS = -I$(PYTHON_PREFIX)/include $(CFLAGS)
-	PYTHON_LDFLAGS = $(PYTHON_PREFIX)/libs/python24.dll
+	PYTHON_LDFLAGS = $(PYTHON_PREFIX)/DLLs/python25.dll
+endif
+
+ALLOBJ = dega$(EXEEXT) mmvconv$(EXEEXT)
+
+ifeq ($(P),unix)
+ALLOBJ += degavi$(EXEEXT)
+endif
+
+ifneq ($(BITS),64)
+ALLOBJ += pydega$(SOEXT)
 endif
 
 ifeq ($(P),unix)
 
-all: dega$(EXEEXT) degavi$(EXEEXT) mmvconv$(EXEEXT) pydega$(SOEXT)
+all: $(ALLOBJ)
 
 release:
 	darcs dist --dist-name dega-$(R)
 
 else ifeq ($(P),win)
 
-all: dega$(EXEEXT) mmvconv$(EXEEXT) pydega$(SOEXT)
+all: $(ALLOBJ)
 
 zlib/libz.a:
 	make -Czlib libz.a
@@ -114,7 +124,7 @@ master/app.o: master/app.rc
 	cd master && $(WINDRES) -o app.o app.rc
 
 specs:
-	sed -e 's/-lmsvcrt/-lmsvcr71/g' $(shell $(CC) -v 2>&1 | head -1 | cut -d' ' -f4) > specs
+	$(CC) -dumpspecs | sed -e 's/-lmsvcrt/-lmsvcr71/g' > specs
 
 $(PYOBJ): %.o: %.c
 	$(CC) -c -o $@ $< $(PYTHON_CFLAGS)

@@ -45,6 +45,8 @@ ARFLAGS = rcs
 RC = windres
 RCFLAGS = --define GCC_WINDRES
 
+RANLIB = ranlib
+
 CP = cp -fp
 # If GNU install is available, replace $(CP) with install.
 INSTALL = $(CP)
@@ -75,6 +77,7 @@ testdll: example_d minigzip_d
 
 $(STATICLIB): $(OBJS) $(OBJA)
 	$(AR) $(ARFLAGS) $@ $(OBJS) $(OBJA)
+	$(RANLIB) $@
 
 $(IMPLIB): $(SHAREDLIB)
 
