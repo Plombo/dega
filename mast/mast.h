@@ -98,6 +98,7 @@ struct MvidHeader {
 #define RECORD_MODE 1
 #define VIDFLAG_PAL   (1<<1)
 #define VIDFLAG_JAPAN (1<<2)
+#define VIDFLAG_GG    (1<<3)
 int MvidReadHeader(FILE *file, struct MvidHeader *header);
 int MvidStart(char *videoFilename, int mode, int reset);
 void MvidStop();

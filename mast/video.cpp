@@ -161,6 +161,9 @@ int MvidStart(char *filename, int mode, int reset) {
 			if (MastEx & MX_JAPAN) {
 				currentMovie.vidFlags |= VIDFLAG_JAPAN;
 			}
+			if (MastEx & MX_GG) {
+				currentMovie.vidFlags |= VIDFLAG_GG;
+			}
 			fwrite(&currentMovie.vidFlags, 4, 1, videoFile);    // 0060: flags
 
 			memcpy(currentMovie.vidRomName, MastRomName, 128);
