@@ -100,12 +100,12 @@ struct MvidHeader {
 #define VIDFLAG_JAPAN (1<<2)
 #define VIDFLAG_GG    (1<<3)
 int MvidReadHeader(FILE *file, struct MvidHeader *header);
-int MvidStart(char *videoFilename, int mode, int reset);
+int MvidStart(char *videoFilename, int mode, int reset, char *author);
 void MvidStop();
 void MvidPostLoadState(int readonly);
 void MvidPostSaveState();
 int MvidSetAuthor(char *author);
-char *MvidGetAuthor();
+void MvidGetAuthor(char *author, int len);
 int MvidGetFrameCount();
 int MvidGetRerecordCount();
 int MvidGotProperties();

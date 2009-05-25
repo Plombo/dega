@@ -160,7 +160,7 @@ void HandleRecordMovie(int reset) {
 	LeaveFullScreen();
 	printf("Enter name of movie to begin recording%s:\n", reset ? " from reset" : "");
 	chompgets(buffer, sizeof(buffer), stdin);
-	MvidStart(buffer, RECORD_MODE, reset);
+	MvidStart(buffer, RECORD_MODE, reset, 0);
 	EnterFullScreen();
 }
 
@@ -169,7 +169,7 @@ void HandlePlaybackMovie(void) {
 	LeaveFullScreen();
 	puts("Enter name of movie to begin playback:");
 	chompgets(buffer, sizeof(buffer), stdin);
-	MvidStart(buffer, PLAYBACK_MODE, 0);
+	MvidStart(buffer, PLAYBACK_MODE, 0, 0);
 	EnterFullScreen();
 }
 

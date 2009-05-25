@@ -202,16 +202,27 @@ int MenuVideo(int Action)
 
 void VideoRecord()
 {
-  MvidStart(VideoName, RECORD_MODE, VideoReset);
-  MvidSetAuthor(VideoAuthor);
-  RunText("Movie record", 2*60);
+  int rv = MvidStart(VideoName, RECORD_MODE, VideoReset, VideoAuthor);
+  if (rv == -1) {
+	char err[512];
+	snprintf(err, sizeof(err), "Unable to start recording to %s:\n\n%s", VideoName, strerror(errno));
+	MessageBox(hFrameWnd, err, "Error", MB_ICONERROR | MB_OK);
+  } else {
+	RunText("Movie record", 2*60);
+  }
 }
 
 void VideoPlayback()
 {
-  MvidStart(VideoName, PLAYBACK_MODE, 0);
-  SetupPal = (MastEx & MX_PAL) ? 1 : 0;
-  RunText("Movie playback", 2*60);
+  int rv = MvidStart(VideoName, PLAYBACK_MODE, 0, 0);
+  if (rv == -1) {
+	char err[512];
+	snprintf(err, sizeof(err), "Unable to start playback from %s:\n\n%s", VideoName, strerror(errno));
+	MessageBox(hFrameWnd, err, "Error", MB_ICONERROR | MB_OK);
+  } else {
+	SetupPal = (MastEx & MX_PAL) ? 1 : 0;
+	RunText("Movie playback", 2*60);
+  }
 }
 
 void MvidModeChanged() {}
@@ -227,8 +238,9 @@ static BOOL CALLBACK VideoPropertiesProc(HWND hwndDlg, UINT uMsg, WPARAM wParam,
 		int frameCount = MvidGetFrameCount(), rerecordCount = MvidGetRerecordCount();
 		char frameCountStr[16], rerecordCountStr[16];
 
-		char *authorName = MvidGetAuthor();
+		char authorName[65];
 		WCHAR authorNameWide[128];
+		MvidGetAuthor(authorName, sizeof(authorName));
 
 		snprintf(frameCountStr, sizeof(frameCountStr), "%d", frameCount);
 		SetDlgItemText(hwndDlg, IDT_MP_FRAMECOUNT, frameCountStr);

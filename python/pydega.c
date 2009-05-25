@@ -294,17 +294,17 @@ static PyObject *pydega_hard_reset(PyObject *self, PyObject *args) {
 }
 
 static PyObject *pydega_movie_start(PyObject *self, PyObject *args, PyObject *kwds) {
-	static char *kwlist[] = { "movie", "mode", "reset", 0 };
-	char *movie;
+	static char *kwlist[] = { "movie", "mode", "reset", "author", 0 };
+	char *movie, *author = 0;
 	int mode = RECORD_MODE, reset = 0;
 	int rv;
 
-	if (!PyArg_ParseTupleAndKeywords(args, kwds, "s|ii", kwlist,
-			&movie, &mode, &reset)) {
+	if (!PyArg_ParseTupleAndKeywords(args, kwds, "s|iis", kwlist,
+			&movie, &mode, &reset, &author)) {
 		return NULL;
 	}
 
-	rv = MvidStart(movie, mode, reset);
+	rv = MvidStart(movie, mode, reset, author);
 	if (rv == -1) {
 		return PyErr_SetFromErrno(PyExc_IOError);
 	}

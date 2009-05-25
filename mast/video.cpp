@@ -83,7 +83,7 @@ int MvidReadHeader(FILE *file, struct MvidHeader *header) {
 	return 1;
 }
 
-int MvidStart(char *filename, int mode, int reset) {
+int MvidStart(char *filename, int mode, int reset, char *author) {
 	int changed = 0; 
 
 	if (videoFile != NULL) {
@@ -152,6 +152,7 @@ int MvidStart(char *filename, int mode, int reset) {
 			fwrite(&currentMovie.packetSize, 4, 1, videoFile);  // 001c: size of input packet
 
 			memset(currentMovie.videoAuthor, 0, sizeof(currentMovie.videoAuthor));
+			if (author) strncpy(currentMovie.videoAuthor, author, sizeof(currentMovie.videoAuthor));
 			fwrite(currentMovie.videoAuthor, sizeof(currentMovie.videoAuthor), 1, videoFile); // 0020-005f: author
 
 			currentMovie.vidFlags = 0;
@@ -218,6 +219,7 @@ int MvidSetAuthor(char *author) {
 
 	if (videoFile) fflush(videoFile);
 	rwVideoFile = fopen(videoFilename, "r+b");
+	if (rwVideoFile == 0) return 0;
 	fseek(rwVideoFile, 0x20, SEEK_SET);
 	fwrite(currentMovie.videoAuthor, sizeof(currentMovie.videoAuthor), 1, rwVideoFile);
 	fclose(rwVideoFile);
@@ -225,8 +227,10 @@ int MvidSetAuthor(char *author) {
 	return 1;
 }
 
-char *MvidGetAuthor() {
-	return currentMovie.videoAuthor;
+void MvidGetAuthor(char *author, int len) {
+	if (len > sizeof(currentMovie.videoAuthor)+1) len = sizeof(currentMovie.videoAuthor)+1;
+	strncpy(author, currentMovie.videoAuthor, len);
+	author[len-1] = 0;
 }
 
 int MvidGotProperties() {

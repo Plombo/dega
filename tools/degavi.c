@@ -246,7 +246,7 @@ int main(int argc, char **argv) {
 	MsndInit();
 
 	if (movieFile != 0) {
-		frames = MvidStart(movieFile, PLAYBACK_MODE, 0);
+		frames = MvidStart(movieFile, PLAYBACK_MODE, 0, 0);
 	}
 
 	MsndLen=(MsndRate+(framerate>>1))/framerate;
