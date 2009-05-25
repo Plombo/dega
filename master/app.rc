@@ -322,7 +322,7 @@ BEGIN
 //  LTEXT "Wibble", IDT_RI_FILENAME, 5, 5, 190, 10
 END
 
-IDD_PLAYBACK_INFO DIALOGEX 0, 0, 250, 100
+IDD_PLAYBACK_INFO DIALOGEX 0, 0, 250, 110
 STYLE WS_CHILD|WS_CLIPSIBLINGS|DS_3DLOOK|DS_CONTROL|DS_SHELLFONT
 CAPTION "Playback Info"
 FONT 8, "MS Shell Dlg"
@@ -338,18 +338,27 @@ BEGIN
 
   LTEXT "From reset:", 0, 10, 40, 100, 10
   LTEXT "", IDT_PI_RESET, 100, 40, 30, 10
-  
-  LTEXT "Current ROM name:", 0, 10, 55, 100, 10
-  LTEXT "", IDT_PI_ROM, 100, 55, 140, 10
 
-  LTEXT "Movie ROM name:", 0, 10, 65, 100, 10
-  LTEXT "", IDT_PI_MOVIE_ROM, 100, 65, 140, 10
-  
-  LTEXT "Current ROM checksum:", 0, 10, 75, 100, 10
-  LTEXT "", IDT_PI_DIGEST, 100, 75, 140, 10
+  LTEXT "PAL:", 0, 10, 50, 40, 10
+  LTEXT "", IDT_PI_PAL, 50, 50, 20, 10
 
-  LTEXT "Movie ROM checksum:", 0, 10, 85, 100, 10
-  LTEXT "", IDT_PI_MOVIE_DIGEST, 100, 85, 140, 10
+  LTEXT "Japan:", 0, 70, 50, 40, 10
+  LTEXT "", IDT_PI_JAPAN, 110, 50, 20, 10
+
+  LTEXT "Game Gear:", 0, 130, 50, 40, 10
+  LTEXT "", IDT_PI_GG, 150, 50, 20, 10
+  
+  LTEXT "Current ROM name:", 0, 10, 65, 100, 10
+  LTEXT "", IDT_PI_ROM, 100, 65, 140, 10
+
+  LTEXT "Movie ROM name:", 0, 10, 75, 100, 10
+  LTEXT "", IDT_PI_MOVIE_ROM, 100, 75, 140, 10
+  
+  LTEXT "Current ROM checksum:", 0, 10, 85, 100, 10
+  LTEXT "", IDT_PI_DIGEST, 100, 85, 140, 10
+
+  LTEXT "Movie ROM checksum:", 0, 10, 95, 100, 10
+  LTEXT "", IDT_PI_MOVIE_DIGEST, 100, 95, 140, 10
 END 
 
 #endif    // English (U.K.) resources

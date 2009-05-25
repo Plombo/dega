@@ -26,6 +26,9 @@
 #define IDT_PI_MOVIE_ROM                1012
 #define IDT_PI_DIGEST                   1013
 #define IDT_PI_MOVIE_DIGEST             1014
+#define IDT_PI_PAL                      1015
+#define IDT_PI_JAPAN                    1016
+#define IDT_PI_GG                       1017
 
 #define ID_FILE_LOADROM                 40001
 #define ID_FILE_RESET                   40002

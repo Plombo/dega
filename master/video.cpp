@@ -64,6 +64,10 @@ static UINT_PTR CALLBACK MenuVideoPlaybackHook(HWND hdlg, UINT uiMsg, WPARAM wPa
 
 					SetDlgItemText(hdlg, IDT_PI_RESET, header.beginReset ? "yes" : "no");
 
+					SetDlgItemText(hdlg, IDT_PI_PAL, (header.vidFlags & VIDFLAG_PAL) ? "yes" : "no");
+					SetDlgItemText(hdlg, IDT_PI_JAPAN, (header.vidFlags & VIDFLAG_JAPAN) ? "yes" : "no");
+					SetDlgItemText(hdlg, IDT_PI_GG, (header.vidFlags & VIDFLAG_GG) ? "yes" : "no");
+
 					SetDlgItemText(hdlg, IDT_PI_MOVIE_ROM, header.vidRomName);
 
 					HexDigest(buf, header.vidDigest);
