@@ -7,18 +7,19 @@ CC=gcc
 CXX=g++
 #CXX=icpc
 NASM=nasm
+WINDRES=windres
 
-TARGET = $(shell $(CC) -v 2>&1 | grep '^Target: ' | sed -e 's/^Target: //g')
+CCVER = $(shell $(CC) -v 2>&1)
 
-ifneq (,$(findstring mingw32,$(TARGET)))
+ifneq (,$(findstring mingw32,$(CCVER)))
 	P=win
-else ifneq (,$(findstring cygwin,$(TARGET)))
+else ifneq (,$(findstring cygwin,$(CCVER)))
 	P=win
 else
 	P=unix
 endif
 
-ifneq (,$(findstring x86_64,$(TARGET)))
+ifneq (,$(findstring x86_64,$(CCVER)))
 	BITS=64
 else
 	BITS=32
@@ -60,7 +61,7 @@ endif
 else ifeq ($(P),win)
 	NASM_FORMAT = win32
 	EXEEXT = .exe
-	SOEXT = .dll
+	SOEXT = .pyd
 	PLATOBJ = master/app.o master/conf.o master/dinp.o master/disp.o master/dsound.o master/emu.o master/frame.o master/input.o master/load.o master/loop.o master/main.o master/misc.o master/python.o master/render.o master/run.o master/shot.o master/state.o master/video.o master/zipfn.o master/keymap.o zlib/libz.a
 	PLATPYOBJ =
 	PLATPYOBJCXX =
@@ -72,7 +73,7 @@ else ifeq ($(P),win)
 	PYTHON_PREFIX = /home/peter/pytest/winpython
 	PYTHON_CFLAGS = -I$(PYTHON_PREFIX)/include $(CFLAGS)
 	PYTHON_CXXFLAGS = -I$(PYTHON_PREFIX)/include $(CFLAGS)
-	PYTHON_LDFLAGS = $(PYTHON_PREFIX)/DLLs/python25.dll
+	PYTHON_LDFLAGS = -L$(PYTHON_PREFIX)/libs -lpython25
 endif
 
 ALLOBJ = dega$(EXEEXT) mmvconv$(EXEEXT)
@@ -97,14 +98,14 @@ else ifeq ($(P),win)
 all: $(ALLOBJ)
 
 zlib/libz.a:
-	make -Czlib libz.a
+	$(MAKE) -Czlib CFLAGS="$(CFLAGS)" libz.a
 
 release: all
 	rm -rf dega-$(R)-win32
 	mkdir dega-$(R)-win32
-	cp dega.exe pydega.dll mmvconv.exe dega.txt python/scripts/*.py dega-$(R)-win32/
-	$(STRIP) dega-$(R)-win32/dega.exe dega-$(R)-win32/pydega.dll dega-$(R)-win32/mmvconv.exe
-	cd dega-$(R)-win32 && zip -9 ../dega-$(R)-win32.zip dega.exe pydega.dll mmvconv.exe dega.txt *.py
+	cp dega.exe pydega$(SOEXT) mmvconv.exe dega.txt python/scripts/*.py dega-$(R)-win32/
+	$(STRIP) dega-$(R)-win32/dega.exe dega-$(R)-win32/pydega$(SOEXT) dega-$(R)-win32/mmvconv.exe
+	cd dega-$(R)-win32 && zip -9 ../dega-$(R)-win32.zip dega.exe pydega$(SOEXT) mmvconv.exe dega.txt *.py
 
 else
 
@@ -155,7 +156,7 @@ $(PLATPYOBJCXX): %.o: %.cpp
 	$(CC) -c -o $@ $< -DEMBEDDED $(PYTHON_CFLAGS)
 
 clean:
-	rm -f $(DOZEOBJ) $(DAMOBJ) $(MASTOBJ) $(PLATOBJ) $(PYOBJ) $(PYEMBOBJ) $(PLATPYOBJ) $(PLATPYOBJCXX) tools/degavi.o tools/mmvconv.o doze/dozea.asm* doze/dam doze/dam.exe dega dega.exe degavi degavi.exe mmvconv mmvconv.exe specs
+	rm -f $(DOZEOBJ) $(DAMOBJ) $(MASTOBJ) $(PLATOBJ) $(PYOBJ) $(PYEMBOBJ) $(PLATPYOBJ) $(PLATPYOBJCXX) tools/degavi.o tools/mmvconv.o doze/dozea.asm* doze/dam doze/dam.exe dega dega.exe degavi degavi.exe mmvconv mmvconv.exe pydega.so pydega.dll pydega.pyd specs
 	make -Czlib clean
 
 distclean: clean
