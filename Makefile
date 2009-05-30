@@ -8,6 +8,22 @@ CXX=g++
 #CXX=icpc
 NASM=nasm
 
+TARGET = $(shell $(CC) -v 2>&1 | grep '^Target: ' | sed -e 's/^Target: //g')
+
+ifneq (,$(findstring mingw32,$(TARGET)))
+	P=win
+else ifneq (,$(findstring cygwin,$(TARGET)))
+	P=win
+else
+	P=unix
+endif
+
+ifneq (,$(findstring x86_64,$(TARGET)))
+	BITS=64
+else
+	BITS=32
+endif
+
 ifeq ($(P),unix)
 	CFLAGS= $(OPTFLAGS) $(shell sdl-config --cflags) -Imast -Idoze -D__cdecl=
 else ifeq ($(P),win)
@@ -93,7 +109,7 @@ release: all
 else
 
 all:
-	@echo Please give a parameter P=unix or P=win
+	@echo Supported platforms are unix and win
 	@false
 
 endif
