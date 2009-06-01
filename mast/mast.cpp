@@ -51,6 +51,39 @@ int MastSetRom(unsigned char *Rom,int RomLen)
   return 0;
 }
 
+void MastFlagsFromHeader()
+{
+  unsigned int i;
+  unsigned short offsets[] = {0x1ff0, 0x3ff0, 0x7ff0}; // possible header locations
+  unsigned char signature[] = "TMR SEGA"; // the header's signature
+  for (i = 0; i < sizeof(offsets)/sizeof(offsets[0]); i++)
+  {
+    unsigned short ofs = offsets[i];
+    if (ofs+15 >= Mastz.RomLen) break;
+    if (memcmp(Mastz.Rom+ofs, signature, 8) == 0) // did we find a header?
+    {
+      unsigned char region = Mastz.Rom[ofs+15] >> 4;
+      if (region == 3 || region == 4) // 0x03 -> Japan, 0x04 -> Export
+      { // SMS
+        MastEx &= ~MX_GG;
+        if (region == 3)
+          MastEx |= MX_JAPAN;
+        else
+          MastEx &= ~MX_JAPAN;
+      }
+      else if (region >= 5 && region <= 7) // 0x05 -> Japan, 0x06 Export, 0x07 International
+      { // GG
+        MastEx |= MX_GG;
+        if (region == 5)
+          MastEx |= MX_JAPAN;
+        else
+          MastEx &= ~MX_JAPAN;
+      } // I haven't seen any ROM that actually had a header that didn't fit any of those five values, so that should be about it
+      break; // We found a header, no need to check at any of the other possible locations
+    }
+  }
+}
+ 
 void MastSetRomName(char *name)
 {
   memset(MastRomName, 0, sizeof(MastRomName));

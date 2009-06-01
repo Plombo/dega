@@ -19,14 +19,6 @@ int PortMemicmp(char *s1, char *s2, size_t len) {
 	return 0;
 }
 
-static int GameGearRom()
-{
-  int Len=0;
-  Len=strlen(EmuRomName); if (Len<3) return 0;
-  if (PortMemicmp(".gg",EmuRomName+Len-3,3)==0) return 1;
-  return 0;
-}
-
 int EmuInit()
 {
   int Ret=0;
@@ -112,9 +104,6 @@ int EmuLoad()
     fread(EmuRom,1,EmuRomLen,f);
     fclose(f);
 
-    Ret=GameGearRom(); // Detect Game Gear from the filename
-    MastEx&=~MX_GG; if (Ret) MastEx|=MX_GG;
-
     EmuRomFileName=strrchr(EmuRomName,'\\');
     if (EmuRomFileName) { EmuRomFileName++; }
                    else { EmuRomFileName=EmuRomName; }
@@ -128,6 +117,7 @@ int EmuLoad()
   AdjustRom(EmuRom,EmuRomLen);
 
   MastSetRom(EmuRom,EmuRomLen); // Plug in the rom
+  MastFlagsFromHeader();
   return 0;
 }
 

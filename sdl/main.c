@@ -449,10 +449,6 @@ int main(int argc, char** argv)
 		exit(1);
 	}
 
-	//detect GG ROM
-	if(strstr(argv[optind],".gg") || strstr(argv[optind],".GG"))
-		MastEx |= MX_GG;
-				
 	atexit(SDL_Quit);
 
 	if(sound)
@@ -460,17 +456,19 @@ int main(int argc, char** argv)
 	else
 		SDL_Init(SDL_INIT_VIDEO);
 
+	MastInit();
+	MastLoadRom(argv[optind], &rom, &romlength);
+	MastSetRom(rom,romlength);
+	if (autodetect)
+		MastFlagsFromHeader();
+	MastHardReset();
+	memset(&MastInput,0,sizeof(MastInput));
+	
 	width=MastEx&MX_GG?160:256;
 	height=MastEx&MX_GG?144:192;
 
 	thescreen=SDL_SetVideoMode(width, height, 8, SDL_SWSURFACE|vidflags);
-		
-	MastInit();
-	MastLoadRom(argv[optind], &rom, &romlength);
-	MastSetRom(rom,romlength);
-	MastHardReset();
-	memset(&MastInput,0,sizeof(MastInput));
-	
+
 	if(sound)
 	{
 		MsndRate=44100; MsndLen=(MsndRate+(framerate>>1))/framerate; //guess
