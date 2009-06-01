@@ -36,8 +36,7 @@ int ZipRead(unsigned char **pMem,int *pLen)
   memset(&Info,0,sizeof(Info));
   memset(Name,0,sizeof(Name));
 
-  MastEx&=~MX_GG;
-  // Find out which entry is the rom, and also auto-detect Game Gear
+  // Find out which entry is the rom
   unzGoToFirstFile(Zip);
   for (i=0; ;i++)
   {
@@ -45,7 +44,7 @@ int ZipRead(unsigned char **pMem,int *pLen)
     unzGetCurrentFileInfo(Zip,&Info,Name,sizeof(Name),NULL,0,NULL,0);
     Len=strlen(Name);
     if (Len>=4) if (PortMemicmp(Name+Len-4,".sms",4)==0) { RomPos=i; break; }
-    if (Len>=3) if (PortMemicmp(Name+Len-3,".gg",3 )==0) { RomPos=i; MastEx|=MX_GG; break; }
+    if (Len>=3) if (PortMemicmp(Name+Len-3,".gg",3 )==0) { RomPos=i; break; }
 
     Ret=unzGoToNextFile(Zip); if (Ret!=UNZ_OK) break;
   }

@@ -32,6 +32,7 @@ extern int MastDrawDo; // 1 to draw image
 int MastInit();
 int MastExit();
 int MastSetRom(unsigned char *Rom,int RomLen);
+void MastFlagsFromHeader();
 extern char MastRomName[128];
 void MastSetRomName(char *romname);
 void MastGetRomDigest(unsigned char *digest);
