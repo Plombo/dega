@@ -24,7 +24,12 @@ static INLINE void VidCtrlWrite(unsigned char d)
     Masta.v.Addr=(unsigned short)(Cmd&0x3fff);
   }
   
-  Masta.v.Wait=0; nDozeInterrupt=-1;
+  Masta.v.Wait=0;
+#ifdef EMU_DOZE
+  nDozeInterrupt=-1;
+#elif defined(EMU_Z80JB)
+  Z80SetIrqLine(0x38, 0);
+#endif
 }
 
 static INLINE unsigned char VidCtrlRead()
@@ -32,7 +37,12 @@ static INLINE unsigned char VidCtrlRead()
   unsigned char d=0;
   d=Masta.v.Stat; d|=0x20;
 
-  Masta.v.Wait=0; Masta.v.Stat&=0x3f; nDozeInterrupt=-1;
+  Masta.v.Wait=0; Masta.v.Stat&=0x3f;
+#ifdef EMU_DOZE
+  nDozeInterrupt=-1;
+#elif defined(EMU_Z80JB)
+  Z80SetIrqLine(0x38, 0);
+#endif
   return d;
 }
 
@@ -177,8 +187,42 @@ End:
 }
 
 #ifdef EMU_DOZE
+
 unsigned char DozeIn(unsigned short a)            { return SysIn(a); }
 void DozeOut(unsigned short a, unsigned char d)   { SysOut(a,d); }
 unsigned char DozeRead(unsigned short a)          { return SysRead(a); }
 void DozeWrite(unsigned short a, unsigned char d) { SysWrite(a,d); }
+
+#elif defined(EMU_Z80JB)
+
+static unsigned char __fastcall ReadIoHandler(unsigned int a)          { if (0) printf("ReadIoHandler (0x%x, PC=%x)\n", a, Z80.pc.w.l); return SysIn(a); }
+static void __fastcall WriteIoHandler(unsigned int a, unsigned char v) { SysOut(a,v); }
+
+static unsigned char __fastcall ReadProgHandler(unsigned int a)
+{
+  if (0) printf("ReadProgHandler (0x%x, PC=%x)\n", a, Z80.pc.w.l);
+  if (MemRead[a >> 8])
+    return MemRead[a >> 8][a];
+  else
+    return SysRead(a);
+}
+
+static void __fastcall WriteProgHandler(unsigned int a, unsigned char v)
+{
+  if (MemWrite[a >> 8])
+    MemWrite[a >> 8][a] = v;
+  else
+    SysWrite(a,v);
+}
+
+void MastSetMemHandlers()
+{
+  Z80SetIOReadHandler(ReadIoHandler);
+  Z80SetIOWriteHandler(WriteIoHandler);
+  Z80SetProgramReadHandler(ReadProgHandler);
+  Z80SetProgramWriteHandler(WriteProgHandler);
+  Z80SetCPUOpReadHandler(ReadProgHandler);
+  Z80SetCPUOpArgReadHandler(ReadProgHandler);
+}
+
 #endif

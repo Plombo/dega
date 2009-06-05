@@ -41,8 +41,13 @@ int MastAreaDega()
   ma.Data=&frameCount;ma.Len=sizeof(frameCount);MastAcb(&ma); // 0x0008: Frame count
   ma.Data=Blank;    ma.Len=0x10-0x0c;       MastAcb(&ma); // reserved
 
+#ifdef EMU_DOZE
   ma.Data=&Doze;    ma.Len=sizeof(Doze);    MastAcb(&ma); // 0x0010: Z80 registers
   ma.Data=Blank;    ma.Len=0x30-0x1e;       MastAcb(&ma); // reserved
+#elif defined(EMU_Z80JB)
+  ma.Data=&Z80;     ma.Len=0x2f;            MastAcb(&ma); // 0x0010: Z80 registers
+  ma.Data=Blank;    ma.Len=0x30-0x1e;       MastAcb(&ma); // reserved
+#endif
 
   ma.Data=&Masta;   ma.Len=sizeof(Masta);   MastAcb(&ma); // 0x0040: Masta
   ma.Data=Blank;    ma.Len=0x40-0x2c;       MastAcb(&ma); // reserved
@@ -78,7 +83,9 @@ int MastAreaMeka()
   pMastb->FmSel=0;
   pMastb->FmDetect=0;
   memset(&(pMastb->FmReg),0,sizeof(pMastb->FmReg));
+#ifdef EMU_DOZE
   Doze.ir=0;
+#endif
   // Scan state
 
   // 0000
@@ -96,7 +103,11 @@ int MastAreaMeka()
   // 0007
 
   ma.Len=2;
+#ifdef EMU_DOZE
 #define SC(regname) ma.Data=&(Doze.regname); MastAcb(&ma);
+#elif defined(EMU_Z80JB)
+#define SC(regname) ma.Data=&(Z80.regname.w.l); MastAcb(&ma);
+#endif
   SC(af)  SC(bc)  SC(de)  SC(hl)  SC(ix) SC(iy) SC(pc) SC(sp)
   SC(af2) SC(bc2) SC(de2) SC(hl2)
 #undef SC
@@ -105,13 +116,22 @@ int MastAreaMeka()
   {
     unsigned char Int=0;
     // compress Interrupt state into three bits
+#ifdef EMU_DOZE
     if (Doze.iff) Int=1;  Int|=Doze.im<<1;
+#elif defined(EMU_Z80JB)
+    if (Z80.iff1) Int=1;  Int|=Z80.im<<1;
+#endif
     
     Int&=7; ma.Data=&Int; ma.Len=1; MastAcb(&ma); Int&=7;
 
     // deompress interrupt state
+#ifdef EMU_DOZE
     Doze.iff=0; if (Int&1) Doze.iff=0x0101;
     Doze.im=(unsigned char)(Int>>1);
+#elif defined(EMU_Z80JB)
+    Z80.iff1=Z80.iff2=0; if (Int&1) Z80.iff1=Z80.iff2=1;
+    Z80.im=(unsigned char)(Int>>1);
+#endif
   }
 
   // 0020

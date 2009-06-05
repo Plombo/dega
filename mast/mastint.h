@@ -18,11 +18,15 @@ extern "C" {
 #pragma warning (disable:4710) //disable "function not inlined" warning message
 
 // Chip emulators ------------------------------------------------
-#define EMU_DOZE // Use my 'Doze' Assembler Z80 emulator
+// #define EMU_DOZE // Use my 'Doze' Assembler Z80 emulator
 
 // Include cpu emu headers
 #ifdef EMU_DOZE
 #include "doze.h"
+#endif
+
+#ifdef EMU_Z80JB
+#include "z80.h"
 #endif
 
 // Include sound emu header
@@ -110,6 +114,12 @@ int MastMapMemory();
 void MastMapPage0();
 void MastMapPage1();
 void MastMapPage2();
+
+// mem.cpp
+#ifdef EMU_Z80JB
+extern unsigned char *MemFetch[0x100], *MemRead[0x100], *MemWrite[0x100];
+void MastSetMemHandlers();
+#endif
 
 // draw.cpp
 int MdrawInit();

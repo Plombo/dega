@@ -27,6 +27,11 @@ int MastInit()
   memset(&Mastz,0,sizeof(Mastz));
   MastSetRom(NULL,0);
 
+#ifdef EMU_Z80JB
+  MastSetMemHandlers();
+  Z80Init();
+#endif
+
   return 0;
 }
 
@@ -119,8 +124,13 @@ int MastReset()
   memset(&Masta.p,0,sizeof(Masta.p));
   DpsgRecalc();
 
+#ifdef EMU_DOZE
   DozeReset();
   Doze.sp=0xdff0; // bios sets
+#elif defined(EMU_Z80JB)
+  Z80Reset();
+  Z80.sp.w.l=0xdff0; // bios sets
+#endif
 
   return 0;
 }

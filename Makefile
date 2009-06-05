@@ -26,14 +26,21 @@ else
 endif
 
 ifeq ($(P),unix)
-	CFLAGS= $(OPTFLAGS) $(shell sdl-config --cflags) -Imast -Idoze -D__cdecl=
+	CFLAGS= $(OPTFLAGS) $(shell sdl-config --cflags) -Imast -Idoze -D__cdecl= -D__fastcall=
 else ifeq ($(P),win)
 	CFLAGS= $(OPTFLAGS) -mno-cygwin -Imast -Idoze -Imaster -Iextra -Izlib
 endif
 
+ifeq ($(Z80),z80jb)
+	CFLAGS += -Iz80jb -DEMU_Z80JB
+	Z80OBJ = z80jb/z80.o z80jb/z80daisy.o
+else
+	CFLAGS += -Idoze -DEMU_DOZE
+	Z80OBJ = doze/doze.o doze/dozea.o
+endif
+
 CXXFLAGS= $(CFLAGS) -fno-exceptions
 
-DOZEOBJ = doze/doze.o doze/dozea.o
 DAMOBJ = doze/dam.o doze/dama.o doze/damc.o doze/dame.o doze/damf.o doze/damj.o doze/damm.o doze/damo.o doze/damt.o
 MASTOBJ = mast/area.o mast/dpsg.o mast/draw.o mast/emu2413.o mast/frame.o mast/load.o mast/map.o mast/mast.o mast/mem.o mast/samp.o mast/snd.o mast/vgm.o mast/video.o mast/osd.o mast/md5.o
 PYOBJ = python/pydega.o python/stdalone.o
@@ -115,17 +122,17 @@ all:
 
 endif
 
-dega$(EXEEXT): $(PLATOBJ) $(PLATPYOBJ) $(PLATPYOBJCXX) $(DOZEOBJ) $(MASTOBJ) $(PYEMBOBJ) $(SPECS)
-	$(CC) $(EXTRA_LDFLAGS) $(GUI_LDFLAGS) -o dega$(EXEEXT) $(PLATOBJ) $(PLATPYOBJ) $(PLATPYOBJCXX) $(DOZEOBJ) $(MASTOBJ) $(PYEMBOBJ) $(EXTRA_LIBS)
+dega$(EXEEXT): $(PLATOBJ) $(PLATPYOBJ) $(PLATPYOBJCXX) $(Z80OBJ) $(MASTOBJ) $(PYEMBOBJ) $(SPECS)
+	$(CC) $(EXTRA_LDFLAGS) $(GUI_LDFLAGS) -o dega$(EXEEXT) $(PLATOBJ) $(PLATPYOBJ) $(PLATPYOBJCXX) $(Z80OBJ) $(MASTOBJ) $(PYEMBOBJ) $(EXTRA_LIBS)
 
-degavi$(EXEEXT): tools/degavi.o $(DOZEOBJ) $(MASTOBJ)
-	$(CC) $(EXTRA_LDFLAGS) -o degavi$(EXEEXT) tools/degavi.o $(DOZEOBJ) $(MASTOBJ) -lm
+degavi$(EXEEXT): tools/degavi.o $(Z80OBJ) $(MASTOBJ)
+	$(CC) $(EXTRA_LDFLAGS) -o degavi$(EXEEXT) tools/degavi.o $(Z80OBJ) $(MASTOBJ) -lm
 
 mmvconv$(EXEEXT): tools/mmvconv.o $(SPECS)
 	$(CC) $(EXTRA_LDFLAGS) -o mmvconv$(EXEEXT) tools/mmvconv.o
 
-pydega$(SOEXT): $(PYOBJ) $(DOZEOBJ) $(MASTOBJ) $(SPECS)
-	$(CC) -shared -o pydega$(SOEXT) $(PYOBJ) $(DOZEOBJ) $(MASTOBJ) $(EXTRA_LDFLAGS) $(PYTHON_LDFLAGS)
+pydega$(SOEXT): $(PYOBJ) $(Z80OBJ) $(MASTOBJ) $(SPECS)
+	$(CC) -shared -o pydega$(SOEXT) $(PYOBJ) $(Z80OBJ) $(MASTOBJ) $(EXTRA_LDFLAGS) $(PYTHON_LDFLAGS)
 
 doze/dozea.o: doze/dozea.asm
 	nasm -f $(NASM_FORMAT) -o doze/dozea.o doze/dozea.asm
@@ -156,7 +163,7 @@ $(PLATPYOBJCXX): %.o: %.cpp
 	$(CC) -c -o $@ $< -DEMBEDDED $(PYTHON_CFLAGS)
 
 clean:
-	rm -f $(DOZEOBJ) $(DAMOBJ) $(MASTOBJ) $(PLATOBJ) $(PYOBJ) $(PYEMBOBJ) $(PLATPYOBJ) $(PLATPYOBJCXX) tools/degavi.o tools/mmvconv.o doze/dozea.asm* doze/dam doze/dam.exe dega dega.exe degavi degavi.exe mmvconv mmvconv.exe pydega.so pydega.dll pydega.pyd specs
+	rm -f $(Z80OBJ) $(DAMOBJ) $(MASTOBJ) $(PLATOBJ) $(PYOBJ) $(PYEMBOBJ) $(PLATPYOBJ) $(PLATPYOBJCXX) tools/degavi.o tools/mmvconv.o doze/dozea.asm* doze/dam doze/dam.exe dega dega.exe degavi degavi.exe mmvconv mmvconv.exe pydega.so pydega.dll pydega.pyd specs
 	make -Czlib clean
 
 distclean: clean

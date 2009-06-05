@@ -1,30 +1,36 @@
 // Mast - map memory module
 #include "mastint.h"
 
+#ifdef EMU_DOZE
+#define MemFetch DozeMemFetch
+#define MemRead DozeMemRead
+#define MemWrite DozeMemWrite
+#elif defined(EMU_Z80JB)
+unsigned char *MemFetch[0x100], *MemRead[0x100], *MemWrite[0x100];
+#endif
+
 int MastMapMemory()
 {
   // Map in framework
-#ifdef EMU_DOZE
   int i=0;
 
-  memset(&DozeMemFetch,0,sizeof(DozeMemFetch));
-  memset(&DozeMemRead, 0,sizeof(DozeMemRead));
-  memset(&DozeMemWrite,0,sizeof(DozeMemWrite));
+  memset(&MemFetch,0,sizeof(MemFetch));
+  memset(&MemRead, 0,sizeof(MemRead));
+  memset(&MemWrite,0,sizeof(MemWrite));
 
   // 0000-03ff Fixed Rom view
   for (i=0x00;i<0x04;i++)
-  { DozeMemFetch[i]=DozeMemRead[i]=(unsigned long)Mastz.Rom; DozeMemWrite[i]=0; }
+  { MemFetch[i]=MemRead[i]=Mastz.Rom; MemWrite[i]=0; }
 
   // c000-dfff Ram
   for (i=0xc0;i<0xe0;i++)
-  { DozeMemFetch[i]=DozeMemRead[i]=DozeMemWrite[i]=(unsigned long)pMastb->Ram-0xc000; }
+  { MemFetch[i]=MemRead[i]=MemWrite[i]=pMastb->Ram-0xc000; }
   // e000-ffff Ram mirror
   for (i=0xe0;i<0x100;i++)
-  { DozeMemFetch[i]=DozeMemRead[i]=DozeMemWrite[i]=(unsigned long)pMastb->Ram-0xe000; }
+  { MemFetch[i]=MemRead[i]=MemWrite[i]=pMastb->Ram-0xe000; }
 
   // For bank writes ff00-ffff callback Doze*
-  DozeMemWrite[0xff]=0;
-#endif
+  MemWrite[0xff]=0;
   // Map in pages
   MastMapPage0(); MastMapPage1(); MastMapPage2();
   return 0;
@@ -46,78 +52,70 @@ TryLower:
   Mastz.RomPage[n]=PageOff; // Store in the Mastz structure
 }
 
-static INLINE unsigned long GetRomPage(int n)
+static INLINE unsigned char *GetRomPage(int n)
 {
   CalcRomPage(n); // Recalc the rom page
-  return (unsigned long)(Mastz.Rom+Mastz.RomPage[n]); // Get the direct memory pointer
+  return Mastz.Rom+Mastz.RomPage[n]; // Get the direct memory pointer
 }
 
 // 0400-3fff Page 0
 void MastMapPage0()
 {
-  unsigned long Page; Page=GetRomPage(0);
+  unsigned char *Page; Page=GetRomPage(0);
   // Map Rom Page
-#ifdef EMU_DOZE
   {
     int i=0;
     for (i=0x04;i<0x40;i++)
     {
-      DozeMemFetch[i]=DozeMemRead[i]=Page;
-      DozeMemWrite[i]=0;
+      MemFetch[i]=MemRead[i]=Page;
+      MemWrite[i]=0;
     }
   }
-#endif
 }
 
 // 4000-7fff Page 1
 void MastMapPage1()
 {
-  unsigned long Page; Page=GetRomPage(1);
+  unsigned char *Page; Page=GetRomPage(1);
   // Map Rom Page
-#ifdef EMU_DOZE
   {
     int i=0;
     Page-=0x4000;
     for (i=0x40;i<0x80;i++)
     {
-      DozeMemFetch[i]=DozeMemRead[i]=Page;
-      DozeMemWrite[i]=0;
+      MemFetch[i]=MemRead[i]=Page;
+      MemWrite[i]=0;
     }
   }
-#endif
 }
 
 // 8000-bfff Page 2
 void MastMapPage2()
 {
-  unsigned long Page=0; int i=0;
+  unsigned char *Page=0; int i=0;
   if (Masta.Bank[0]&0x08)
   {
     // Map Battery Ram
-    Page=(unsigned long)pMastb->Sram;
+    Page=pMastb->Sram;
     Page+=(Masta.Bank[0]&4)<<11; // Page -> 0000 or 2000
-#ifdef EMU_DOZE
     Page-=0x8000;
     for (i=0x80;i<0xc0;i++)
     {
-      DozeMemFetch[i]=Page;
-      DozeMemRead [i]=Page;
-      DozeMemWrite[i]=Page;
+      MemFetch[i]=Page;
+      MemRead [i]=Page;
+      MemWrite[i]=Page;
     }
-#endif
   }
   else
   {
     // Map normal Rom Page
     Page=GetRomPage(2);
-#ifdef EMU_DOZE
     Page-=0x8000;
     for (i=0x80;i<0xc0;i++)
     {
-      DozeMemFetch[i]=Page;
-      DozeMemRead [i]=Page;
-      DozeMemWrite[i]=0;
+      MemFetch[i]=Page;
+      MemRead [i]=Page;
+      MemWrite[i]=0;
     }
-#endif
   }
 }
