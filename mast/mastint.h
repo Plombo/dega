@@ -41,6 +41,7 @@ struct Mastv
   unsigned char  Reg[0x10]; // Video registers
   unsigned char  Mode;  // Video read/write mode
   unsigned short Addr;  // Video read/write addr
+  unsigned char  CRamLatch; // CRam latch
 };
 
 // dpsg.cpp

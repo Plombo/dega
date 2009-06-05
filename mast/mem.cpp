@@ -19,10 +19,7 @@ static INLINE void VidCtrlWrite(unsigned char d)
     i=(Cmd>>8)&0x3f;
     if (i<0x10) Masta.v.Reg[i]=(unsigned char)(Cmd&0xff);
   }
-  else
-  {
-    Masta.v.Addr=(unsigned short)(Cmd&0x3fff);
-  }
+  Masta.v.Addr=(unsigned short)(Cmd&0x3fff);
   
   Masta.v.Wait=0;
 #ifdef EMU_DOZE
@@ -54,8 +51,17 @@ static INLINE void VidDataWrite(unsigned char d)
   {
     // CRam Write
     unsigned char *pc;
-    pc=pMastb->CRam+(Masta.v.Addr&0x3f);
-    if (pc[0]!=d) { pc[0]=d; MdrawCramChange(Masta.v.Addr); }  // CRam byte change
+    pc=pMastb->CRam+(Masta.v.Addr&((MastEx&MX_GG)?0x3f:0x1f));
+    if (MastEx&MX_GG)
+    {
+      if ((Masta.v.Addr&1)==0) { Masta.v.CRamLatch = d; }
+      else
+      {
+        *(pc-1) = Masta.v.CRamLatch; *pc = d;
+        MdrawCramChange(Masta.v.Addr);
+      }
+    }
+    else if (pc[0]!=d) { pc[0]=d; MdrawCramChange(Masta.v.Addr); }  // CRam byte change
   }
   else
   {
