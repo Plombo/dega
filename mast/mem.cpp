@@ -6,10 +6,10 @@
 static INLINE void VidCtrlWrite(unsigned char d)
 {
   int Cmd=0;
-  if (Masta.v.Wait==0) { Masta.v.Low=d; Masta.v.Wait=1; return; } // low byte
+  if (Masta.v.Wait==0) { Masta.v.Addr&=0xff00; Masta.v.Addr|=d; Masta.v.Wait=1; return; } // low byte
 
   // high byte: do video command
-  Cmd=d<<8; Cmd|=Masta.v.Low;
+  Cmd=d<<8; Cmd|=Masta.v.Addr&0xff;
   Masta.v.Mode=(unsigned char)((Cmd>>14)&3); // 0-2=VRAM read/write 3=CRAM write
 
   if (Masta.v.Mode==2)
@@ -32,7 +32,7 @@ static INLINE void VidCtrlWrite(unsigned char d)
 static INLINE unsigned char VidCtrlRead()
 {
   unsigned char d=0;
-  d=Masta.v.Stat; d|=0x20;
+  d=Masta.v.Stat;
 
   Masta.v.Wait=0; Masta.v.Stat&=0x3f;
 #ifdef EMU_DOZE

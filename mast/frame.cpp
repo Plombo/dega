@@ -40,7 +40,6 @@ static INLINE void CpuRun(int Cycles)
 
 static void RunLine()
 {
-  if (MastY<=0) Hint=Masta.v.Reg[10];
 
   if (MastY<=192)
   {
@@ -60,7 +59,9 @@ static void RunLine()
       Hint=Masta.v.Reg[10];
     }
   }
-
+  else
+    Hint=Masta.v.Reg[10];
+  
   if (MastY==193)
   {
     if (Masta.v.Reg[1]&0x20) // Do vint

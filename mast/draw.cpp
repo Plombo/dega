@@ -57,19 +57,21 @@ void MdrawCramChange(int a)
   // printf("MdrawCramChange %d %d\n", a,i++);
 }
 
-static INLINE void TileLine(unsigned char *pd,unsigned int Line,char nPal)
+static INLINE int TileLine(unsigned char *pd,unsigned int Line,char nPal,unsigned char *cv,unsigned int x)
 {
-  unsigned char *pe; pe=pd+8;
+  unsigned char *pe=pd+8, collision=0;
   do
   {
     unsigned int c;
     c=Line&0x80808080; if (c==0) goto Trans;
     c|=c>>15; // 18180
     c>>=7; c&=0x0303; *pd=qc[nPal+c];
+    if (cv) { if (cv[x/8]&(1<<(x%8))) collision=1; cv[x/8]|=1<<x%8; }
   Trans:
-    pd++; Line<<=1;
+    pd++; x++; Line<<=1;
   }
   while (pd<pe);
+  return collision;
 }
 
 static INLINE void TileFlip(unsigned char *pd,unsigned int Line,char nPal)
@@ -144,14 +146,14 @@ static INLINE char MdrawBackground(unsigned short nPass)
     Line=*((unsigned int *)Tile);
     
     if (t&0x200) TileFlip(Dest,Line,nPal);
-    else         TileLine(Dest,Line,nPal);
+    else         TileLine(Dest,Line,nPal,0,0);
   }
   return NeedHigh;
 }
 
 static INLINE void MdrawSprites()
 {
-  unsigned char *Sprite,*ps,*Tile;
+  unsigned char *Sprite,*ps,*Tile,cv[40];
   int i;
   // Find sprite table
   Sprite=pMastb->VRam + ((Masta.v.Reg[5]<< 7)&0x3f00);
@@ -160,6 +162,7 @@ static INLINE void MdrawSprites()
   // Find the end of the sprite list
   for (i=0,ps=Sprite; i<64; i++,ps++) { if (ps[0]==0xd0) break; } // End of sprite list
   i--;
+  memset(&cv,0,sizeof(cv));
   // Go through the sprites backwards
   for (ps=Sprite+i; i>=0; i--,ps--)
   {
@@ -180,7 +183,10 @@ static INLINE void MdrawSprites()
     t+=(Mdraw.Line-y)<<2;
     Line=*((unsigned int *)(Tile+t));
     // Draw sprite tile line
-    TileLine(Mdraw.Data+16+x,Line,4);
+    if (TileLine(Mdraw.Data+16+x,Line,4,cv,16+x))
+    {
+      Masta.v.Stat|=0x20;
+    }
   }
 }
 
