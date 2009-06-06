@@ -16,11 +16,15 @@ static INLINE void VidCtrlWrite(unsigned char d)
   {
     // Video register set
     int i;
-    i=(Cmd>>8)&0x3f;
-    if (i<0x10) Masta.v.Reg[i]=(unsigned char)(Cmd&0xff);
+    i=(Cmd>>8)&0xf;
+    Masta.v.Reg[i]=(unsigned char)(Cmd&0xff);
   }
   Masta.v.Addr=(unsigned short)(Cmd&0x3fff);
-  
+  if (Masta.v.Mode==0)
+  {
+    Masta.v.DataBuf=pMastb->VRam[(Masta.v.Addr++)&0x3fff];
+  }
+
   Masta.v.Wait=0;
 #ifdef EMU_DOZE
   nDozeInterrupt=-1;
@@ -47,6 +51,7 @@ static INLINE unsigned char VidCtrlRead()
 
 static INLINE void VidDataWrite(unsigned char d)
 {
+  Masta.v.DataBuf=d;
   if (Masta.v.Mode==3)
   {
     // CRam Write
@@ -74,8 +79,8 @@ static INLINE void VidDataWrite(unsigned char d)
 static INLINE unsigned char VidDataRead()
 {
   unsigned char d=0;
-  d=pMastb->VRam[Masta.v.Addr&0x3fff];
-  Masta.v.Addr++; // auto increment address
+  d=Masta.v.DataBuf;
+  Masta.v.DataBuf=pMastb->VRam[(Masta.v.Addr++)&0x3fff];
   Masta.v.Wait=0;
   return d;
 }

@@ -154,7 +154,7 @@ static INLINE char MdrawBackground(unsigned short nPass)
 static INLINE void MdrawSprites()
 {
   unsigned char *Sprite,*ps,*Tile,cv[40];
-  int i;
+  int i,OnLine=0;
   // Find sprite table
   Sprite=pMastb->VRam + ((Masta.v.Reg[5]<< 7)&0x3f00);
   // Find sprite tiles
@@ -174,6 +174,7 @@ static INLINE void MdrawSprites()
     Height=8; if (Masta.v.Reg[1]&2) Height=16;
     if (Mdraw.Line>=y+Height) continue; // Sprite is above
     // Sprite is on this line, get other info
+    OnLine++;
     pa=Sprite+0x80+(i<<1); x=pa[0];
     if (Masta.v.Reg[0]&8) x-=8; // gng
     // Find sprite tile
@@ -188,6 +189,8 @@ static INLINE void MdrawSprites()
       Masta.v.Stat|=0x20;
     }
   }
+  if (OnLine > 8)
+    Masta.v.Stat|=0x40;
 }
 
 // Draw a scanline

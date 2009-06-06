@@ -46,7 +46,6 @@ static void RunLine()
     Hint--;
     if (Hint<0)
     {
-      Masta.v.Stat|=0x40;
       if (Masta.v.Reg[0]&0x10) // Do hint
       { 
 #ifdef EMU_DOZE
@@ -99,14 +98,16 @@ int MastFrame()
   MsndDone=0; FrameCyc=0; CyclesLeft=0; CpuBase=0;
 
   // V-Int:
-  Masta.v.Stat|=0x80; MastY=192; RunLine();
-  for (MastY=193;MastY<262;MastY++) { RunLine(); }
+  MastY=192; RunLine();
+  Masta.v.Stat|=0x80; for (MastY=193;MastY<262;MastY++) { RunLine(); }
 
   if (MastInput[0]&0x40) // Cause nmi if pause pressed
 #ifdef EMU_DOZE
     DozeNmi();
 #elif defined(EMU_Z80JB)
     Z80SetIrqLine(Z80_INPUT_LINE_NMI, 1);
+  else
+    Z80SetIrqLine(Z80_INPUT_LINE_NMI, 0);
 #endif
 
   // Active scan
