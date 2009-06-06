@@ -16,7 +16,7 @@
 #include "../python/embed.h"
 
 SDL_Surface *thescreen;
-SDL_Color themap[256];
+unsigned short themap[256];
 
 int width, height;
 
@@ -127,13 +127,13 @@ static int StateSave(char *StateName)
 
 static void LeaveFullScreen() {
 	if (vidflags&SDL_FULLSCREEN) {
-		thescreen = SDL_SetVideoMode(width, height, 8, SDL_SWSURFACE|(vidflags&~SDL_FULLSCREEN));
+		thescreen = SDL_SetVideoMode(width, height, 15, SDL_SWSURFACE|(vidflags&~SDL_FULLSCREEN));
 	}
 }
 
 static void EnterFullScreen() {
 	if (vidflags&SDL_FULLSCREEN) {
-		thescreen = SDL_SetVideoMode(width, height, 8, SDL_SWSURFACE|vidflags);
+		thescreen = SDL_SetVideoMode(width, height, 15, SDL_SWSURFACE|vidflags);
 	}
 }
 
@@ -467,7 +467,7 @@ int main(int argc, char** argv)
 	width=MastEx&MX_GG?160:256;
 	height=MastEx&MX_GG?144:192;
 
-	thescreen=SDL_SetVideoMode(width, height, 8, SDL_SWSURFACE|vidflags);
+	thescreen=SDL_SetVideoMode(width, height, 15, SDL_SWSURFACE|vidflags);
 
 	if(sound)
 	{
@@ -611,7 +611,8 @@ Handler:		switch (event.type)
 
 void MdrawCall()
 {
-	int i,yoff=0;
+	int i,xoff,yoff=0;
+	unsigned short *line;
 	if(Mdraw.Data[0]) printf("MdrawCall called, line %d, first pixel %d\n",Mdraw.Line,Mdraw.Data[0]);
 	if(Mdraw.PalChange)
 	{
@@ -619,15 +620,15 @@ void MdrawCall()
 #define p(x) Mdraw.Pal[x]
 		for(i=0;i<0x100;i++)
 		{
-			themap[i].r=(p(i)&0x00f)<<4;
-			themap[i].g=(p(i)&0x0f0);
-			themap[i].b=(p(i)&0xf00)>>4;
+			themap[i] = ((p(i)&0xf00)>>7) | ((p(i)&0xf0)<<2) | ((p(i)&0xf)<<11);
 		}
-		SDL_SetColors(thescreen, themap, 0, 256);
 	}
-    	if(MastEx&MX_GG) {i=64; yoff=24;}
-    		else	 {i=16; }
+    	if(MastEx&MX_GG) {xoff=64; yoff=24;}
+    		else	 {xoff=16; }
     	if(Mdraw.Line-yoff<0 || Mdraw.Line-yoff>=height) return;
-	memcpy(thescreen->pixels+(Mdraw.Line-yoff)*thescreen->pitch,Mdraw.Data+i,width);
+	line = thescreen->pixels+(Mdraw.Line-yoff)*thescreen->pitch;
+	for (i=0; i < width; i++) {
+		line[i] = themap[Mdraw.Data[xoff+i]];
+	}
 }
 
