@@ -38,6 +38,8 @@ int MastAreaDega()
 
   FileVer=MastVer;
   ma.Data=&FileVer; ma.Len=sizeof(FileVer); MastAcb(&ma); // 0x0004: Version number
+  if (MastVer&0xc000 != FileVer&0xc000) return 1; // verify that the same Z80 core was used
+
   ma.Data=&frameCount;ma.Len=sizeof(frameCount);MastAcb(&ma); // 0x0008: Frame count
   ma.Data=Blank;    ma.Len=0x10-0x0c;       MastAcb(&ma); // reserved
 
@@ -45,12 +47,12 @@ int MastAreaDega()
   ma.Data=&Doze;    ma.Len=sizeof(Doze);    MastAcb(&ma); // 0x0010: Z80 registers
   ma.Data=Blank;    ma.Len=0x30-0x1e;       MastAcb(&ma); // reserved
 #elif defined(EMU_Z80JB)
-  ma.Data=&Z80;     ma.Len=0x2f;            MastAcb(&ma); // 0x0010: Z80 registers
-  ma.Data=Blank;    ma.Len=0x30-0x1e;       MastAcb(&ma); // reserved
+  ma.Data=&Z80;     ma.Len=0x25;            MastAcb(&ma); // 0x0010: Z80 registers
+  ma.Data=Blank;    ma.Len=0x30-0x25;       MastAcb(&ma); // reserved
 #endif
 
   ma.Data=&Masta;   ma.Len=sizeof(Masta);   MastAcb(&ma); // 0x0040: Masta
-  ma.Data=Blank;    ma.Len=0x40-0x2c;       MastAcb(&ma); // reserved
+  ma.Data=Blank;    ma.Len=0x40-0x2e;       MastAcb(&ma); // reserved
 
   // 0x0080: pMastb
   ma.Data=pMastb->Ram; ma.Len=sizeof(*pMastb)-0x4000; // Exclude sram

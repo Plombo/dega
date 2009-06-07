@@ -148,40 +148,40 @@ unsigned char Z80Vector = 0;
 #define INT_IRQ 0x01
 #define NMI_IRQ 0x02
 
-#define PRVPC Z80.prvpc.d		/* previous program counter */
+#define PRVPC Z80.prvpc.w.l		/* previous program counter */
 
-#define PCD	Z80.pc.d
+#define PCD	Z80.pc.w.l
 #define PC Z80.pc.w.l
 
-#define SPD Z80.sp.d
+#define SPD Z80.sp.w.l
 #define SP Z80.sp.w.l
 
-#define AFD Z80.af.d
+#define AFD Z80.af.w.l
 #define AF Z80.af.w.l
 #define A Z80.af.b.h
 #define F Z80.af.b.l
 
-#define BCD Z80.bc.d
+#define BCD Z80.bc.w.l
 #define BC Z80.bc.w.l
 #define B Z80.bc.b.h
 #define C Z80.bc.b.l
 
-#define DED Z80.de.d
+#define DED Z80.de.w.l
 #define DE Z80.de.w.l
 #define D Z80.de.b.h
 #define E Z80.de.b.l
 
-#define HLD Z80.hl.d
+#define HLD Z80.hl.w.l
 #define HL Z80.hl.w.l
 #define H Z80.hl.b.h
 #define L Z80.hl.b.l
 
-#define IXD Z80.ix.d
+#define IXD Z80.ix.w.l
 #define IX Z80.ix.w.l
 #define HX Z80.ix.b.h
 #define LX Z80.ix.b.l
 
-#define IYD Z80.iy.d
+#define IYD Z80.iy.w.l
 #define IY Z80.iy.w.l
 #define HY Z80.iy.b.h
 #define LY Z80.iy.b.l
@@ -1158,7 +1158,7 @@ Z80_INLINE uint8_t DEC(uint8_t value)
  ***************************************************************/
 #define EXSP(DR)												\
 {																\
-	Z80_PAIR tmp = { { 0, 0, 0, 0 } };								\
+	Z80_PAIR tmp = { { 0, 0 } };								\
 	RM16( SPD, &tmp );											\
 	WM16( SPD, &Z80.DR );										\
 	Z80.DR = tmp;												\
@@ -1170,9 +1170,9 @@ Z80_INLINE uint8_t DEC(uint8_t value)
  ***************************************************************/
 #define ADD16(DR,SR)											\
 {																\
-	uint32_t res = Z80.DR.d + Z80.SR.d;							\
+	uint32_t res = Z80.DR.w.l + Z80.SR.w.l;							\
 	F = (F & (SF | ZF | VF)) |									\
-		(((Z80.DR.d ^ res ^ Z80.SR.d) >> 8) & HF) |				\
+		(((Z80.DR.w.l ^ res ^ Z80.SR.w.l) >> 8) & HF) |				\
 		((res >> 16) & CF) | ((res >> 8) & (YF | XF));			\
 	Z80.DR.w.l = (uint16_t)res;									\
 }
@@ -1182,12 +1182,12 @@ Z80_INLINE uint8_t DEC(uint8_t value)
  ***************************************************************/
 #define ADC16(Reg)												\
 {																\
-	uint32_t res = HLD + Z80.Reg.d + (F & CF);					\
-	F = (((HLD ^ res ^ Z80.Reg.d) >> 8) & HF) |					\
+	uint32_t res = HLD + Z80.Reg.w.l + (F & CF);					\
+	F = (((HLD ^ res ^ Z80.Reg.w.l) >> 8) & HF) |					\
 		((res >> 16) & CF) |									\
 		((res >> 8) & (SF | YF | XF)) |							\
 		((res & 0xffff) ? 0 : ZF) |								\
-		(((Z80.Reg.d ^ HLD ^ 0x8000) & (Z80.Reg.d ^ res) & 0x8000) >> 13); \
+		(((Z80.Reg.w.l ^ HLD ^ 0x8000) & (Z80.Reg.w.l ^ res) & 0x8000) >> 13); \
 	HL = (uint16_t)res;											\
 }
 
@@ -1196,12 +1196,12 @@ Z80_INLINE uint8_t DEC(uint8_t value)
  ***************************************************************/
 #define SBC16(Reg)												\
 {																\
-	uint32_t res = HLD - Z80.Reg.d - (F & CF);					\
-	F = (((HLD ^ res ^ Z80.Reg.d) >> 8) & HF) | NF |			\
+	uint32_t res = HLD - Z80.Reg.w.l - (F & CF);					\
+	F = (((HLD ^ res ^ Z80.Reg.w.l) >> 8) & HF) | NF |			\
 		((res >> 16) & CF) |									\
 		((res >> 8) & (SF | YF | XF)) |							\
 		((res & 0xffff) ? 0 : ZF) |								\
-		(((Z80.Reg.d ^ HLD) & (HLD ^ res) &0x8000) >> 13);		\
+		(((Z80.Reg.w.l ^ HLD) & (HLD ^ res) &0x8000) >> 13);		\
 	HL = (uint16_t)res;											\
 }
 
@@ -3313,7 +3313,7 @@ static void take_interrupt(void)
 	Z80Vector = 0;
 
 	/* there isn't a valid previous program counter */
-	PRVPC = (uint32_t)-1;
+	PRVPC = -1;
 
 	/* Check if processor was halted */
 	LEAVE_HALT;
@@ -3516,7 +3516,7 @@ int Z80Execute(int cycles)
 	if (Z80.nmi_pending)
 	{
 //		LOG(("Z80 #%d take NMI\n", cpu_getactivecpu()));
-		PRVPC = (uint32_t)-1;			/* there isn't a valid previous program counter */
+		PRVPC = -1;			/* there isn't a valid previous program counter */
 		LEAVE_HALT;			/* Check if processor was halted */
 
 		IFF1 = 0;

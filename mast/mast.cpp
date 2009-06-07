@@ -2,7 +2,13 @@
 #include "mastint.h"
 #include "md5.h"
 
-int MastVer=0x1150; // Version number of the library
+#ifdef EMU_DOZE
+#define EMU_VERSION 0x0000
+#elif defined(EMU_Z80JB)
+#define EMU_VERSION 0x4000
+#endif
+
+unsigned int MastVer=0x1160 | EMU_VERSION; // Version number of the library (bits 30+31 indicate which Z80 simulator is in use)
 
 unsigned char MastInput[2]={0,0}; // Joypads
 unsigned int MastEx=0; // Extra options

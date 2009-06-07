@@ -10,9 +10,8 @@
 
 typedef union
 {
-	struct { uint8_t l,h,h2,h3; } b;
-	struct { uint16_t l,h; } w;
-	uint32_t d;
+	struct { uint8_t l,h; } b;
+	struct { uint16_t l; } w;
 } Z80_PAIR;
 
 typedef struct

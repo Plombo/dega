@@ -19,7 +19,7 @@ extern "C" {
 #endif
 
 // mast.cpp
-extern int MastVer; // Version number of the library
+extern unsigned int MastVer; // Version number of the library
 
 extern unsigned char MastInput[2]; // Joypads
 extern unsigned int MastEx; // Extra options
