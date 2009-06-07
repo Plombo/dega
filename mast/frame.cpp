@@ -51,7 +51,7 @@ static void RunLine()
 #ifdef EMU_DOZE
         nDozeInterrupt=0xff;
 #elif defined(EMU_Z80JB)
-        Z80Vector=0x38;
+        Z80Vector=0xff;
         Z80SetIrqLine(0x38, 1);
 #endif
       }
@@ -61,17 +61,14 @@ static void RunLine()
   else
     Hint=Masta.v.Reg[10];
   
-  if (MastY==193)
-  {
-    if (Masta.v.Reg[1]&0x20) // Do vint
-    { 
+  if (Masta.v.Reg[1]&0x20 && Masta.v.Stat&0x80) // Do vint
+  { 
 #ifdef EMU_DOZE
-      nDozeInterrupt=0xff;
+    nDozeInterrupt=0xff;
 #elif defined(EMU_Z80JB)
-      Z80Vector=0x38;
-      Z80SetIrqLine(0x38, 1);
+    Z80Vector=0xff;
+    Z80SetIrqLine(0x38, 1);
 #endif
-    }
   }
 
   CpuRun(LineCyc);
