@@ -24,6 +24,15 @@ ________________________________________________________________________________
 
                                 What's New?
 
+  v1.16
+  + Movie file format altered to record whether this is a Game Gear game
+  + Now uses ROM file header rather than file extension to determine
+    game type
+  + Added optional new portable Z80 core from Final Burn Alpha (originally MAME)
+  + Fixed a number of emulation bugs affecting a variety of games
+  + Fixed flickering issue with SDL version affecting games which change the
+    palette during the frame
+
   v1.15
   + Fixed emulation bugs affecting Rygar and Golden Axe Warrior
   + Saving/loading of memory watch list (courtesy Alden Sliter)
