@@ -26,7 +26,7 @@ else
 endif
 
 ifeq ($(P),unix)
-	CFLAGS= $(OPTFLAGS) $(shell sdl-config --cflags) -Imast -Idoze -D__cdecl= -D__fastcall=
+	CFLAGS= $(OPTFLAGS) $(shell sdl-config --cflags) -DUSE_MENCODER -Imast -Idoze -Ilibmencoder -D__cdecl= -D__fastcall=
 else ifeq ($(P),win)
 	CFLAGS= $(OPTFLAGS) -mno-cygwin -Imast -Idoze -Imaster -Iextra -Izlib
 endif
@@ -100,6 +100,9 @@ all: $(ALLOBJ)
 release:
 	darcs dist --dist-name dega-$(R)
 
+libmencoder/libmencoder.a:
+	make -Clibmencoder libmencoder.a
+
 else ifeq ($(P),win)
 
 all: $(ALLOBJ)
@@ -125,8 +128,8 @@ endif
 dega$(EXEEXT): $(PLATOBJ) $(PLATPYOBJ) $(PLATPYOBJCXX) $(Z80OBJ) $(MASTOBJ) $(PYEMBOBJ) $(SPECS)
 	$(CC) $(EXTRA_LDFLAGS) $(GUI_LDFLAGS) -o dega$(EXEEXT) $(PLATOBJ) $(PLATPYOBJ) $(PLATPYOBJCXX) $(Z80OBJ) $(MASTOBJ) $(PYEMBOBJ) $(EXTRA_LIBS)
 
-degavi$(EXEEXT): tools/degavi.o $(Z80OBJ) $(MASTOBJ)
-	$(CC) $(EXTRA_LDFLAGS) -o degavi$(EXEEXT) tools/degavi.o $(Z80OBJ) $(MASTOBJ) -lm
+degavi$(EXEEXT): tools/degavi.o $(Z80OBJ) $(MASTOBJ) libmencoder/libmencoder.a
+	$(CC) $(EXTRA_LDFLAGS) -o degavi$(EXEEXT) tools/degavi.o $(Z80OBJ) $(MASTOBJ) libmencoder/libmencoder.a -lm
 
 mmvconv$(EXEEXT): tools/mmvconv.o $(SPECS)
 	$(CC) $(EXTRA_LDFLAGS) -o mmvconv$(EXEEXT) tools/mmvconv.o
