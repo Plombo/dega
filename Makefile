@@ -28,7 +28,7 @@ endif
 ifeq ($(P),unix)
 	CFLAGS= $(OPTFLAGS) $(shell sdl-config --cflags) -DUSE_MENCODER -Imast -Idoze -Ilibmencoder -D__cdecl= -D__fastcall=
 else ifeq ($(P),win)
-	CFLAGS= $(OPTFLAGS) -mno-cygwin -Imast -Idoze -Imaster -Iextra -Izlib
+	CFLAGS= $(OPTFLAGS) -DUSE_VFW -mno-cygwin -Imast -Idoze -Imaster -Iextra -Izlib -Ilibvfw
 endif
 
 ifeq ($(Z80),z80jb)
@@ -59,6 +59,9 @@ endif
 	PLATPYOBJCXX =
 	EXTRA_LIBS = $(shell sdl-config --libs)
 	DOZE_FIXUP = sed -f doze/doze.cmd.sed <doze/dozea.asm >doze/dozea.asm.new && mv doze/dozea.asm.new doze/dozea.asm
+	ENCODER_OBJ =
+	ENCODER_LIBS = libmencoder/libmencoder.a
+	ENCODER_LDFLAGS = -lm
 	EXTRA_LDFLAGS =
 	GUI_LDFLAGS =
 	SPECS =
@@ -74,6 +77,9 @@ else ifeq ($(P),win)
 	PLATPYOBJCXX =
 	EXTRA_LIBS = -ldsound -ldinput -lddraw -ldxguid -lcomdlg32 -lcomctl32 -luser32 -lwinmm
 	DOZE_FIXUP =
+	ENCODER_OBJ =
+	ENCODER_LIBS = libvfw/libvfw.a
+	ENCODER_LDFLAGS = -lvfw32 -lmsacm32 -lm
 	EXTRA_LDFLAGS = -specs=$(shell pwd)/specs -mno-cygwin
 	GUI_LDFLAGS = -Wl,--subsystem,windows
 	SPECS = specs
@@ -83,11 +89,7 @@ else ifeq ($(P),win)
 	PYTHON_LDFLAGS = -L$(PYTHON_PREFIX)/libs -lpython25
 endif
 
-ALLOBJ = dega$(EXEEXT) mmvconv$(EXEEXT)
-
-ifeq ($(P),unix)
-ALLOBJ += degavi$(EXEEXT)
-endif
+ALLOBJ = dega$(EXEEXT) mmvconv$(EXEEXT) degavi$(EXEEXT)
 
 ifneq ($(BITS),64)
 ALLOBJ += pydega$(SOEXT)
@@ -101,7 +103,7 @@ release:
 	darcs dist --dist-name dega-$(R)
 
 libmencoder/libmencoder.a:
-	make -Clibmencoder libmencoder.a
+	$(MAKE) -Clibmencoder CFLAGS="$(CFLAGS)" libmencoder.a
 
 else ifeq ($(P),win)
 
@@ -109,6 +111,9 @@ all: $(ALLOBJ)
 
 zlib/libz.a:
 	$(MAKE) -Czlib CFLAGS="$(CFLAGS)" libz.a
+
+libvfw/libvfw.a:
+	$(MAKE) -Clibvfw CFLAGS="$(CFLAGS)" libvfw.a
 
 release: all
 	rm -rf dega-$(R)-win32
@@ -128,8 +133,8 @@ endif
 dega$(EXEEXT): $(PLATOBJ) $(PLATPYOBJ) $(PLATPYOBJCXX) $(Z80OBJ) $(MASTOBJ) $(PYEMBOBJ) $(SPECS)
 	$(CC) $(EXTRA_LDFLAGS) $(GUI_LDFLAGS) -o dega$(EXEEXT) $(PLATOBJ) $(PLATPYOBJ) $(PLATPYOBJCXX) $(Z80OBJ) $(MASTOBJ) $(PYEMBOBJ) $(EXTRA_LIBS)
 
-degavi$(EXEEXT): tools/degavi.o $(Z80OBJ) $(MASTOBJ) libmencoder/libmencoder.a
-	$(CC) $(EXTRA_LDFLAGS) -o degavi$(EXEEXT) tools/degavi.o $(Z80OBJ) $(MASTOBJ) libmencoder/libmencoder.a -lm
+degavi$(EXEEXT): tools/degavi.o $(ENCODER_OBJ) $(Z80OBJ) $(MASTOBJ) $(ENCODER_LIBS)
+	$(CC) $(EXTRA_LDFLAGS) -o degavi$(EXEEXT) tools/degavi.o $(ENCODER_OBJ) $(Z80OBJ) $(MASTOBJ) $(ENCODER_LIBS) $(ENCODER_LDFLAGS)
 
 mmvconv$(EXEEXT): tools/mmvconv.o $(SPECS)
 	$(CC) $(EXTRA_LDFLAGS) -o mmvconv$(EXEEXT) tools/mmvconv.o

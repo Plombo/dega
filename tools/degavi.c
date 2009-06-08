@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <sys/select.h>
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -8,10 +7,21 @@
 #include <mast.h>
 #include <getopt.h>
 #include <sys/types.h>
-#include <sys/wait.h>
 
 #ifdef USE_MENCODER
 #include "mencoder.h"
+#define HAS_AVI
+#define AVIOpen MencoderOpen
+#define AVIVideoData MencoderVideoData
+#define AVIAudioData MencoderAudioData
+#endif
+
+#ifdef USE_VFW
+#include "libvfw.h"
+#define HAS_AVI
+#define AVIOpen VFWOpen
+#define AVIVideoData VFWVideoData
+#define AVIAudioData VFWAudioData
 #endif
 
 unsigned char paldata[256][3];
@@ -22,19 +32,32 @@ unsigned char *videodata;
 
 void MdrawCall() {
 	int i;
+	unsigned char *curline;
 
 	if (Mdraw.PalChange) {
 		for (i = 0; i < 256; i++) {
+#ifdef USE_VFW
+			paldata[i][0] = (Mdraw.Pal[i] & 0x0f00) >>-(4 - 8); /* blue */
+			paldata[i][1] = (Mdraw.Pal[i] & 0x00f0) << (4 - 4); /* green */
+			paldata[i][2] = (Mdraw.Pal[i] & 0x000f) << (4 - 0); /* red */
+#else
 			paldata[i][0] = (Mdraw.Pal[i] & 0x000f) << (4 - 0); /* red */
 			paldata[i][1] = (Mdraw.Pal[i] & 0x00f0) << (4 - 4); /* green */
 			paldata[i][2] = (Mdraw.Pal[i] & 0x0f00) >>-(4 - 8); /* blue */
+#endif
 		}
 	}
 
 	if (Mdraw.Line<ytop || Mdraw.Line>=ytop+yhei) return;
 
+#ifdef USE_VFW
+	curline = videodata+((yhei-1-Mdraw.Line+ytop)*xwid*3);
+#else
+	curline = videodata+((Mdraw.Line-ytop)*xwid*3);
+#endif
+
 	for (i = 0; i < xwid; i++) {
-		memcpy(videodata+((Mdraw.Line-ytop)*xwid*3)+i*3, paldata[Mdraw.Data[i+xlef]], 3);
+		memcpy(curline+i*3, paldata[Mdraw.Data[i+xlef]], 3);
 	}
 }
 
@@ -48,7 +71,7 @@ void usage(char *name) {
 	printf("DegAVI -- mmv movie encoder\n"
 	       "Usage:\n"
 	       "%s [-f frames] [-m movie.mmv] "
-#ifdef USE_MENCODER
+#ifdef HAS_AVI
 	                                     "[-o output.avi] "
 #endif
 	                                                     "[-a audio.raw]\n"
@@ -66,14 +89,16 @@ void usage(char *name) {
 	       "  -n            show a frame number as an overlay on each frame\n"
 	       "  -g            use this flag for Game Gear games\n"
 	       "  rom.sms       the ROM file to load\n"
-#ifdef USE_MENCODER
+#ifdef HAS_AVI
 	       "  -o output.avi the name of the encoded movie (need not be AVI). You can omit\n"
 	       "                this parameter if -a and -v are given\n"
+#ifdef USE_MENCODER
 	       "  mencoder-opts if -o option given, supply the given options to mencoder (must\n"
 	       "                at least include -oac and -ovc options)\n"
 #endif
+#endif
 	       "\n"
-#ifdef USE_MENCODER
+#ifdef HAS_AVI
 	       "Note: at least one of -a, -v or -o must be given.\n"
 #else
 	       "Note: at least one of -a or -v must be given.\n"
@@ -93,19 +118,28 @@ int main(int argc, char **argv) {
 	FILE *rawa = 0, *rawv = 0;
 #ifdef USE_MENCODER
 	Mencoder enc;
-	char *mencoderOutput = 0;
+#endif
+#ifdef USE_VFW
+	VFW enc;
+	VFWOptions encOpts;
+#endif
+#ifdef HAS_AVI
+	char *aviOutput = 0;
 #endif
 
 	int opt;
+	for (opt = 0; opt < argc; opt++) {
+		printf("argv[%d] = '%s'\n", opt, argv[opt]);
+	}
 
 	while ((opt = getopt(argc, argv, "f:o:m:a:v:bng")) != -1) {
 		switch (opt) {
 			case 'f':
 				additionalFrames = atoi(optarg);
 				break;
-#ifdef USE_MENCODER
+#ifdef HAS_AVI
 			case 'o':
-				mencoderOutput = optarg;
+				aviOutput = optarg;
 				break;
 #endif
 			case 'm':
@@ -133,16 +167,16 @@ int main(int argc, char **argv) {
 	}
 
 	if (!(rawAudioFile || rawVideoFile
-#ifdef USE_MENCODER
-	                                   || mencoderOutput
+#ifdef HAS_AVI
+	                                   || aviOutput
 #endif
-	                                                    )) {
+	                                               )) {
 		usage(argv[0]);
 		exit(1);
 	}
 
 
-	if (optind+!rawAudioFile >= argc) {
+	if (optind >= argc) {
 		usage(argv[0]);
 		exit(1);
 	}
@@ -189,9 +223,11 @@ int main(int argc, char **argv) {
 		}
 	}
 
+#ifdef HAS_AVI
+	if (aviOutput) {
 #ifdef USE_MENCODER
-	if (mencoderOutput) {
 		enc.mencoder = 0;
+#endif
 
 		enc.width = xwid;
 		enc.height = yhei;
@@ -201,11 +237,30 @@ int main(int argc, char **argv) {
 		enc.rate = MsndRate;
 		enc.samplesize = 2;
 
+#ifdef USE_MENCODER
 		enc.params = argv+optind+1;
-		enc.output = mencoderOutput;
+#endif
+		enc.output = aviOutput;
 
-		if (MencoderOpen(&enc) == -1) {
-			perror("MencoderOpen");
+#ifdef USE_VFW
+		VFWOptionsInit(&encOpts, &enc);
+		encOpts.parent = 0;
+		
+		if (VFWOptionsChooseAudioCodec(&encOpts) != 0) {
+			puts("Unable to choose audio codec or user cancelled");
+			return 1;
+		}
+		
+		if (VFWOptionsChooseVideoCodec(&encOpts) != 0) {
+			puts("Unable to choose video codec or user cancelled");
+			return 1;
+		}
+
+		enc.opts = &encOpts;
+#endif
+
+		if (AVIOpen(&enc) != 0) {
+			perror("AVIOpen");
 			return 1;
 		}
 	}
@@ -214,9 +269,10 @@ int main(int argc, char **argv) {
 	for (i = 0; i < frames+additionalFrames; i++) {
 		MastFrame();
 
-#ifdef USE_MENCODER
-		if (mencoderOutput) {
+#ifdef HAS_AVI
+		if (aviOutput) {
 			int rv;
+#ifdef USE_MENCODER
 #define CHECKRV(fn) \
 	if (rv == 0) { \
 		puts("Buffer overrun!"); \
@@ -226,10 +282,18 @@ int main(int argc, char **argv) {
 		perror(fn); \
 		return 1; \
 	}
-			rv = MencoderVideoData(&enc, videodata);
-			CHECKRV("MencoderVideoData")
-			rv = MencoderAudioData(&enc, pMsndOut);
-			CHECKRV("MencoderAudioData")
+#endif
+#ifdef USE_VFW
+#define CHECKRV(fn) \
+	if (rv != 0) { \
+		puts(fn ": unable to write data"); \
+		return 1; \
+	}
+#endif
+			rv = AVIVideoData(&enc, videodata);
+			CHECKRV("AVIVideoData")
+			rv = AVIAudioData(&enc, pMsndOut);
+			CHECKRV("AVIAudioData")
 #undef CHECKRV
 		}
 #endif
@@ -250,7 +314,7 @@ int main(int argc, char **argv) {
 	}
 
 #ifdef USE_MENCODER
-	if (mencoderOutput) {
+	if (aviOutput) {
 		int status;
 		if (MencoderClose(&enc, &status) == -1) {
 			perror("MencoderClose");
@@ -260,6 +324,15 @@ int main(int argc, char **argv) {
 			return WEXITSTATUS(status);
 		} else if (WIFSIGNALED(status)) {
 			printf("mencoder subprocess terminated with signal %d\n", WTERMSIG(status));
+			return 1;
+		}
+	}
+#endif
+
+#ifdef USE_VFW
+	if (aviOutput) {
+		if (VFWClose(&enc) == -1) {
+			perror("VFWClose");
 			return 1;
 		}
 	}
