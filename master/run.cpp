@@ -5,6 +5,7 @@ static unsigned int LastSecond=0;
 static int FramesDone=0;
 
 static HANDLE hRunThread=NULL;
+static HANDLE hQuitEvent=NULL;
 static DWORD RunId=0,MainId=0;
 
 int StatusMode=STATUS_AUTO;
@@ -107,7 +108,7 @@ int StatusHeight()
   }
 }
 
-static void RunIdle()
+static int RunIdle()
 {
 #if 1
   int Time=0,Frame=0;
@@ -125,7 +126,7 @@ static void RunIdle()
   }
 
   // Try to run with sound
-  if (DSoundPlaying) { DSoundCheck(); return; }
+  if (DSoundPlaying) { return DSoundCheck(); }
 
 #if 1
   Time=timeGetTime()-LastSecond; // This will be about 0-1000 ms
@@ -139,7 +140,7 @@ static void RunIdle()
     while (FramesDone>=RealFramesPerSecond) { FramesDone-=RealFramesPerSecond; LastSecond+=1000; }
   }
 
-  if (Do<=0) { Sleep(4); return; }
+  if (Do<=0) { return 4; }
   if (Do>10) Do=10; // Limit frame skipping
 
   // Exec frames
@@ -149,6 +150,7 @@ static void RunIdle()
     if (i>=Do-1) RunFrame(1,NULL);
     else         RunFrame(0,NULL);
   }
+  return 0;
 #else
   NewTime = timeGetTime();
   printf("N-L = %d, M = %d, S = %d\n", NewTime-LastSecond, MsPerFrame, SkipCount);
@@ -170,9 +172,8 @@ static int FrameWithSound(int bDraw) { return RunFrame(bDraw,DSoundNextSound); }
 // The Run Thread
 static DWORD WINAPI RunThreadProc(void *pParam)
 {
-  MSG Msg; int Ret=0;
+  MSG Msg; int Ret=0,WaitTime=4;
   (void)pParam;
-  PeekMessage(&Msg,NULL,0,0,PM_NOREMOVE); // Make message queue
   AttachThreadInput(RunId,MainId,1); // Attach to main thread (for Input/GetActiveWindow)
 
   LastSecond=timeGetTime(); FramesDone=0; // Remember start time
@@ -187,16 +188,22 @@ static DWORD WINAPI RunThreadProc(void *pParam)
   {
     for (;;)
     {
-      Ret=PeekMessage(&Msg,NULL,0,0,PM_REMOVE);
-      if (Ret!=0)
+      Ret = WaitForSingleObject(hQuitEvent, WaitTime);
+      if (Ret==WAIT_OBJECT_0)
       {
         // A message is waiting to be processed
-        if (Msg.message==WM_QUIT) break; // Quit thread
+        break; // Quit thread
       }
-      else
+      else if (Ret==WAIT_TIMEOUT)
       {
         // No messages are waiting
         RunIdle();
+      }
+      else
+      {
+        // An error condition
+        MessageBox(0, "WaitForSingleObject failed", "Error", 0);
+        break;
       }
     }
   }
@@ -209,6 +216,8 @@ int RunStart()
 {
   // Get the main thread id
   MainId=GetCurrentThreadId();
+
+  hQuitEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 
   RunId=0;
   hRunThread=CreateThread(NULL,0,RunThreadProc,NULL,0,&RunId);
@@ -232,10 +241,11 @@ int RunStop()
   if (hRunThread!=NULL)
   {
     // Exit the thread
-    PostThreadMessage(RunId,WM_QUIT,0,0); // try to exit cleanly
+    SetEvent(hQuitEvent);
     Ret=WaitForSingleObject(hRunThread,250);
     if (Ret!=WAIT_OBJECT_0) TerminateThread(hRunThread,0); // else kill the thread
     CloseHandle(hRunThread);
+    CloseHandle(hQuitEvent);
   }
   hRunThread=NULL;
   RunId=0;

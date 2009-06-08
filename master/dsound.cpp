@@ -74,8 +74,7 @@ int DSoundCheck()
   if (DSoundNextSeg==PlaySeg)
   {
     // Don't need to do anything for a bit
-    Sleep(4);
-    goto End;
+    return 4;
   }
 
   // work out which seg we will fill next
@@ -104,7 +103,7 @@ int DSoundCheck()
     WRAP_INC(FollowingSeg)
   }
 End:
-  return RetVal;
+  return 0;
 }
 
 int DSoundInit(HWND hWnd)
