@@ -118,9 +118,9 @@ libvfw/libvfw.a:
 release: all
 	rm -rf dega-$(R)-win32
 	mkdir dega-$(R)-win32
-	cp dega.exe pydega$(SOEXT) mmvconv.exe dega.txt python/scripts/*.py dega-$(R)-win32/
-	$(STRIP) dega-$(R)-win32/dega.exe dega-$(R)-win32/pydega$(SOEXT) dega-$(R)-win32/mmvconv.exe
-	cd dega-$(R)-win32 && zip -9 ../dega-$(R)-win32.zip dega.exe pydega$(SOEXT) mmvconv.exe dega.txt *.py
+	cp dega.exe degavi.exe pydega$(SOEXT) mmvconv.exe dega.txt python/scripts/*.py dega-$(R)-win32/
+	$(STRIP) dega-$(R)-win32/dega.exe dega-$(R)-win32/degavi.exe dega-$(R)-win32/pydega$(SOEXT) dega-$(R)-win32/mmvconv.exe
+	cd dega-$(R)-win32 && zip -9 ../dega-$(R)-win32.zip dega.exe pydega$(SOEXT) degavi.exe mmvconv.exe dega.txt *.py
 
 else
 
