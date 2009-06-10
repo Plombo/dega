@@ -32,6 +32,8 @@ ________________________________________________________________________________
   + Fixed a number of emulation bugs affecting a variety of games
   + Fixed flickering issue with SDL version affecting games which change the
     palette during the frame
+  + degavi ported to Windows using VfW
+  + Windows: act more friendly to the CPU by not busy looping
 
   v1.15
   + Fixed emulation bugs affecting Rygar and Golden Axe Warrior
@@ -199,7 +201,7 @@ ________________________________________________________________________________
                            Technical Information
 
   * Estimated 97% compatibility.
-  * Uses Dave's assembler Z80 core.
+  * Uses Dave's assembler Z80 core, or MAME's C Z80 core written by Juergen Buchmueller.
   * Uses Dave's PSG sound emulator.
   * Uses EMU2413 sound emulator written by Mitsutaka Okazaki.
   * H-interrupts and raster effects supported.
