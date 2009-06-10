@@ -19,6 +19,7 @@
  *
  *   Additional changes [Peter Collingbourne]
  *   - Mark Z80 as extern
+ *   - Register fields shrunk to 16 bits to fit in save state
  *   Changes in 3.7 [Aaron Giles]
  *   - Changed NMI handling. NMIs are now latched in set_irq_state
  *     but are not taken there. Instead they are taken at the start of the
