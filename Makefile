@@ -100,7 +100,15 @@ ifeq ($(P),unix)
 all: $(ALLOBJ)
 
 release:
-	darcs dist --dist-name dega-$(R)
+	git tag dega-$(R)
+	git clone . ../dega-$(R)
+	cd ../dega-$(R) && git checkout dega-$(R)
+	rm -rf ../dega-$(R)/.git
+	git clone ../libmencoder ../dega-$(R)/libmencoder
+	rm -rf ../dega-$(R)/libmencoder/.git
+	git clone ../libvfw ../dega-$(R)/libvfw
+	rm -rf ../dega-$(R)/libvfw/.git
+	cd .. && tar czf dega-$(R).tar.gz dega-$(R)
 
 libmencoder/libmencoder.a:
 	$(MAKE) -Clibmencoder CFLAGS="$(CFLAGS)" libmencoder.a
