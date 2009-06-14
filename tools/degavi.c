@@ -4,9 +4,10 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <mast.h>
 #include <getopt.h>
 #include <sys/types.h>
+
+#include "avioutput.h"
 
 #ifdef USE_MENCODER
 #include "mencoder.h"
@@ -24,48 +25,90 @@
 #define AVIAudioData VFWAudioData
 #endif
 
-unsigned char paldata[256][3];
-
-int xlef, ytop, xwid, yhei, framerate=60;
-
-unsigned char *videodata;
-
-void MdrawCall() {
-	int i;
-	unsigned char *curline;
-
-	if (Mdraw.PalChange) {
-		for (i = 0; i < 256; i++) {
-#ifdef USE_VFW
-			paldata[i][0] = (Mdraw.Pal[i] & 0x0f00) >>-(4 - 8); /* blue */
-			paldata[i][1] = (Mdraw.Pal[i] & 0x00f0) << (4 - 4); /* green */
-			paldata[i][2] = (Mdraw.Pal[i] & 0x000f) << (4 - 0); /* red */
-#else
-			paldata[i][0] = (Mdraw.Pal[i] & 0x000f) << (4 - 0); /* red */
-			paldata[i][1] = (Mdraw.Pal[i] & 0x00f0) << (4 - 4); /* green */
-			paldata[i][2] = (Mdraw.Pal[i] & 0x0f00) >>-(4 - 8); /* blue */
+int width, height, framerate;
+FILE *rawa = 0, *rawv = 0;
+#ifdef USE_MENCODER
+Mencoder enc;
 #endif
+#ifdef USE_VFW
+VFW enc;
+VFWOptions encOpts;
+#endif
+
+static int EncInit(int _width, int _height, int _framerate, void *data) {
+#ifdef HAS_AVI
+	if (enc.output) {
+		enc.width = _width;
+		enc.height = _height;
+		enc.fps = _framerate;
+
+		if (AVIOpen(&enc) != 0) {
+			perror("AVIOpen");
+			return 1;
+		}
+	}
+#endif
+
+	return 0;
+}
+
+#ifdef USE_MENCODER
+#define CHECKRV(fn) \
+	if (rv == 0) { \
+		puts("Buffer overrun!"); \
+		return 1; \
+	} \
+	if (rv == -1) { \
+		perror(fn); \
+		return 1; \
+	}
+#endif
+#ifdef USE_VFW
+#define CHECKRV(fn) \
+	if (rv != 0) { \
+		puts(fn ": unable to write data"); \
+		return 1; \
+	}
+#endif
+
+static int EncVideoFrame(unsigned char *videoData, int videoDataSize, void *data) {
+#ifdef HAS_AVI
+	if (enc.output) {
+		int rv;
+		rv = AVIVideoData(&enc, videoData);
+		CHECKRV("AVIVideoData")
+	}
+#endif
+
+	if (rawv) {
+		if (!fwrite(videoData, videoDataSize, 1, rawv)) {
+			perror("fwrite");
+			return 1;
 		}
 	}
 
-	if (Mdraw.Line<ytop || Mdraw.Line>=ytop+yhei) return;
+	return 0;
+}
 
-#ifdef USE_VFW
-	curline = videodata+((yhei-1-Mdraw.Line+ytop)*xwid*3);
-#else
-	curline = videodata+((Mdraw.Line-ytop)*xwid*3);
+static int EncAudioFrame(short *audioData, int audioDataSize, void *data) {
+#ifdef HAS_AVI
+	if (enc.output) {
+		int rv;
+		rv = AVIAudioData(&enc, audioData);
+		CHECKRV("AVIAudioData")
+	}
 #endif
 
-	for (i = 0; i < xwid; i++) {
-		memcpy(curline+i*3, paldata[Mdraw.Data[i+xlef]], 3);
+	if (rawa) {
+		if (!fwrite(audioData, audioDataSize, 1, rawa)) {
+			perror("fwrite");
+			return 1;
+		}
 	}
+
+	return 0;
 }
 
-void MvidModeChanged() {
-	framerate = (MastEx & MX_PAL) ? 50 : 60;
-}
-
-void MvidMovieStopped() {}
 
 void usage(char *name) {
 	printf("DegAVI -- mmv movie encoder\n"
@@ -87,7 +130,6 @@ void usage(char *name) {
 	       "  -v video.raw  write raw video data to given file\n"
 	       "  -b            show button presses as an overlay on each frame\n"
 	       "  -n            show a frame number as an overlay on each frame\n"
-	       "  -g            use this flag for Game Gear games\n"
 	       "  rom.sms       the ROM file to load\n"
 #ifdef HAS_AVI
 	       "  -o output.avi the name of the encoded movie (need not be AVI). You can omit\n"
@@ -107,32 +149,16 @@ void usage(char *name) {
 }
 
 int main(int argc, char **argv) {
-	int i, frames = 0;
-
-	unsigned char *rom;
-	int romlength;
+	int i, frames = 0, osd = 0, rv, opt;
 
 	int additionalFrames = 0;
 	char *movieFile = 0;
 	char *rawAudioFile = 0, *rawVideoFile = 0;
-	FILE *rawa = 0, *rawv = 0;
-#ifdef USE_MENCODER
-	Mencoder enc;
-#endif
-#ifdef USE_VFW
-	VFW enc;
-	VFWOptions encOpts;
-#endif
 #ifdef HAS_AVI
 	char *aviOutput = 0;
 #endif
 
-	int opt;
-	for (opt = 0; opt < argc; opt++) {
-		printf("argv[%d] = '%s'\n", opt, argv[opt]);
-	}
-
-	while ((opt = getopt(argc, argv, "f:o:m:a:v:bng")) != -1) {
+	while ((opt = getopt(argc, argv, "f:o:m:a:v:bn")) != -1) {
 		switch (opt) {
 			case 'f':
 				additionalFrames = atoi(optarg);
@@ -152,13 +178,10 @@ int main(int argc, char **argv) {
 				rawVideoFile = optarg;
 				break;
 			case 'b':
-				MdrawOsdOptions |= OSD_BUTTONS;
+				osd |= AVI_OSD_BUTTONS;
 				break;
 			case 'n':
-				MdrawOsdOptions |= OSD_FRAMECOUNT;
-				break;
-			case 'g':
-				MastEx |= MX_GG;
+				osd |= AVI_OSD_FRAMECOUNT;
 				break;
 			default:
 				usage(argv[0]);
@@ -181,60 +204,14 @@ int main(int argc, char **argv) {
 		exit(1);
 	}
 
-	if ((rawAudioFile != 0) != (rawVideoFile != 0)) {
-		usage(argv[0]);
-		exit(1);
-	}
-
-	xlef = MastEx&MX_GG ? 64 : 16;
-	ytop = MastEx&MX_GG ? 24 : 0;
-	xwid = MastEx&MX_GG ? 160 : 256;
-	yhei = MastEx&MX_GG ? 144 : 192;
-
-	MastInit();
-	MastLoadRom(argv[optind], &rom, &romlength);
-	MastSetRom(rom,romlength);
-	MastHardReset();
-
-	MsndRate=44100;
-	MsndInit();
-
-	if (movieFile != 0) {
-		frames = MvidStart(movieFile, PLAYBACK_MODE, 0, 0);
-	}
-
-	MsndLen=(MsndRate+(framerate>>1))/framerate;
-	pMsndOut=malloc(MsndLen*2*2);
-	videodata = malloc(xwid*yhei*3);
-
-	if (rawAudioFile) {
-		rawa = fopen(rawAudioFile, "wb");
-		if (!rawa) {
-			perror("fopen");
-			return 1;
-		}
-	}
-
-	if (rawVideoFile) {
-		rawv = fopen(rawVideoFile, "wb");
-		if (!rawv) {
-			perror("fopen");
-			return 1;
-		}
-	}
-
 #ifdef HAS_AVI
 	if (aviOutput) {
 #ifdef USE_MENCODER
 		enc.mencoder = 0;
 #endif
 
-		enc.width = xwid;
-		enc.height = yhei;
-		enc.fps = framerate;
-
 		enc.channels = 2;
-		enc.rate = MsndRate;
+		enc.rate = 44100;
 		enc.samplesize = 2;
 
 #ifdef USE_MENCODER
@@ -258,60 +235,37 @@ int main(int argc, char **argv) {
 
 		enc.opts = &encOpts;
 #endif
+	} else {
+		enc.output = 0;
+	}
+#endif
 
-		if (AVIOpen(&enc) != 0) {
-			perror("AVIOpen");
+	if (rawAudioFile) {
+		rawa = fopen(rawAudioFile, "wb");
+		if (!rawa) {
+			perror("fopen");
 			return 1;
 		}
 	}
-#endif
 
-	for (i = 0; i < frames+additionalFrames; i++) {
-		MastFrame();
-
-#ifdef HAS_AVI
-		if (aviOutput) {
-			int rv;
-#ifdef USE_MENCODER
-#define CHECKRV(fn) \
-	if (rv == 0) { \
-		puts("Buffer overrun!"); \
-		return 1; \
-	} \
-	if (rv == -1) { \
-		perror(fn); \
-		return 1; \
+	if (rawVideoFile) {
+		rawv = fopen(rawVideoFile, "wb");
+		if (!rawv) {
+			perror("fopen");
+			return 1;
+		}
 	}
-#endif
+
+	rv = AVIOutputRun(argv[optind], movieFile, additionalFrames, osd, 44100,
 #ifdef USE_VFW
-#define CHECKRV(fn) \
-	if (rv != 0) { \
-		puts(fn ": unable to write data"); \
-		return 1; \
-	}
+		aviOutput ? VFORMAT_DIB : VFORMAT_RGB,
+#else
+		VFORMAT_RGB,
 #endif
-			rv = AVIVideoData(&enc, videodata);
-			CHECKRV("AVIVideoData")
-			rv = AVIAudioData(&enc, pMsndOut);
-			CHECKRV("AVIAudioData")
-#undef CHECKRV
-		}
-#endif
-
-		if (rawv) {
-			if (!fwrite(videodata, xwid*yhei*3, 1, rawv)) {
-				perror("fwrite");
-				return 1;
-			}
-		}
-
-		if (rawa) {
-			if (!fwrite(pMsndOut, MsndLen*2*2, 1, rawa)) {
-				perror("fwrite");
-				return 1;
-			}
-		}
-	}
+		EncInit, 0,
+		EncVideoFrame, 0,
+		EncAudioFrame, 0);
+	if (rv != 0) return rv;
 
 #ifdef USE_MENCODER
 	if (aviOutput) {

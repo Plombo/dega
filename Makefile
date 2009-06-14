@@ -59,7 +59,7 @@ endif
 	PLATPYOBJCXX =
 	EXTRA_LIBS = $(shell sdl-config --libs)
 	DOZE_FIXUP = sed -f doze/doze.cmd.sed <doze/dozea.asm >doze/dozea.asm.new && mv doze/dozea.asm.new doze/dozea.asm
-	ENCODER_OBJ =
+	ENCODER_OBJ = tools/degavi.o
 	ENCODER_LIBS = libmencoder/libmencoder.a
 	ENCODER_LDFLAGS = -lm
 	EXTRA_LDFLAGS =
@@ -77,7 +77,7 @@ else ifeq ($(P),win)
 	PLATPYOBJCXX =
 	EXTRA_LIBS = -ldsound -ldinput -lddraw -ldxguid -lcomdlg32 -lcomctl32 -luser32 -lwinmm
 	DOZE_FIXUP =
-	ENCODER_OBJ =
+	ENCODER_OBJ = tools/degavi.o
 	ENCODER_LIBS = libvfw/libvfw.a
 	ENCODER_LDFLAGS = -lvfw32 -lmsacm32 -lm
 	EXTRA_LDFLAGS = -specs=$(shell pwd)/specs -mno-cygwin
@@ -141,8 +141,8 @@ endif
 dega$(EXEEXT): $(PLATOBJ) $(PLATPYOBJ) $(PLATPYOBJCXX) $(Z80OBJ) $(MASTOBJ) $(PYEMBOBJ) $(SPECS)
 	$(CC) $(EXTRA_LDFLAGS) $(GUI_LDFLAGS) -o dega$(EXEEXT) $(PLATOBJ) $(PLATPYOBJ) $(PLATPYOBJCXX) $(Z80OBJ) $(MASTOBJ) $(PYEMBOBJ) $(EXTRA_LIBS)
 
-degavi$(EXEEXT): tools/degavi.o $(ENCODER_OBJ) $(Z80OBJ) $(MASTOBJ) $(ENCODER_LIBS)
-	$(CC) $(EXTRA_LDFLAGS) -o degavi$(EXEEXT) tools/degavi.o $(ENCODER_OBJ) $(Z80OBJ) $(MASTOBJ) $(ENCODER_LIBS) $(ENCODER_LDFLAGS)
+degavi$(EXEEXT): tools/avioutput.o $(ENCODER_OBJ) $(Z80OBJ) $(MASTOBJ) $(ENCODER_LIBS)
+	$(CC) $(EXTRA_LDFLAGS) -o degavi$(EXEEXT) tools/avioutput.o $(ENCODER_OBJ) $(Z80OBJ) $(MASTOBJ) $(ENCODER_LIBS) $(ENCODER_LDFLAGS)
 
 mmvconv$(EXEEXT): tools/mmvconv.o $(SPECS)
 	$(CC) $(EXTRA_LDFLAGS) -o mmvconv$(EXEEXT) tools/mmvconv.o
