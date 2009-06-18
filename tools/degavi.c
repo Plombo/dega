@@ -35,7 +35,7 @@ VFW enc;
 VFWOptions encOpts;
 #endif
 
-static int EncInit(int _width, int _height, int _framerate, void *data) {
+static int EncInit(int _width, int _height, int _framerate, int frameCount, void *data) {
 #ifdef HAS_AVI
 	if (enc.output) {
 		enc.width = _width;
@@ -120,7 +120,7 @@ void usage(char *name) {
 	                                                     "[-a audio.raw]\n"
 	       "  [-v video.raw] [-bng] rom.sms"
 #ifdef USE_MENCODER
-	                                      " -- mencoder-opts..."
+	                                      " [-- mencoder-opts...]"
 #endif
 	       "\n\n"
 	       "  -f frames     encode specified number of frames after movie end (default: 0)\n"

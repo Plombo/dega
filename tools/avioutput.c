@@ -79,11 +79,12 @@ int AVIOutputRun(char *romFile, char *movieFile, int additionalFrames, int osd, 
 	yhei = MastEx&MX_GG ? 144 : 192;
 
 	if (movieFile != 0) {
+		printf("movieFile = '%s'\n", movieFile);
 		frames = MvidStart(movieFile, PLAYBACK_MODE, 0, 0);
 		if (frames < 0) return frames;
 	}
 
-	rv = initcb(xwid, yhei, framerate, initcbData);
+	rv = initcb(xwid, yhei, framerate, frames+additionalFrames, initcbData);
 	if (rv != 0) return rv;
 
 	MsndLen = (MsndRate+(framerate>>1))/framerate;

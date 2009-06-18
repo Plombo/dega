@@ -77,9 +77,9 @@ else ifeq ($(P),win)
 	PLATPYOBJCXX =
 	EXTRA_LIBS = -ldsound -ldinput -lddraw -ldxguid -lcomdlg32 -lcomctl32 -luser32 -lwinmm
 	DOZE_FIXUP =
-	ENCODER_OBJ = tools/degavi.o
+	ENCODER_OBJ = tools/wdegavi.o tools/degavirc.o
 	ENCODER_LIBS = libvfw/libvfw.a
-	ENCODER_LDFLAGS = -lvfw32 -lmsacm32 -lm
+	ENCODER_LDFLAGS = -lcomdlg32 -lvfw32 -lmsacm32 -lm -Wl,--subsystem,windows
 	EXTRA_LDFLAGS = -specs=$(shell pwd)/specs -mno-cygwin
 	GUI_LDFLAGS = -Wl,--subsystem,windows
 	SPECS = specs
@@ -162,6 +162,9 @@ doze/dam$(EXEEXT): $(DAMOBJ)
 
 master/app.o: master/app.rc
 	cd master && $(WINDRES) -o app.o app.rc
+
+tools/degavirc.o: tools/degavirc.rc
+	cd tools && $(WINDRES) -o degavirc.o degavirc.rc
 
 specs:
 	$(CC) -dumpspecs | sed -e 's/-lmsvcrt/-lmsvcr71/g' > specs
