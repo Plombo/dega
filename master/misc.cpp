@@ -139,8 +139,9 @@ int IntegerScale(RECT *pRect,int FitWidth,int FitHeight)
 char *AppName()
 {
   static char Name[64];
-  if (MastVer&0xf) sprintf (Name,APP_TITLE " v%x.%.3x",MastVer>>12,MastVer&0xfff);
-  else             sprintf (Name,APP_TITLE " v%x.%.2x",MastVer>>12,(MastVer>>4)&0xff);
+  unsigned int MastVersion = MastVer & MAST_VERSION_MASK;
+  if (MastVersion&0xf) sprintf (Name,APP_TITLE " v%x.%.3x",MastVersion>>12,MastVersion&0xfff);
+  else                 sprintf (Name,APP_TITLE " v%x.%.2x",MastVersion>>12,(MastVersion>>4)&0xff);
   return Name;
 }
 

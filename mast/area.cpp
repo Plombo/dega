@@ -38,7 +38,7 @@ int MastAreaDega()
 
   FileVer=MastVer;
   ma.Data=&FileVer; ma.Len=sizeof(FileVer); MastAcb(&ma); // 0x0004: Version number
-  if (MastVer&0xc000 != FileVer&0xc000) return 1; // verify that the same Z80 core was used
+  if (MastVer&MAST_CORE_MASK != FileVer&MAST_CORE_MASK) return 1; // verify that the same Z80 core was used
 
   ma.Data=&frameCount;ma.Len=sizeof(frameCount);MastAcb(&ma); // 0x0008: Frame count
   ma.Data=Blank;    ma.Len=0x10-0x0c;       MastAcb(&ma); // reserved
