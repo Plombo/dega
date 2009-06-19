@@ -52,9 +52,9 @@ static int EncInit(int _width, int _height, int _framerate, int frameCount, void
 #endif
 
 	pb = GetDlgItem(es->hwndDlg, IDC_ENCODE_PROGRESS);
-	SendMessage(pb, PBM_SETRANGE32, 0, frameCount);
-	SendMessage(pb, PBM_SETPOS, 0, 0);
-	SendMessage(pb, PBM_SETSTEP, 1, 0);
+	PostMessage(pb, PBM_SETRANGE32, 0, frameCount);
+	PostMessage(pb, PBM_SETPOS, 0, 0);
+	PostMessage(pb, PBM_SETSTEP, 1, 0);
 
 	return ENC_OK;
 }
@@ -76,7 +76,7 @@ static int EncVideoFrame(unsigned char *videoData, int videoDataSize, void *data
 	CHECKRV("VFWVideoData")
 #endif
 
-	SendMessage(GetDlgItem(es->hwndDlg, IDC_ENCODE_PROGRESS), PBM_STEPIT, 0, 0);
+	PostMessage(GetDlgItem(es->hwndDlg, IDC_ENCODE_PROGRESS), PBM_STEPIT, 0, 0);
 
 	return ENC_OK;
 }
@@ -179,13 +179,14 @@ static DWORD WINAPI EncodeThreadProc(void *param) {
 		MessageBox(es->hwndDlg, "An error occurred during encoding.", "Error", MB_ICONERROR | MB_OK);
 	}
 
+	PostMessage(GetDlgItem(es->hwndDlg, IDC_ENCODE_PROGRESS), PBM_SETPOS, 0, 0);
+
+	encodeThread = 0;
+	ResetControls(es->hwndDlg, 0);
+
 	free(es->romFile); free(es->movieFile); free(enc.output);
 	free(es);
 
-	SendMessage(GetDlgItem(es->hwndDlg, IDC_ENCODE_PROGRESS), PBM_SETPOS, 0, 0);
-
-	ResetControls(es->hwndDlg, 0);
-	encodeThread = 0;
 	return rv;
 }
 
@@ -195,6 +196,8 @@ INT_PTR CALLBACK EncodeOptionsDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam,
 			enc.channels = 2;
 			enc.rate = 44100;
 			enc.samplesize = 2;
+			enc.width = 256; /* We don't know yet what the actual size of the movie will be, but we guess here that it is SMS size */
+			enc.height = 192;
 
 			VFWOptionsInit(&encOpts, &enc);
 			encOpts.parent = hwndDlg;

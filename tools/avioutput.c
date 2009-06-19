@@ -55,7 +55,7 @@ int AVIOutputRun(char *romFile, char *movieFile, int additionalFrames, int osd, 
 	unsigned char *rom;
 	int romlength;
 
-	_vformat = vformat;
+	vformat = _vformat;
 	framerate = 60;
 
 	MdrawOsdOptions = 0;
