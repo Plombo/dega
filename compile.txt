@@ -1,0 +1,69 @@
+Choosing a Z80 core
+-------------------
+
+You can choose whether to build using Dega's original assembler Z80
+core, Doze, or the C Z80 core ported from MAME.  By default, Doze
+will be used.  To use MAME's Z80 core supply the argument "Z80=z80jb"
+(no quotes) to the make command.
+
+Compilation on *NIX
+-------------------
+
+Ensure you have the following:
+
+* nasm (Doze only)
+* Python development headers (on Debian this is python2.5-dev)
+* SDL development headers (on Debian this is libsdl1.2-dev)
+
+Then you should be able to simply run "make" in the dega directory.
+
+Compilation on Windows
+----------------------
+
+Install Cygwin from http://www.cygwin.com if you do not have it already.
+
+When installing ensure you install the following packages:
+
+* gcc 3 (4 does not work as mingw support was removed)
+* make
+* nasm (Doze only)
+
+Install Python 2.5 from http://www.python.org (not the Cygwin python)
+
+Then open a Cygwin bash shell and navigate to the dega directory.
+Run "make PYTHON_PREFIX=<path to your installed python>".  Note that
+PYTHON_PREFIX must be expressed as a Cygwin path, for example a Python
+installation to C:\Python25 must be written /cygdrive/c/Python25
+
+Cross compilation of the Windows version from Linux
+---------------------------------------------------
+
+Cross compilation is also supported, this is how the official Windows
+builds are made.
+
+Ensure you have:
+
+* nasm (Doze only)
+* Wine
+* a Windows cross compiler (on Debian this is the mingw32 package)
+
+Get the Windows Python 2.5 from http://www.python.org and install
+using Wine (note: MSI files can be installed using msiexec).  Or you
+could copy the Python25 directory from a Windows machine.
+
+Now you can run make in the dega directory.  The following variables
+must be supplied to the make command:
+
+CC, CXX, AR, WINDRES, RANLIB: your cross compiler's versions of the build tools.  On Debian the names are prefixed with i586-mingw32msvc-
+PYTHON_PREFIX: path to the Windows version of Python (e.g. /home/you/.wine/drive_c/Python25)
+WINE: the Wine command (usually "wine")
+
+So a complete command line may look like this:
+
+make CC=i586-mingw32msvc-gcc CXX=i586-mingw32msvc-g++ AR=i586-mingw32msvc-ar WINDRES=i586-mingw32msvc-windres RANLIB=i586-mingw32msvc-ranlib PYTHON_PREFIX=/home/you/.wine/drive_c/Python25 WINE=wine
+
+You may wish to use an alias.  For example:
+
+alias winmake='make CC=i586-mingw32msvc-gcc CXX=i586-mingw32msvc-g++ AR=i586-mingw32msvc-ar WINDRES=i586-mingw32msvc-windres RANLIB=i586-mingw32msvc-ranlib PYTHON_PREFIX=/home/you/.wine/drive_c/Python25 WINE=wine'
+
+Now you can just type winmake to build.
