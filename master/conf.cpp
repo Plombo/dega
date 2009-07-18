@@ -82,7 +82,7 @@ int ConfSave()
   if (h==NULL) return 1;
 
   // Write title
-  fprintf (h,"// %s Config File\n",AppName());
+  fprintf (h,"// %s Config File\n",AppName(MastVer));
 
 #define VAR(x) fprintf (h,#x " %d\n",x);
 #define STR(x) fprintf (h,#x " %s\n",x);

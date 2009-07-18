@@ -53,6 +53,8 @@ static UINT_PTR CALLBACK MenuVideoPlaybackHook(HWND hdlg, UINT uiMsg, WPARAM wPa
 				  && MvidReadHeader(file, &header)) {
 				  	WCHAR bufWide[128];
 
+					SetDlgItemText(hdlg, IDT_PI_MASTVER, AppName(header.mastVer));
+
 					snprintf(buf, sizeof(buf), "%d", header.vidFrameCount);
 					SetDlgItemText(hdlg, IDT_PI_FRAMECOUNT, buf);
 

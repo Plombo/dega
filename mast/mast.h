@@ -88,6 +88,7 @@ extern int VgmAccurate; // 1=Sample accurate
 
 // video.cpp
 struct MvidHeader {
+  int mastVer;
   int vidFrameCount;
   int rerecordCount;
   int beginReset;

@@ -37,7 +37,7 @@ int MvidReadHeader(FILE *file, struct MvidHeader *header) {
 	  return 0;
 	}
 
-	fseek(file, 0x8, SEEK_SET);
+	fread(&header->mastVer, 4, 1, file);
 	fread(&header->vidFrameCount, 4, 1, file);
 	fread(&header->rerecordCount, 4, 1, file);
 	fread(&header->beginReset, 4, 1, file);

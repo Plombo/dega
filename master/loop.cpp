@@ -63,10 +63,10 @@ static int MediaInit(int Level)
     // Make frame window title
     if (EmuTitle!=NULL)
     {
-      sprintf (WinName,"%.60s - %s",EmuTitle,AppName());
+      sprintf (WinName,"%.60s - %s",EmuTitle,AppName(MastVer));
     }
     else
-    { sprintf (WinName,"%s",AppName()); }
+    { sprintf (WinName,"%s",AppName(MastVer)); }
 
     SetWindowText(hFrameWnd,WinName);
 

@@ -29,6 +29,7 @@
 #define IDT_PI_PAL                      1015
 #define IDT_PI_JAPAN                    1016
 #define IDT_PI_GG                       1017
+#define IDT_PI_MASTVER                  1018
 
 #define ID_FILE_LOADROM                 40001
 #define ID_FILE_RESET                   40002

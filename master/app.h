@@ -54,7 +54,7 @@ int AppDirectory();
 char *GetStubName(char *Full);
 int GetClientScreenRect(HWND hWnd,RECT *pRect);
 int IntegerScale(RECT *pRect,int FitWidth,int FitHeight);
-char *AppName();
+char *AppName(unsigned int MastVer);
 int GetSurfaceFormat(IDirectDrawSurface *pSurf,unsigned int *pFormat,int *pBpp);
 int AutodetectUseSys(IDirectDraw *pDirDraw);
 int SurfaceClear(IDirectDrawSurface *Surf,unsigned int Col);
