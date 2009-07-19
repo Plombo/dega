@@ -31,6 +31,10 @@ else ifeq ($(P),win)
 	CFLAGS= $(OPTFLAGS) -DUSE_VFW -mno-cygwin -Imast -Idoze -Imaster -Iextra -Izlib -Ilibvfw
 endif
 
+ifndef Z80
+	Z80=doze
+endif
+
 ifeq ($(Z80),z80jb)
 	CFLAGS += -Iz80jb -DEMU_Z80JB
 	Z80OBJ = z80jb/z80.o z80jb/z80daisy.o
@@ -124,11 +128,11 @@ libvfw/libvfw.a:
 	$(MAKE) -Clibvfw CFLAGS="$(CFLAGS)" libvfw.a
 
 release: all
-	rm -rf dega-$(R)-win32
-	mkdir dega-$(R)-win32
-	cp dega.exe degavi.exe pydega$(SOEXT) mmvconv.exe dega.txt python/scripts/*.py dega-$(R)-win32/
-	$(STRIP) dega-$(R)-win32/dega.exe dega-$(R)-win32/degavi.exe dega-$(R)-win32/pydega$(SOEXT) dega-$(R)-win32/mmvconv.exe
-	cd dega-$(R)-win32 && zip -9 ../dega-$(R)-win32.zip dega.exe pydega$(SOEXT) degavi.exe mmvconv.exe dega.txt *.py
+	rm -rf dega-$(R)-win32-$(Z80)
+	mkdir dega-$(R)-win32-$(Z80)
+	cp dega.exe degavi.exe pydega$(SOEXT) mmvconv.exe dega.txt python/scripts/*.py dega-$(R)-win32-$(Z80)/
+	$(STRIP) dega-$(R)-win32-$(Z80)/dega.exe dega-$(R)-win32-$(Z80)/degavi.exe dega-$(R)-win32-$(Z80)/pydega$(SOEXT) dega-$(R)-win32-$(Z80)/mmvconv.exe
+	cd dega-$(R)-win32-$(Z80) && zip -9 ../dega-$(R)-win32-$(Z80).zip dega.exe pydega$(SOEXT) degavi.exe mmvconv.exe dega.txt *.py
 
 else
 
