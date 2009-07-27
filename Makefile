@@ -83,7 +83,7 @@ else ifeq ($(P),win)
 	DOZE_FIXUP =
 	ENCODER_OBJ = tools/wdegavi.o tools/degavirc.o
 	ENCODER_LIBS = libvfw/libvfw.a
-	ENCODER_LDFLAGS = -lcomdlg32 -lvfw32 -lmsacm32 -lm -Wl,--subsystem,windows
+	ENCODER_LDFLAGS = -lcomdlg32 -lvfw32 -lmsacm32 -lole32 -lm -Wl,--subsystem,windows
 	EXTRA_LDFLAGS = -specs=$(shell pwd)/specs -mno-cygwin
 	GUI_LDFLAGS = -Wl,--subsystem,windows
 	SPECS = specs
