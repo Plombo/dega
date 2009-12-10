@@ -171,7 +171,7 @@ extern int SaveSlot;
 int StateLoad(int Meka);
 int StateSave(int Meka);
 int StateAuto(int Save);
-int StateAutoState(int Save);
+int StateAutoState(int Save, int Slot);
 
 // shot.cpp
 int ShotStart();

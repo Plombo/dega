@@ -82,19 +82,24 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Quick Save",                  ID_STATE_QUICKSAVE
         MENUITEM "Quick Load",                  ID_STATE_QUICKLOAD
-	POPUP "Quick Save Slot"
-	BEGIN
-	    MENUITEM "0",                          ID_STATE_SLOT(0)
-	    MENUITEM "1",                          ID_STATE_SLOT(1)
-	    MENUITEM "2",                          ID_STATE_SLOT(2)
-	    MENUITEM "3",                          ID_STATE_SLOT(3)
-	    MENUITEM "4",                          ID_STATE_SLOT(4)
-	    MENUITEM "5",                          ID_STATE_SLOT(5)
-	    MENUITEM "6",                          ID_STATE_SLOT(6)
-	    MENUITEM "7",                          ID_STATE_SLOT(7)
-	    MENUITEM "8",                          ID_STATE_SLOT(8)
-	    MENUITEM "9",                          ID_STATE_SLOT(9)
+#define STATE_SLOT_POPUP(str, id) \
+	POPUP str \
+	BEGIN \
+	    MENUITEM "0",                          id(0) \
+	    MENUITEM "1",                          id(1) \
+	    MENUITEM "2",                          id(2) \
+	    MENUITEM "3",                          id(3) \
+	    MENUITEM "4",                          id(4) \
+	    MENUITEM "5",                          id(5) \
+	    MENUITEM "6",                          id(6) \
+	    MENUITEM "7",                          id(7) \
+	    MENUITEM "8",                          id(8) \
+	    MENUITEM "9",                          id(9) \
 	END
+	STATE_SLOT_POPUP("Quick Save Slot", ID_STATE_SLOT)
+        MENUITEM SEPARATOR
+	STATE_SLOT_POPUP("Quick Save To",   ID_STATE_SAVE_SLOT)
+	STATE_SLOT_POPUP("Quick Load From", ID_STATE_LOAD_SLOT)
         MENUITEM SEPARATOR
         MENUITEM "Load/save SRAM",              ID_STATE_SRAM
         MENUITEM SEPARATOR
@@ -229,7 +234,7 @@ END
 
 // "Hotkey mapping" dialog
 
-IDD_HOTKEYMAP DIALOGEX 10, 10, 660, 325
+IDD_HOTKEYMAP DIALOGEX 10, 10, 920, 325
 STYLE WS_POPUP | WS_BORDER | DS_SHELLFONT
 CAPTION "Hotkey Mapping"
 FONT 8, "MS Shell Dlg"
@@ -305,8 +310,30 @@ BEGIN
   KMAP_DIALOG_RES("Save Slot 8", KMAP_SAVESLOT(8), 530, 170)
   KMAP_DIALOG_RES("Save Slot 9", KMAP_SAVESLOT(9), 530, 190)
 
-  PUSHBUTTON "OK", IDOK, 275, 300, 50, 15
-  PUSHBUTTON "Cancel", IDCANCEL, 335, 300, 50, 15
+  KMAP_DIALOG_RES("Quick Save 0", KMAP_SAVE_TO_SLOT(0), 660, 10)
+  KMAP_DIALOG_RES("Quick Save 1", KMAP_SAVE_TO_SLOT(1), 660, 30)
+  KMAP_DIALOG_RES("Quick Save 2", KMAP_SAVE_TO_SLOT(2), 660, 50)
+  KMAP_DIALOG_RES("Quick Save 3", KMAP_SAVE_TO_SLOT(3), 660, 70)
+  KMAP_DIALOG_RES("Quick Save 4", KMAP_SAVE_TO_SLOT(4), 660, 90)
+  KMAP_DIALOG_RES("Quick Save 5", KMAP_SAVE_TO_SLOT(5), 660, 110)
+  KMAP_DIALOG_RES("Quick Save 6", KMAP_SAVE_TO_SLOT(6), 660, 130)
+  KMAP_DIALOG_RES("Quick Save 7", KMAP_SAVE_TO_SLOT(7), 660, 150)
+  KMAP_DIALOG_RES("Quick Save 8", KMAP_SAVE_TO_SLOT(8), 660, 170)
+  KMAP_DIALOG_RES("Quick Save 9", KMAP_SAVE_TO_SLOT(9), 660, 190)
+
+  KMAP_DIALOG_RES("Quick Load 0", KMAP_LOAD_FROM_SLOT(0), 790, 10)
+  KMAP_DIALOG_RES("Quick Load 1", KMAP_LOAD_FROM_SLOT(1), 790, 30)
+  KMAP_DIALOG_RES("Quick Load 2", KMAP_LOAD_FROM_SLOT(2), 790, 50)
+  KMAP_DIALOG_RES("Quick Load 3", KMAP_LOAD_FROM_SLOT(3), 790, 70)
+  KMAP_DIALOG_RES("Quick Load 4", KMAP_LOAD_FROM_SLOT(4), 790, 90)
+  KMAP_DIALOG_RES("Quick Load 5", KMAP_LOAD_FROM_SLOT(5), 790, 110)
+  KMAP_DIALOG_RES("Quick Load 6", KMAP_LOAD_FROM_SLOT(6), 790, 130)
+  KMAP_DIALOG_RES("Quick Load 7", KMAP_LOAD_FROM_SLOT(7), 790, 150)
+  KMAP_DIALOG_RES("Quick Load 8", KMAP_LOAD_FROM_SLOT(8), 790, 170)
+  KMAP_DIALOG_RES("Quick Load 9", KMAP_LOAD_FROM_SLOT(9), 790, 190)
+
+  PUSHBUTTON "OK", IDOK, 405, 300, 50, 15
+  PUSHBUTTON "Cancel", IDCANCEL, 465, 300, 50, 15
 
 END
 

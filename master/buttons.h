@@ -59,7 +59,10 @@
 #define KMAP_BUTTONSTATE 58
 #define KMAP_FRAMECOUNTER 59
 
-#define KMAPCOUNT 60
+#define KMAP_SAVE_TO_SLOT(x) (60+(x))
+#define KMAP_LOAD_FROM_SLOT(x) (70+(x))
+
+#define KMAPCOUNT 80
 
 #define ID_KMAP_START 41000
 #define IS_ID_KMAP(id) ((id) >= ID_KMAP_START && (id) < ID_KMAP_START+KMAPCOUNT)

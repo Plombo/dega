@@ -100,6 +100,10 @@
 #define ID_SETUP_SCALE_4X               40119
 #define ID_SETUP_MENUHIDEONLOAD         40120
 #define ID_STATE_SRAM                   40121
+#define ID_STATE_SAVE_SLOT_START        40122
+#define ID_STATE_SAVE_SLOT(x)          (ID_STATE_SAVE_SLOT_START+(x))
+#define ID_STATE_LOAD_SLOT_START        40132
+#define ID_STATE_LOAD_SLOT(x)          (ID_STATE_LOAD_SLOT_START+(x))
 
 // Next default values for new objects
 // 

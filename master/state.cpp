@@ -9,7 +9,7 @@ int AutoLoadSave=0;
 int VideoReadOnly=0;
 int SaveSlot=0;
 
-static char *MakeAutoName(int Battery)
+static char *MakeAutoName(int Battery, int Slot)
 {
   char *Name=NULL; int Len=0,Extra=0;
   if (EmuTitle==NULL) return NULL;
@@ -27,7 +27,7 @@ static char *MakeAutoName(int Battery)
   else         memcpy(Name+6+Len,"_auto.dgz",10);
 #else
   if (Battery) snprintf(Name, Len+Extra, "saves\\%s.sav", EmuTitle);
-  else         snprintf(Name, Len+Extra, "saves\\%s_auto.%d.dgz", EmuTitle, SaveSlot);
+  else         snprintf(Name, Len+Extra, "saves\\%s_auto.%d.dgz", EmuTitle, Slot);
 #endif
   return Name;
 }
@@ -116,7 +116,7 @@ int BatterySave()
 {
   char *Name=NULL;
   // Get name of save ram
-  Name=MakeAutoName(1); if (Name==NULL) return 1;
+  Name=MakeAutoName(1, SaveSlot); if (Name==NULL) return 1;
 
   bf=fopen(Name,"rb"); // See if there is anything already saved
   if (bf!=NULL) { fclose(bf); } // Yes
@@ -143,7 +143,7 @@ int BatteryLoad()
 {
   char *Name=NULL;
   // Get name of save ram
-  Name=MakeAutoName(1); if (Name==NULL) return 1;
+  Name=MakeAutoName(1, SaveSlot); if (Name==NULL) return 1;
   bf=fopen(Name,"rb");
   free(Name);
   if (bf==NULL) return 1;
@@ -152,13 +152,13 @@ int BatteryLoad()
   return 0;
 }
 
-int StateAutoState(int Save)
+int StateAutoState(int Save, int Slot)
 {
   char *Name=NULL;
   // Load/Save state
 
   // Make the name of the auto save file
-  Name=MakeAutoName(0); if (Name==NULL) return 1;
+  Name=MakeAutoName(0, Slot); if (Name==NULL) return 1;
   strncpy(StateName,Name,255);
   free(Name);
 
@@ -179,7 +179,7 @@ int StateAutoState(int Save)
 // Load/Save battery ram and state
 int StateAuto(int Save)
 {
-  if (AutoLoadSave) StateAutoState(Save);
+  if (AutoLoadSave) StateAutoState(Save, SaveSlot);
   if (Save) BatterySave(); else BatteryLoad();
   return 0;
 }
