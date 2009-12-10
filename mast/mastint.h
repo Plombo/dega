@@ -98,6 +98,9 @@ extern struct Masta Masta;
 extern struct Mastb *pMastb;
 int MastsSetRom(unsigned char *Rom,int RomLen);
 
+// area.cpp
+#define SFLAG_SRAM 1 // Does save state have SRAM?
+
 // snd.cpp
 extern int MsndDone; // Sound rendered so far this frame
 extern OPLL *MastOpl;

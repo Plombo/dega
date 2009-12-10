@@ -160,6 +160,7 @@ static int MediaInit(int Level)
     CHK(ID_INPUT_KEYBOARD,UseJoystick==0)
     CHK(ID_INPUT_JOYSTICK,UseJoystick!=0)
     CHK(ID_STATE_AUTOLOADSAVE,AutoLoadSave!=0)
+    CHK(ID_STATE_SRAM,MastEx&MX_SRAM)
     CHK(ID_SOUND_ENHANCEPSG,DpsgEnhance)
     CHK(ID_SOUND_QUALITY_OFF,DSoundSamRate==0)
     CHK(ID_SOUND_QUALITY_12000HZ,DSoundSamRate==12000)
@@ -344,6 +345,7 @@ int LoopDo()
       if (Msg.wParam==ID_INPUT_KEYBOARD) UseJoystick=0;
       if (Msg.wParam==ID_INPUT_JOYSTICK) UseJoystick=1;
       if (Msg.wParam==ID_STATE_AUTOLOADSAVE) AutoLoadSave=!AutoLoadSave;
+      if (Msg.wParam==ID_STATE_SRAM) MastEx^=MX_SRAM;
       if (Msg.wParam==ID_SOUND_ENHANCEPSG) DpsgEnhance=!DpsgEnhance;
       if (Msg.wParam==ID_SOUND_QUALITY_OFF) DSoundSamRate=0;
       if (Msg.wParam==ID_SOUND_QUALITY_12000HZ) DSoundSamRate=12000;

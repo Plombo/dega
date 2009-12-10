@@ -99,6 +99,7 @@
 #define ID_SETUP_SCALE_3X               40118
 #define ID_SETUP_SCALE_4X               40119
 #define ID_SETUP_MENUHIDEONLOAD         40120
+#define ID_STATE_SRAM                   40121
 
 // Next default values for new objects
 // 

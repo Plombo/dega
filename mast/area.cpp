@@ -22,8 +22,9 @@ int MastAreaBattery()
 int MastAreaDega()
 {
   struct MastArea ma;
-  unsigned char Blank[0x100];
+  unsigned char Blank[sizeof(pMastb->Sram)];
   unsigned int FileVer=0;
+  unsigned int MastFlags=0, FileFlags=0;
   if (pMastb==NULL) return 1;
 
   memset(&ma,0,sizeof(ma));
@@ -41,7 +42,11 @@ int MastAreaDega()
   if (MastVer&MAST_CORE_MASK != FileVer&MAST_CORE_MASK) return 1; // verify that the same Z80 core was used
 
   ma.Data=&frameCount;ma.Len=sizeof(frameCount);MastAcb(&ma); // 0x0008: Frame count
-  ma.Data=Blank;    ma.Len=0x10-0x0c;       MastAcb(&ma); // reserved
+
+  if (MastEx&MX_SRAM)
+    MastFlags |= SFLAG_SRAM;
+  FileFlags=MastFlags;
+  ma.Data=&FileFlags; ma.Len=sizeof(FileFlags); MastAcb(&ma); // 0x000c: State flags
 
 #ifdef EMU_DOZE
   ma.Data=&Doze;    ma.Len=sizeof(Doze);    MastAcb(&ma); // 0x0010: Z80 registers
@@ -58,6 +63,16 @@ int MastAreaDega()
   ma.Data=pMastb->Ram; ma.Len=sizeof(*pMastb)-0x4000; // Exclude sram
   MastAcb(&ma);
   ma.Data=Blank;    ma.Len=0x100-0x04;      MastAcb(&ma); // reserved
+
+  if (FileVer&MAST_VERSION_MASK >= 0x1160)
+  {
+    if (MastEx&MX_SRAM && FileFlags&SFLAG_SRAM)
+      ma.Data=pMastb->Sram;
+    else
+      ma.Data=Blank;
+    ma.Len=sizeof(pMastb->Sram);
+    MastAcb(&ma);
+  }
 
   // Update banks, colors and sound
   MastMapPage0(); MastMapPage1(); MastMapPage2();

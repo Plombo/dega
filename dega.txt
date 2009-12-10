@@ -34,6 +34,8 @@ ________________________________________________________________________________
     palette during the frame
   + degavi ported to Windows using VfW
   + Windows: act more friendly to the CPU by not busy looping
+  + Added capability for loading/saving SRAM in save states
+    (fixed "The Flash")
 
   v1.15
   + Fixed emulation bugs affecting Rygar and Golden Axe Warrior

@@ -346,9 +346,10 @@ void usage(void)
 	printf("  -m --sms\tforce Master System emulation (default autodetect)\n");
 	printf("  -p --pal\tuse PAL mode (default NTSC)\n");
 	printf("  -j --japan\tJapanese region\n");
-	printf("  -s --nosound\tdisable sound\n");
+	printf("  -q --nosound\tdisable sound\n");
 	printf("  -f --fullscreen\tfullscreen display\n");
 	printf("  -r --readonly\tmovies are readonly\n");
+	printf("  -s --sram\tload/save SRAM in save states\n");
 	printf("\n" APPNAME_LONG " version " VERSION " by Ulrich Hecht <uli@emulinks.de>\n");
 	printf("extended by Peter Collingbourne <peter@peter.uk.to>\n");
 	printf("based on Win32 version by Dave <dave@finalburn.com>\n");
@@ -388,13 +389,14 @@ int main(int argc, char** argv)
 			{"sms",no_argument,NULL,'m'},
 			{"pal",no_argument,NULL,'p'},
 			{"japan",no_argument,NULL,'j'},
-			{"nosound",no_argument,NULL,'s'},
+			{"nosound",no_argument,NULL,'q'},
 			{"fullscreen",no_argument,NULL,'f'},
 			{"readonly",no_argument,NULL,'r'},
+			{"sram",no_argument,NULL,'s'},
 			{0,0,0,0}
 		};
 		
-		copt=getopt_long(argc,argv,"vgmpjsfr",long_options,&option_index);
+		copt=getopt_long(argc,argv,"vgmpjqfrs",long_options,&option_index);
 		if(copt==-1) break;
 		switch(copt)
 		{
@@ -425,7 +427,7 @@ int main(int argc, char** argv)
 				MastEx |= MX_JAPAN;
 				break;
 			
-			case 's':
+			case 'q':
 				sound=0;
 				break;
 
@@ -437,6 +439,10 @@ int main(int argc, char** argv)
 				readonly = 1;
 				break;
 
+			case 's':
+				MastEx |= MX_SRAM;
+				break;
+			
 			case '?':
 				usage();
 				break;

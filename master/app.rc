@@ -96,6 +96,8 @@ BEGIN
 	    MENUITEM "9",                          ID_STATE_SLOT(9)
 	END
         MENUITEM SEPARATOR
+        MENUITEM "Load/save SRAM",              ID_STATE_SRAM
+        MENUITEM SEPARATOR
         MENUITEM "Import Meka",                 ID_STATE_IMPORT
         MENUITEM "Export Meka",                 ID_STATE_EXPORT
     END

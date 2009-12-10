@@ -31,6 +31,7 @@ extern unsigned int MastEx; // Extra options
 #define MX_PAL    (2) // Run as PAL timing
 #define MX_JAPAN  (4) // Return Japan as Region
 #define MX_FMCHIP (8) // Emulate FM chip
+#define MX_SRAM  (16) // Save/load SRAM in save state
 
 extern int MastDrawDo; // 1 to draw image
 int MastInit();

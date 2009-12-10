@@ -17,7 +17,7 @@ static struct MvidHeader currentMovie;
 int frameCount;
 
 #define HEADER_SIZE 0xF4
-#define SAVE_STATE_SIZE 25088
+#define SAVE_STATE_SIZE 41472
 
 static int MastAcbVideoRead(struct MastArea *area) {
 	return fread(area->Data, area->Len, 1, videoFile);
