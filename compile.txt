@@ -16,8 +16,8 @@ The source code for these libraries is maintained using git and
 therefore the code may be fetched by issuing the following commands
 from within the dega directory:
 
-git clone git://git.pcc.me.uk/~peter/libvfw.git
-git clone git://git.pcc.me.uk/~peter/libmencoder.git
+git submodule init
+git submodule update
 
 Compilation on *NIX
 -------------------
