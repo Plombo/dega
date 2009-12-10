@@ -188,6 +188,8 @@ $(PLATPYOBJCXX): %.o: %.cpp
 clean:
 	rm -f $(Z80OBJ) $(DAMOBJ) $(MASTOBJ) $(PLATOBJ) $(PYOBJ) $(PYEMBOBJ) $(PLATPYOBJ) $(PLATPYOBJCXX) tools/avioutput.o tools/degavi.o tools/degavirc.o tools/mmvconv.o tools/wdegavi.o doze/dozea.asm* doze/dam doze/dam.exe dega dega.exe degavi degavi.exe mmvconv mmvconv.exe pydega.so pydega.dll pydega.pyd specs
 	make -Czlib clean
+	make -Clibmencoder clean
+	make -Clibvfw clean
 
 distclean: clean
 	rm -f *~ */*~
