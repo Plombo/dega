@@ -1,0 +1,6 @@
+[submodule "libmencoder"]
+	path = libmencoder
+	url = git://git.pcc.me.uk/~peter/libmencoder.git
+[submodule "libvfw"]
+	path = libvfw
+	url = git://git.pcc.me.uk/~peter/libvfw.git
