@@ -1,4 +1,4 @@
-OPTFLAGS=-O3 -fomit-frame-pointer -funroll-loops -Wall
+OPTFLAGS=-O3 -g -fomit-frame-pointer -funroll-loops -Wall
 #OPTFLAGS=-O3 -fomit-frame-pointer -funroll-loops -march=i686 -mcpu=i686
 #OPTFLAGS=-xM -O3
 
@@ -26,7 +26,7 @@ else
 endif
 
 ifeq ($(P),unix)
-	CFLAGS= $(OPTFLAGS) $(shell sdl-config --cflags) -DUSE_MENCODER -Imast -Idoze -Ilibmencoder -D__cdecl= -D__fastcall=
+	CFLAGS= $(OPTFLAGS) $(shell sdl-config --cflags) $(shell pkg-config --cflags gtk+-2.0) -export-dynamic -DGTK -DUSE_MENCODER -Imast -Idoze -Ilibmencoder -D__cdecl= -D__fastcall= 
 else ifeq ($(P),win)
 	CFLAGS= $(OPTFLAGS) -DUSE_VFW -mno-cygwin -Imast -Idoze -Imaster -Iextra -Izlib -Ilibvfw
 endif
@@ -58,16 +58,16 @@ else
 endif
 	EXEEXT =
 	SOEXT = .so
-	PLATOBJ = sdl/main.o
+	PLATOBJ = sdl/sdl.o sdl/gtk.o sdl/gtksdl.o sdl/callbacks.o sdl/logwav.o
 	PLATPYOBJ =
 	PLATPYOBJCXX =
-	EXTRA_LIBS = $(shell sdl-config --libs)
+	EXTRA_LIBS = $(shell sdl-config --libs) $(shell pkg-config --libs gtk+-2.0) -lGL
 	DOZE_FIXUP = sed -f doze/doze.cmd.sed <doze/dozea.asm >doze/dozea.asm.new && mv doze/dozea.asm.new doze/dozea.asm
 	ENCODER_OBJ = tools/degavi.o
 	ENCODER_LIBS = libmencoder/libmencoder.a
 	ENCODER_LDFLAGS = -lm
 	EXTRA_LDFLAGS =
-	GUI_LDFLAGS =
+	GUI_LDFLAGS = -export-dynamic
 	SPECS =
 	PYTHON_CFLAGS = $(shell python-config --cflags) $(CFLAGS)
 	PYTHON_CXXFLAGS = $(shell python-config --cflags) $(CXXFLAGS)
@@ -182,6 +182,9 @@ $(PLATPYOBJ): %.o: %.c
 $(PLATPYOBJCXX): %.o: %.cpp
 	$(CXX) -c -o $@ $< -DEMBEDDED $(PYTHON_CXXFLAGS)
 
+$(PLATOBJ) : %.o: %.c
+	$(CC) -c -o $@ $< $(CFLAGS)
+
 %.emb.o: %.c
 	$(CC) -c -o $@ $< -DEMBEDDED $(PYTHON_CFLAGS)
 
@@ -193,3 +196,4 @@ clean:
 
 distclean: clean
 	rm -f *~ */*~
+
