@@ -63,8 +63,8 @@ int paused2=0, frameadvance=0;
 int autodetect=1;
 int sound=1;
 int joystick=1;
-int scale = 1;
-int opengl = 1;
+int scale = 0;
+int opengl = 0;
 
 // misc.
 GLuint gltexture;
@@ -313,10 +313,10 @@ void MimplFrame(int input) {
                                 if(key==SDLK_z || key==SDLK_y) {MastInput[0]|=0x10;break;}
                                 if(key==SDLK_x) {MastInput[0]|=0x20;break;}
                                 if(key==SDLK_c) {
-				  MastInput[0]|=0x80;
-				  if ((MastEx&MX_GG)==0)
-				    MastInput[0]|=0x40;
-				  break;}
+								  MastInput[0]|=0x80;
+								  if ((MastEx&MX_GG)==0)
+								    MastInput[0]|=0x40;
+								  break;}
 
                                 if(key==SDLK_u) {MastInput[1]|=0x01;break;}
                                 if(key==SDLK_j) {MastInput[1]|=0x02;break;}
@@ -808,7 +808,7 @@ void SetMessage(char* format, ...)
     va_start(arglist, format);
     vsprintf(message, format, arglist);
     va_end(arglist);
-    messageTime = 5000;
+    messageTime = 10000;
 }
 
 
